@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: qyf-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: qyf_inventory
+      POSTGRES_USER: qyf_user
+      POSTGRES_PASSWORD: qyf_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

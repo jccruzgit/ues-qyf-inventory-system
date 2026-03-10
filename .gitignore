@@ -1,5 +1,6 @@
 # Java
 /target/
+**/target/
 *.log
 *.class
 
@@ -17,3 +18,7 @@ Thumbs.db
 
 # Env
 .env
+
+# Local run logs
+run.out.log
+run.err.log
