@@ -11,11 +11,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>sv.ues.qyf</groupId>
-    <artifactId>inventory</artifactId>
+    <groupId>sv.edu.ues.qyf</groupId>
+    <artifactId>inventory-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>qyf-inventory</name>
-    <description>QYF inventory system backend</description>
+    <name>inventory-backend</name>
+    <description>UES QYF inventory system backend</description>
     <packaging>jar</packaging>
 
     <properties>
@@ -30,6 +30,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -52,6 +56,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.6.0</version>
         </dependency>
     </dependencies>
 

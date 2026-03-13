@@ -1,0 +1,2 @@
+-- Initial schema placeholder for the UES QYF inventory backend.
+-- Future database objects should be created here using Flyway migrations.
