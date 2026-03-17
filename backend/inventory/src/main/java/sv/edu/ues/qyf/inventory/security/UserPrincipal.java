@@ -11,14 +11,26 @@ public class UserPrincipal implements UserDetails {
 
     private final String username;
     private final String password;
+    private final String fullName;
+    private final String role;
     private final boolean enabled;
     private final List<GrantedAuthority> authorities;
 
     public UserPrincipal(User user) {
         this.username = user.getUsername();
         this.password = user.getPassword();
+        this.fullName = user.getFullName();
+        this.role = user.getRole().getName();
         this.enabled = Boolean.TRUE.equals(user.getActive());
-        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
+        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getRole() {
+        return role;
     }
 
     @Override
