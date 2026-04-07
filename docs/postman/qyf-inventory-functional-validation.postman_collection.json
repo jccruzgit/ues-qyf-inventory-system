@@ -1,0 +1,310 @@
+{
+  "info": {
+    "_postman_id": "5307a45f-094e-4f53-b1ea-c4b0e7f7f4e8",
+    "name": "QYF Inventory Backend Functional Validation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Coleccion funcional para validar el backend actual del Sistema de Inventario QYF. Incluye requests ejecutables para endpoints publicados y ejemplos pendientes para rutas que aun no existen en la API."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8081" },
+    { "key": "managerUsername", "value": "func_manager" },
+    { "key": "assignedUsername", "value": "func_assigned" },
+    { "key": "globalUsername", "value": "func_global" },
+    { "key": "password", "value": "FuncPass123!" },
+    { "key": "managerToken", "value": "" },
+    { "key": "assignedToken", "value": "" },
+    { "key": "globalToken", "value": "" },
+    { "key": "labAssignedId", "value": "101" },
+    { "key": "labUnassignedId", "value": "102" },
+    { "key": "productId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('managerToken', json.data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{managerUsername}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Obtiene JWT para un usuario INVENTORY_MANAGER con accessScope ALL_LABS."
+          }
+        },
+        {
+          "name": "Login Assigned User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('assignedToken', json.data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{assignedUsername}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Obtiene JWT para un usuario ASSIGNED_ONLY."
+          }
+        },
+        {
+          "name": "Login Global User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('globalToken', json.data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{globalUsername}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Obtiene JWT para un usuario VIEWER con accessScope ALL_LABS."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get Products Without Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            },
+            "description": "Caso negativo. Debe responder 401."
+          }
+        },
+        {
+          "name": "Create Product As Manager",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"FUNC-POSTMAN-001\",\n  \"name\": \"Producto Postman\",\n  \"description\": \"Creado desde la coleccion de validacion\",\n  \"categoryId\": 1,\n  \"baseUnitId\": 1,\n  \"minimumStock\": 5,\n  \"currentStock\": 20,\n  \"locationId\": 1,\n  \"requiresExpiration\": false,\n  \"requiresBatchControl\": true,\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            },
+            "description": "Caso positivo. Debe responder 201 para INVENTORY_MANAGER."
+          }
+        },
+        {
+          "name": "Create Product As Assigned Viewer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{assignedToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"FUNC-POSTMAN-002\",\n  \"name\": \"Producto No Autorizado\",\n  \"description\": \"Debe rechazar por rol\",\n  \"categoryId\": 1,\n  \"baseUnitId\": 1,\n  \"minimumStock\": 1,\n  \"currentStock\": 1,\n  \"locationId\": 1,\n  \"requiresExpiration\": false,\n  \"requiresBatchControl\": true,\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            },
+            "description": "Caso negativo. Debe responder 403 por rol."
+          }
+        },
+        {
+          "name": "Get Products As Assigned User",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{assignedToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            },
+            "description": "Caso positivo. Debe responder 200."
+          }
+        },
+        {
+          "name": "Get Product By Id As Global User",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{globalToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}"]
+            },
+            "description": "Caso positivo. Debe responder 200."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pending Lab-Scoped Routes",
+      "description": "Ejemplos de requests solicitados para inventario, movimientos, lotes y alertas. En el backend actual no hay controladores HTTP para estas rutas; si se ejecutan hoy, lo esperable es 404 hasta que se expongan oficialmente.",
+      "item": [
+        {
+          "name": "Inventory By Laboratory (Pending)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{assignedToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laboratories/{{labAssignedId}}/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "laboratories", "{{labAssignedId}}", "inventory"]
+            },
+            "description": "Ejemplo propuesto. Caso positivo esperado una vez exista endpoint: usuario ASSIGNED_ONLY en laboratorio asignado."
+          }
+        },
+        {
+          "name": "Inventory By Unassigned Laboratory (Pending)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{assignedToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laboratories/{{labUnassignedId}}/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "laboratories", "{{labUnassignedId}}", "inventory"]
+            },
+            "description": "Ejemplo propuesto. Caso negativo esperado una vez exista endpoint: 403 para usuario sin asignacion."
+          }
+        },
+        {
+          "name": "Create Inventory Movement (Pending)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{globalToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"laboratoryId\": {{labAssignedId}},\n  \"type\": \"ENTRY\",\n  \"notes\": \"Movimiento funcional de ejemplo\",\n  \"lines\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory-movements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory-movements"]
+            },
+            "description": "Ejemplo propuesto. Caso positivo esperado una vez exista endpoint para movimientos."
+          }
+        },
+        {
+          "name": "Get Product Batches By Laboratory (Pending)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{globalToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}/batches?laboratoryId={{labAssignedId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}", "batches"],
+              "query": [
+                { "key": "laboratoryId", "value": "{{labAssignedId}}" }
+              ]
+            },
+            "description": "Ejemplo propuesto. Caso positivo esperado una vez exista endpoint para lotes."
+          }
+        },
+        {
+          "name": "Get Inventory Alerts By Laboratory (Pending)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{globalToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory-alerts?laboratoryId={{labAssignedId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory-alerts"],
+              "query": [
+                { "key": "laboratoryId", "value": "{{labAssignedId}}" }
+              ]
+            },
+            "description": "Ejemplo propuesto. Caso positivo esperado una vez exista endpoint para alertas."
+          }
+        }
+      ]
+    }
+  ]
+}
