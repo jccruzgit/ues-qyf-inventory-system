@@ -2,7 +2,7 @@ spring:
   application:
     name: inventory-backend
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/qyf_inventory}
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/qyf_inventory}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver

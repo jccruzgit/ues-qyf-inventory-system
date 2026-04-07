@@ -133,8 +133,8 @@ Universidad de El Salvador
 
 Este proyecto fue desarrollado como parte de un sistema académico, pero siguiendo prácticas utilizadas en sistemas empresariales reales:
 
-diseño normalizado (3FN)
-trazabilidad completa
-control por laboratorio
-auditoría
-pruebas de integración
+* diseño normalizado (3FN)
+* trazabilidad completa
+* control por laboratorio
+* auditoría
+* pruebas de integración
