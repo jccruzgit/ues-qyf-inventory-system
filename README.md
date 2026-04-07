@@ -9,37 +9,42 @@ Backend
 * Spring Security (JWT)
 * Spring Data JPA
 * Flyway (migraciones)
-PostgreSQL
-OpenAPI / Swagger
-Testing
-JUnit 5
-Testcontainers (PostgreSQL real)
+* PostgreSQL
+* OpenAPI / Swagger
+* Testing
+* JUnit 5
+* Testcontainers (PostgreSQL real)
+  
 🧩 Funcionalidades principales
-🔐 Autenticación y autorización con JWT
-👥 Gestión de usuarios y roles (ADMIN, ENCARGADO, ESTUDIANTE)
-🧪 Gestión de productos con unidades de medida (masa, volumen, conteo)
-🏢 Control de inventario por laboratorio
-📦 Manejo de lotes con fechas de vencimiento
-🔄 Registro de movimientos (entrada, salida, ajuste)
-📊 Trazabilidad completa por usuario, fecha y lote
-⚠️ Generación de alertas (bajo stock, vencimientos)
-📎 Soporte para documentos adjuntos (PDF, imágenes)
-🗑️ Eliminación lógica (soft delete)
-🧾 Auditoría de cambios (audit_log)
-🔐 Restricción de acceso por laboratorio
+* 🔐 Autenticación y autorización con JWT
+* 👥 Gestión de usuarios y roles (ADMIN, ENCARGADO, ESTUDIANTE)
+* 🧪 Gestión de productos con unidades de medida (masa, volumen, conteo)
+* 🏢 Control de inventario por laboratorio
+* 📦 Manejo de lotes con fechas de vencimiento
+* 🔄 Registro de movimientos (entrada, salida, ajuste)
+* 📊 Trazabilidad completa por usuario, fecha y lote
+* ⚠️ Generación de alertas (bajo stock, vencimientos)
+* 📎 Soporte para documentos adjuntos (PDF, imágenes)
+* 🗑️ Eliminación lógica (soft delete)
+* 🧾 Auditoría de cambios (audit_log)
+* 🔐 Restricción de acceso por laboratorio
+  
 🗄️ Base de datos
-Motor: PostgreSQL
-Base de datos: qyf_inventory
-Puerto (Docker): 5433
+* Motor: PostgreSQL
+* Base de datos: qyf_inventory
+* Puerto (Docker): 5433
+
 Migraciones
 
 Gestionadas con Flyway:
 
-V1 - V5 → esquema completo alineado con el modelo ER actualizado
+* V1 - V5 → esquema completo alineado con el modelo ER actualizado
+
 ⚙️ Configuración del entorno
 1. Clonar repositorio
 git clone https://github.com/jccruzgit/ues-qyf-inventory-system.git
 cd ues-qyf-inventory-system
+
 2. Configurar PostgreSQL (Docker recomendado)
 docker run -d \
   --name qyf-postgres \
@@ -48,6 +53,7 @@ docker run -d \
   -e POSTGRES_PASSWORD=postgres \
   -p 5433:5432 \
   postgres:15
+
 3. Configurar application.yml
 spring:
   datasource:
@@ -61,6 +67,7 @@ spring:
 
   flyway:
     enabled: true
+    
 4. Ejecutar el proyecto
 ./mvnw spring-boot:run
 
@@ -71,6 +78,7 @@ O desde IntelliJ → Run Application
 Swagger disponible en:
 
 http://localhost:8080/swagger-ui.html
+
 🧪 Pruebas
 
 El proyecto incluye tests de integración con PostgreSQL real usando Testcontainers.
@@ -81,17 +89,20 @@ Para ejecutar:
 
 Valida:
 
-migraciones Flyway
-persistencia real
-integridad referencial
-relaciones entre entidades
+* migraciones Flyway
+* persistencia real
+* integridad referencial
+* relaciones entre entidades
+
 🔐 Seguridad
-Autenticación basada en JWT
-Protección de endpoints
-Control de acceso por:
-roles
-laboratorio asignado
+* Autenticación basada en JWT
+* Protección de endpoints
+* Control de acceso por:
+    * roles
+    * laboratorio asignado
+      
 📂 Estructura del proyecto
+
 backend/
  └── inventory/
      ├── config/
@@ -103,6 +114,7 @@ backend/
      ├── service/
      └── resources/
          └── db/migration/
+
 📈 Estado del proyecto
 
 ✔ Backend funcional
