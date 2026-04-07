@@ -4,11 +4,11 @@ Sistema de inventario desarrollado para la Facultad de Química y Farmacia – U
 
 🚀 Tecnologías utilizadas
 Backend
-Java 17+
-Spring Boot
-Spring Security (JWT)
-Spring Data JPA
-Flyway (migraciones)
+* Java 17+
+* Spring Boot
+* Spring Security (JWT)
+* Spring Data JPA
+* Flyway (migraciones)
 PostgreSQL
 OpenAPI / Swagger
 Testing
