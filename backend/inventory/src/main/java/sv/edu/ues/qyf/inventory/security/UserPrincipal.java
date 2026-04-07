@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import sv.edu.ues.qyf.inventory.entity.AccessScope;
 import sv.edu.ues.qyf.inventory.entity.User;
 
 public class UserPrincipal implements UserDetails {
@@ -13,6 +14,7 @@ public class UserPrincipal implements UserDetails {
     private final String password;
     private final String fullName;
     private final String role;
+    private final AccessScope accessScope;
     private final boolean enabled;
     private final List<GrantedAuthority> authorities;
 
@@ -21,6 +23,7 @@ public class UserPrincipal implements UserDetails {
         this.password = user.getPassword();
         this.fullName = user.getFullName();
         this.role = user.getRole().getName();
+        this.accessScope = user.getAccessScope();
         this.enabled = Boolean.TRUE.equals(user.getActive());
         this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
     }
@@ -31,6 +34,10 @@ public class UserPrincipal implements UserDetails {
 
     public String getRole() {
         return role;
+    }
+
+    public AccessScope getAccessScope() {
+        return accessScope;
     }
 
     @Override

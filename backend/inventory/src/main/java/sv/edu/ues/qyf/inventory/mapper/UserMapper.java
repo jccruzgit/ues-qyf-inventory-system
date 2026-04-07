@@ -24,6 +24,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .active(user.getActive())
+                .accessScope(user.getAccessScope())
                 .createdAt(user.getCreatedAt())
                 .role(roleMapper.toResponseDto(user.getRole()))
                 .build();

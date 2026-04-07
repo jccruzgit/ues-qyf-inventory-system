@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sv.edu.ues.qyf.inventory.entity.AccessScope;
 
 @Getter
 @Builder
@@ -17,6 +18,7 @@ public class UserResponseDto {
     private String email;
     private String fullName;
     private Boolean active;
+    private AccessScope accessScope;
     private OffsetDateTime createdAt;
     private RoleResponseDto role;
 }

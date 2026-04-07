@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sv.edu.ues.qyf.inventory.dto.UserRequestDto;
 import sv.edu.ues.qyf.inventory.dto.UserResponseDto;
+import sv.edu.ues.qyf.inventory.entity.AccessScope;
 import sv.edu.ues.qyf.inventory.entity.Role;
 import sv.edu.ues.qyf.inventory.entity.User;
 import sv.edu.ues.qyf.inventory.exception.BadRequestException;
@@ -52,6 +53,7 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName().trim())
                 .active(request.getActive() != null ? request.getActive() : Boolean.TRUE)
+                .accessScope(request.getAccessScope() != null ? request.getAccessScope() : AccessScope.ALL_LABS)
                 .role(role)
                 .build();
 

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import sv.edu.ues.qyf.inventory.entity.AccessScope;
 
 @Getter
 @Setter
@@ -33,6 +34,8 @@ public class UserRequestDto {
     private String fullName;
 
     private Boolean active;
+
+    private AccessScope accessScope;
 
     @NotBlank(message = "Role name is required")
     @Size(max = 50, message = "Role name must not exceed 50 characters")

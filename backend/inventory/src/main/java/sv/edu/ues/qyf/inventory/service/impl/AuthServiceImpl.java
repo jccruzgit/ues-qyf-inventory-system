@@ -38,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
                     .username(userPrincipal.getUsername())
                     .role(userPrincipal.getRole())
                     .fullName(userPrincipal.getFullName())
+                    .accessScope(userPrincipal.getAccessScope())
                     .build();
         } catch (AuthenticationException exception) {
             throw new BadCredentialsException("Invalid username or password", exception);
