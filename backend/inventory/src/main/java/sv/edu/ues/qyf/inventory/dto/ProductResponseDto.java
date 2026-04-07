@@ -23,7 +23,13 @@ public class ProductResponseDto {
     private BigDecimal minimumStock;
     private BigDecimal currentStock;
     private String locationName;
+    private String observations;
+    private String storageCondition;
+    private Boolean requiresExpiration;
+    private Boolean requiresBatchControl;
     private Boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
+    private Long deletedById;
 }

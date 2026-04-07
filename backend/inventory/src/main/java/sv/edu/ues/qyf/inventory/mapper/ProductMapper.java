@@ -19,6 +19,10 @@ public class ProductMapper {
                 .description(request.getDescription())
                 .minimumStock(request.getMinimumStock())
                 .currentStock(request.getCurrentStock())
+                .observations(request.getObservations())
+                .storageCondition(request.getStorageCondition())
+                .requiresExpiration(request.getRequiresExpiration())
+                .requiresBatchControl(request.getRequiresBatchControl())
                 .active(request.getActive())
                 .build();
     }
@@ -29,6 +33,10 @@ public class ProductMapper {
         product.setDescription(request.getDescription());
         product.setMinimumStock(request.getMinimumStock());
         product.setCurrentStock(request.getCurrentStock());
+        product.setObservations(request.getObservations());
+        product.setStorageCondition(request.getStorageCondition());
+        product.setRequiresExpiration(request.getRequiresExpiration());
+        product.setRequiresBatchControl(request.getRequiresBatchControl());
     }
 
     public ProductResponseDto toResponseDto(Product product) {
@@ -47,9 +55,15 @@ public class ProductMapper {
                 .minimumStock(product.getMinimumStock())
                 .currentStock(product.getCurrentStock())
                 .locationName(product.getLocation().getName())
+                .observations(product.getObservations())
+                .storageCondition(product.getStorageCondition())
+                .requiresExpiration(product.getRequiresExpiration())
+                .requiresBatchControl(product.getRequiresBatchControl())
                 .active(product.getActive())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
+                .deletedAt(product.getDeletedAt())
+                .deletedById(product.getDeletedBy() != null ? product.getDeletedBy().getId() : null)
                 .build();
     }
 }

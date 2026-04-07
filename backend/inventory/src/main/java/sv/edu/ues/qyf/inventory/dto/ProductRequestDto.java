@@ -44,5 +44,14 @@ public class ProductRequestDto {
     @NotNull(message = "Location id is required")
     private Long locationId;
 
+    private String observations;
+
+    @Size(max = 120, message = "Storage condition must not exceed 120 characters")
+    private String storageCondition;
+
+    private Boolean requiresExpiration;
+
+    private Boolean requiresBatchControl;
+
     private Boolean active;
 }
