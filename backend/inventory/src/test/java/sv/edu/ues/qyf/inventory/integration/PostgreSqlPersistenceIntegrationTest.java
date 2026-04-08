@@ -4,12 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import jakarta.persistence.EntityManager;
+import java.math.BigDecimal;
+import java.util.List;
 import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +29,7 @@ import sv.edu.ues.qyf.inventory.entity.InventoryMovement;
 import sv.edu.ues.qyf.inventory.entity.InventoryMovementLine;
 import sv.edu.ues.qyf.inventory.entity.Laboratory;
 import sv.edu.ues.qyf.inventory.entity.Location;
+import sv.edu.ues.qyf.inventory.entity.MovementType;
 import sv.edu.ues.qyf.inventory.entity.Product;
 import sv.edu.ues.qyf.inventory.entity.ProductBatch;
 import sv.edu.ues.qyf.inventory.entity.ProductDocument;
@@ -31,12 +37,18 @@ import sv.edu.ues.qyf.inventory.entity.Role;
 import sv.edu.ues.qyf.inventory.entity.UnitOfMeasure;
 import sv.edu.ues.qyf.inventory.entity.UnitType;
 import sv.edu.ues.qyf.inventory.entity.User;
+import sv.edu.ues.qyf.inventory.dto.InventoryMovementLineRequestDto;
+import sv.edu.ues.qyf.inventory.dto.InventoryMovementRequestDto;
+import sv.edu.ues.qyf.inventory.dto.InventoryMovementResponseDto;
+import sv.edu.ues.qyf.inventory.dto.ProductUpdateRequestDto;
+import sv.edu.ues.qyf.inventory.exception.BadRequestException;
 import sv.edu.ues.qyf.inventory.repository.InventoryAlertRepository;
 import sv.edu.ues.qyf.inventory.repository.InventoryMovementRepository;
 import sv.edu.ues.qyf.inventory.repository.LaboratoryRepository;
 import sv.edu.ues.qyf.inventory.repository.ProductBatchRepository;
-
-import java.math.BigDecimal;
+import sv.edu.ues.qyf.inventory.repository.ProductRepository;
+import sv.edu.ues.qyf.inventory.service.ProductService;
+import sv.edu.ues.qyf.inventory.service.InventoryMovementService;
 
 @SpringBootTest(
         classes = InventoryBackendApplication.class,
@@ -82,15 +94,29 @@ class PostgreSqlPersistenceIntegrationTest {
     private ProductBatchRepository productBatchRepository;
 
     @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
     private InventoryMovementRepository inventoryMovementRepository;
 
     @Autowired
     private InventoryAlertRepository inventoryAlertRepository;
 
+    @Autowired
+    private InventoryMovementService inventoryMovementService;
+
+    @Autowired
+    private ProductService productService;
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     void shouldApplyFlywayMigrationsAndCreateExpectedTables() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("5");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
 
         Integer tableCount = jdbcTemplate.queryForObject(
                 """
@@ -154,35 +180,124 @@ class PostgreSqlPersistenceIntegrationTest {
     }
 
     @Test
-    void shouldPersistInventoryMovementAndMovementLine() {
+    void shouldRegisterEntryMovementAndPersistStockAtOneHundred() {
         Laboratory laboratory = persist(Laboratory.builder().build());
-        User uploadedBy = persistUser("movement-doc-user");
-        Product product = persistProduct("MOVE-001");
-        ProductDocument attachmentDocument = persist(ProductDocument.builder()
-                .product(product)
-                .fileName("movement-attachment.png")
-                .originalName("movement-attachment.png")
-                .fileType("PNG")
-                .filePath("/logical/docs/movement-attachment.png")
-                .uploadedBy(uploadedBy)
-                .active(Boolean.TRUE)
-                .build());
+        User user = persistUser("entry-user");
+        Product product = persistProduct("MOVE-ENTRY", BigDecimal.ZERO);
+        authenticate(user);
 
-        InventoryMovement inventoryMovement = inventoryMovementRepository.save(InventoryMovement.builder()
-                .laboratory(laboratory)
-                .attachmentDocument(attachmentDocument)
-                .build());
-        InventoryMovementLine movementLine = persist(InventoryMovementLine.builder()
-                .lineNotes("Entrada inicial de lote")
-                .build());
+        InventoryMovementResponseDto response = inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.ENTRY,
+                laboratory.getId(),
+                "Entrada inicial",
+                List.of(new InventoryMovementLineRequestDto(product.getId(), new BigDecimal("100"), "Ingreso"))));
+        entityManager.flush();
         entityManager.clear();
 
-        InventoryMovement persistedMovement = inventoryMovementRepository.findById(inventoryMovement.getId()).orElseThrow();
-        InventoryMovementLine persistedLine = entityManager.find(InventoryMovementLine.class, movementLine.getId());
+        Product persistedProduct = entityManager.find(Product.class, product.getId());
+        InventoryMovement persistedMovement = inventoryMovementRepository.findById(response.getId()).orElseThrow();
+
+        assertThat(persistedProduct.getCurrentStock()).isEqualByComparingTo("100");
+        assertThat(persistedMovement.getMovementType()).isEqualTo(MovementType.ENTRY);
+        assertThat(persistedMovement.getPerformedBy().getId()).isEqualTo(user.getId());
+        assertThat(persistedMovement.getLines()).hasSize(1);
+        assertThat(persistedMovement.getLines().get(0).getQuantity()).isEqualByComparingTo("100");
+    }
+
+    @Test
+    void shouldRegisterExitMovementAndPersistStockAtSeventyFive() {
+        Laboratory laboratory = persist(Laboratory.builder().build());
+        User user = persistUser("exit-user");
+        Product product = persistProduct("MOVE-EXIT", new BigDecimal("100"));
+        authenticate(user);
+
+        InventoryMovementResponseDto response = inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.EXIT,
+                laboratory.getId(),
+                "Salida de reactivo",
+                List.of(new InventoryMovementLineRequestDto(product.getId(), new BigDecimal("25"), "Consumo"))));
+        entityManager.flush();
+        entityManager.clear();
+
+        Product persistedProduct = entityManager.find(Product.class, product.getId());
+        InventoryMovement persistedMovement = inventoryMovementRepository.findById(response.getId()).orElseThrow();
+
+        assertThat(persistedProduct.getCurrentStock()).isEqualByComparingTo("75");
+        assertThat(persistedMovement.getMovementType()).isEqualTo(MovementType.EXIT);
+        assertThat(persistedMovement.getLines()).hasSize(1);
+        assertThat(persistedMovement.getLines().get(0).getProduct().getId()).isEqualTo(product.getId());
+        assertThat(persistedMovement.getLines().get(0).getQuantity()).isEqualByComparingTo("25");
+    }
+
+    @Test
+    void shouldKeepCurrentStockUnchangedWhenProductIsUpdated() {
+        Product product = persistProduct("PROD-UPDATE", new BigDecimal("75"));
+
+        productService.update(product.getId(), new ProductUpdateRequestDto(
+                "PROD-UPDATE",
+                "Producto actualizado",
+                "Descripcion actualizada",
+                product.getCategory().getId(),
+                product.getBaseUnit().getId(),
+                new BigDecimal("5"),
+                product.getLocation().getId(),
+                "Nueva observacion",
+                "Seco",
+                Boolean.FALSE,
+                Boolean.TRUE,
+                Boolean.TRUE));
+        entityManager.flush();
+        entityManager.clear();
+
+        Product persistedProduct = entityManager.find(Product.class, product.getId());
+
+        assertThat(persistedProduct.getCurrentStock()).isEqualByComparingTo("75");
+        assertThat(persistedProduct.getName()).isEqualTo("Producto actualizado");
+        assertThat(persistedProduct.getMinimumStock()).isEqualByComparingTo("5");
+    }
+
+    @Test
+    void shouldRejectExitMovementWhenStockIsInsufficient() {
+        Laboratory laboratory = persist(Laboratory.builder().build());
+        User user = persistUser("insufficient-user");
+        Product product = persistProduct("MOVE-FAIL", new BigDecimal("10"));
+        authenticate(user);
+
+        assertThatThrownBy(() -> inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.EXIT,
+                laboratory.getId(),
+                "Salida invalida",
+                List.of(new InventoryMovementLineRequestDto(product.getId(), new BigDecimal("25"), null)))))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("Insufficient stock for product");
+    }
+
+    @Test
+    void shouldPersistInventoryMovementHeaderAndLinesWhenRegisteredThroughService() {
+        Laboratory laboratory = persist(Laboratory.builder().build());
+        User user = persistUser("persistence-user");
+        Product product = persistProduct("MOVE-PERSIST", BigDecimal.ZERO);
+        authenticate(user);
+
+        InventoryMovementResponseDto response = inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.ENTRY,
+                laboratory.getId(),
+                "Movimiento con detalle",
+                List.of(new InventoryMovementLineRequestDto(product.getId(), new BigDecimal("100"), "Linea 1"))));
+        entityManager.flush();
+        entityManager.clear();
+
+        InventoryMovement persistedMovement = inventoryMovementRepository.findById(response.getId()).orElseThrow();
 
         assertThat(persistedMovement.getLaboratory().getId()).isEqualTo(laboratory.getId());
-        assertThat(persistedMovement.getAttachmentDocument().getId()).isEqualTo(attachmentDocument.getId());
-        assertThat(persistedLine.getLineNotes()).isEqualTo("Entrada inicial de lote");
+        assertThat(persistedMovement.getPerformedBy().getId()).isEqualTo(user.getId());
+        assertThat(persistedMovement.getPerformedAt()).isNotNull();
+        assertThat(persistedMovement.getObservation()).isEqualTo("Movimiento con detalle");
+        assertThat(persistedMovement.getLines()).hasSize(1);
+        InventoryMovementLine persistedLine = persistedMovement.getLines().get(0);
+        assertThat(persistedLine.getProduct().getId()).isEqualTo(product.getId());
+        assertThat(persistedLine.getQuantity()).isEqualByComparingTo("100");
+        assertThat(persistedLine.getLineNotes()).isEqualTo("Linea 1");
     }
 
     @Test
@@ -223,6 +338,58 @@ class PostgreSqlPersistenceIntegrationTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
+    @Test
+    void shouldRejectNegativeCurrentStockAtDatabaseLevel() {
+        Category category = persist(Category.builder()
+                .name("Category-NEG")
+                .description("Negative stock test category")
+                .active(Boolean.TRUE)
+                .build());
+        UnitOfMeasure unit = persist(UnitOfMeasure.builder()
+                .name("Unit-NEG")
+                .symbol("uneg")
+                .type(UnitType.COUNT)
+                .active(Boolean.TRUE)
+                .build());
+        Location location = persist(Location.builder()
+                .name("Location-NEG")
+                .description("Negative stock test location")
+                .active(Boolean.TRUE)
+                .build());
+
+        assertThatThrownBy(() -> jdbcTemplate.update(
+                """
+                INSERT INTO products (
+                    code,
+                    name,
+                    description,
+                    category_id,
+                    base_unit_id,
+                    minimum_stock,
+                    current_stock,
+                    location_id,
+                    active,
+                    created_at,
+                    updated_at,
+                    requires_expiration,
+                    requires_batch_control
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?)
+                """,
+                "NEG-001",
+                "Negative stock product",
+                "Constraint validation test",
+                category.getId(),
+                unit.getId(),
+                BigDecimal.ZERO,
+                new BigDecimal("-1"),
+                location.getId(),
+                true,
+                false,
+                true))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
     private User persistUser(String username) {
         Role role = persist(Role.builder()
                 .name("ROLE_" + username.toUpperCase())
@@ -241,6 +408,10 @@ class PostgreSqlPersistenceIntegrationTest {
     }
 
     private Product persistProduct(String code) {
+        return persistProduct(code, BigDecimal.TEN);
+    }
+
+    private Product persistProduct(String code, BigDecimal currentStock) {
         Category category = persist(Category.builder()
                 .name("Category-" + code)
                 .description("Integration test category")
@@ -265,7 +436,7 @@ class PostgreSqlPersistenceIntegrationTest {
                 .category(category)
                 .baseUnit(unit)
                 .minimumStock(BigDecimal.ZERO)
-                .currentStock(BigDecimal.TEN)
+                .currentStock(currentStock)
                 .location(location)
                 .active(Boolean.TRUE)
                 .requiresExpiration(Boolean.FALSE)
@@ -277,5 +448,10 @@ class PostgreSqlPersistenceIntegrationTest {
         entityManager.persist(entity);
         entityManager.flush();
         return entity;
+    }
+
+    private void authenticate(User user) {
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(user.getUsername(), "n/a", List.of()));
     }
 }

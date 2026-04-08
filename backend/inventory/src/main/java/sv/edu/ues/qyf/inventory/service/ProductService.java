@@ -3,6 +3,7 @@ package sv.edu.ues.qyf.inventory.service;
 import java.util.List;
 import sv.edu.ues.qyf.inventory.dto.ProductRequestDto;
 import sv.edu.ues.qyf.inventory.dto.ProductResponseDto;
+import sv.edu.ues.qyf.inventory.dto.ProductUpdateRequestDto;
 
 public interface ProductService {
 
@@ -12,7 +13,7 @@ public interface ProductService {
 
     ProductResponseDto getById(Long id);
 
-    ProductResponseDto update(Long id, ProductRequestDto request);
+    ProductResponseDto update(Long id, ProductUpdateRequestDto request);
 
     ProductResponseDto deactivate(Long id);
 

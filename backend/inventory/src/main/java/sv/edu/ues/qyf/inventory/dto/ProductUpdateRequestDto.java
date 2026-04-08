@@ -1,5 +1,6 @@
 package sv.edu.ues.qyf.inventory.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +15,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductRequestDto {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ProductUpdateRequestDto {
 
     @NotBlank(message = "Product code is required")
     @Size(max = 50, message = "Product code must not exceed 50 characters")
@@ -36,9 +38,6 @@ public class ProductRequestDto {
     @NotNull(message = "Minimum stock is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Minimum stock must be greater than or equal to 0")
     private BigDecimal minimumStock;
-
-    @DecimalMin(value = "0.0", inclusive = true, message = "Current stock must be greater than or equal to 0")
-    private BigDecimal currentStock;
 
     @NotNull(message = "Location id is required")
     private Long locationId;

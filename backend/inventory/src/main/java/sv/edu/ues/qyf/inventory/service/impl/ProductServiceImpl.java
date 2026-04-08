@@ -2,6 +2,7 @@ package sv.edu.ues.qyf.inventory.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sv.edu.ues.qyf.inventory.dto.ProductRequestDto;
 import sv.edu.ues.qyf.inventory.dto.ProductResponseDto;
+import sv.edu.ues.qyf.inventory.dto.ProductUpdateRequestDto;
 import sv.edu.ues.qyf.inventory.entity.Category;
 import sv.edu.ues.qyf.inventory.entity.Location;
 import sv.edu.ues.qyf.inventory.entity.Product;
@@ -74,6 +76,7 @@ public class ProductServiceImpl implements ProductService {
         product.setCode(code);
         product.setName(name);
         product.setDescription(normalizeNullable(request.getDescription()));
+        product.setCurrentStock(resolveCurrentStockForCreate(request.getCurrentStock()));
         product.setActive(resolveActive(request.getActive(), Boolean.TRUE));
 
         Product savedProduct = productRepository.save(product);
@@ -104,7 +107,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDto update(Long id, ProductRequestDto request) {
+    public ProductResponseDto update(Long id, ProductUpdateRequestDto request) {
         Product product = getActiveProduct(id);
         String oldValues = serializeState(product);
         String code = normalize(request.getCode());
@@ -200,6 +203,22 @@ public class ProductServiceImpl implements ProductService {
         product.setLocation(location);
     }
 
+    private void applyRelations(Product product, ProductUpdateRequestDto request) {
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Category not found with id: " + request.getCategoryId()));
+        UnitOfMeasure baseUnit = unitOfMeasureRepository.findById(request.getBaseUnitId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Unit of measure not found with id: " + request.getBaseUnitId()));
+        Location location = locationRepository.findById(request.getLocationId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Location not found with id: " + request.getLocationId()));
+
+        product.setCategory(category);
+        product.setBaseUnit(baseUnit);
+        product.setLocation(location);
+    }
+
     private void validateDuplicateCode(String code, Long currentId) {
         productRepository.findByCode(code)
                 .filter(existing -> !existing.getId().equals(currentId))
@@ -222,6 +241,10 @@ public class ProductServiceImpl implements ProductService {
 
     private Boolean resolveActive(Boolean requestedActive, Boolean currentValue) {
         return requestedActive != null ? requestedActive : currentValue;
+    }
+
+    private BigDecimal resolveCurrentStockForCreate(BigDecimal requestedCurrentStock) {
+        return requestedCurrentStock != null ? requestedCurrentStock : BigDecimal.ZERO;
     }
 
     private String serializeState(Product product) {

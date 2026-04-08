@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sv.edu.ues.qyf.inventory.dto.ApiResponse;
 import sv.edu.ues.qyf.inventory.dto.ProductRequestDto;
 import sv.edu.ues.qyf.inventory.dto.ProductResponseDto;
+import sv.edu.ues.qyf.inventory.dto.ProductUpdateRequestDto;
 import sv.edu.ues.qyf.inventory.service.ProductService;
 
 @RestController
@@ -51,7 +52,7 @@ public class ProductController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTORY_MANAGER')")
     public ResponseEntity<ApiResponse<ProductResponseDto>> update(
-            @PathVariable Long id, @Valid @RequestBody ProductRequestDto request) {
+            @PathVariable Long id, @Valid @RequestBody ProductUpdateRequestDto request) {
         return ResponseEntity.ok(ApiResponse.success("Product updated successfully", productService.update(id, request)));
     }
 

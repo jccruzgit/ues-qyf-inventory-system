@@ -3,6 +3,7 @@ package sv.edu.ues.qyf.inventory.mapper;
 import org.springframework.stereotype.Component;
 import sv.edu.ues.qyf.inventory.dto.ProductRequestDto;
 import sv.edu.ues.qyf.inventory.dto.ProductResponseDto;
+import sv.edu.ues.qyf.inventory.dto.ProductUpdateRequestDto;
 import sv.edu.ues.qyf.inventory.entity.Product;
 
 @Component
@@ -18,7 +19,6 @@ public class ProductMapper {
                 .name(request.getName())
                 .description(request.getDescription())
                 .minimumStock(request.getMinimumStock())
-                .currentStock(request.getCurrentStock())
                 .observations(request.getObservations())
                 .storageCondition(request.getStorageCondition())
                 .requiresExpiration(request.getRequiresExpiration())
@@ -27,12 +27,11 @@ public class ProductMapper {
                 .build();
     }
 
-    public void updateEntity(Product product, ProductRequestDto request) {
+    public void updateEntity(Product product, ProductUpdateRequestDto request) {
         product.setCode(request.getCode());
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setMinimumStock(request.getMinimumStock());
-        product.setCurrentStock(request.getCurrentStock());
         product.setObservations(request.getObservations());
         product.setStorageCondition(request.getStorageCondition());
         product.setRequiresExpiration(request.getRequiresExpiration());
