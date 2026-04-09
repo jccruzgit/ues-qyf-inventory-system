@@ -3,8 +3,8 @@ spring:
     name: inventory-backend
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5433/qyf_inventory}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    username: ${DB_USERNAME:qyf_user}
+    password: ${DB_PASSWORD:qyf_password}
     driver-class-name: org.postgresql.Driver
 
   jpa:
