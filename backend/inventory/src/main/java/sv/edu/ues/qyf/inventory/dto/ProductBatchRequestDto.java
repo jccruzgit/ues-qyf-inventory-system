@@ -3,10 +3,12 @@ package sv.edu.ues.qyf.inventory.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import sv.edu.ues.qyf.inventory.entity.BatchStatus;
 
 @Getter
 @Setter
@@ -26,8 +28,9 @@ public class ProductBatchRequestDto {
 
     private Long certificateDocumentId;
 
-    @Size(max = 30, message = "Status must not exceed 30 characters")
-    private String status;
+    private BatchStatus status;
+
+    private LocalDate expirationDate;
 
     private String notes;
 

@@ -35,4 +35,19 @@ public class CurrentUserServiceImpl implements CurrentUserService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Authenticated user not found: " + authentication.getName()));
     }
+
+    @Override
+    public User getAuthenticatedUserOrNull() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            return null;
+        }
+
+        return userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Authenticated user not found: " + authentication.getName()));
+    }
 }

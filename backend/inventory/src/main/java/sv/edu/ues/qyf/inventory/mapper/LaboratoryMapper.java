@@ -14,7 +14,12 @@ public class LaboratoryMapper {
 
         return LaboratoryResponseDto.builder()
                 .id(laboratory.getId())
+                .code(laboratory.getCode())
+                .name(laboratory.getName())
+                .description(laboratory.getDescription())
                 .active(laboratory.getActive())
+                .createdAt(laboratory.getCreatedAt())
+                .updatedAt(laboratory.getUpdatedAt())
                 .deletedAt(laboratory.getDeletedAt())
                 .deletedById(laboratory.getDeletedBy() != null ? laboratory.getDeletedBy().getId() : null)
                 .build();

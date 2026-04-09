@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sv.edu.ues.qyf.inventory.entity.AuditLog;
 import sv.edu.ues.qyf.inventory.entity.Laboratory;
+import sv.edu.ues.qyf.inventory.entity.User;
 import sv.edu.ues.qyf.inventory.repository.AuditLogRepository;
 import sv.edu.ues.qyf.inventory.service.AuditLogService;
 import sv.edu.ues.qyf.inventory.service.CurrentUserService;
@@ -70,11 +71,21 @@ public class AuditLogServiceImpl implements AuditLogService {
             String newValues,
             String description) {
         try {
+            User changedBy = currentUserService.getAuthenticatedUserOrNull();
+            if (changedBy == null) {
+                LOGGER.debug(
+                        "Skipping audit log for table={} recordId={} action={} because there is no authenticated user",
+                        tableName,
+                        recordId,
+                        action);
+                return;
+            }
+
             AuditLog auditLog = AuditLog.builder()
                     .tableName(tableName)
                     .recordId(recordId)
                     .action(action)
-                    .changedBy(currentUserService.getAuthenticatedUser())
+                    .changedBy(changedBy)
                     .oldValues(oldValues)
                     .newValues(newValues)
                     .description(description)

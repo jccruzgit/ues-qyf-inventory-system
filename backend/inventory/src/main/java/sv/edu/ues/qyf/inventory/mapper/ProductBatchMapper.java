@@ -21,8 +21,11 @@ public class ProductBatchMapper {
                         ? productBatch.getCertificateDocument().getId()
                         : null)
                 .status(productBatch.getStatus())
+                .expirationDate(productBatch.getExpirationDate())
                 .notes(productBatch.getNotes())
                 .active(productBatch.getActive())
+                .createdAt(productBatch.getCreatedAt())
+                .updatedAt(productBatch.getUpdatedAt())
                 .deletedAt(productBatch.getDeletedAt())
                 .deletedById(productBatch.getDeletedBy() != null ? productBatch.getDeletedBy().getId() : null)
                 .build();

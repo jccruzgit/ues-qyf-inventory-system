@@ -31,11 +31,14 @@ import sv.edu.ues.qyf.inventory.entity.Role;
 import sv.edu.ues.qyf.inventory.entity.User;
 import sv.edu.ues.qyf.inventory.exception.BadRequestException;
 import sv.edu.ues.qyf.inventory.mapper.InventoryMovementMapper;
+import sv.edu.ues.qyf.inventory.repository.InventoryMovementLineRepository;
 import sv.edu.ues.qyf.inventory.repository.InventoryMovementRepository;
 import sv.edu.ues.qyf.inventory.repository.LaboratoryRepository;
+import sv.edu.ues.qyf.inventory.repository.ProductBatchRepository;
 import sv.edu.ues.qyf.inventory.repository.ProductRepository;
 import sv.edu.ues.qyf.inventory.service.AuditLogService;
 import sv.edu.ues.qyf.inventory.service.CurrentUserService;
+import sv.edu.ues.qyf.inventory.service.InventoryAlertService;
 import sv.edu.ues.qyf.inventory.service.LaboratoryAccessService;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,7 +48,13 @@ class InventoryMovementServiceImplTest {
     private InventoryMovementRepository inventoryMovementRepository;
 
     @Mock
+    private InventoryMovementLineRepository inventoryMovementLineRepository;
+
+    @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private ProductBatchRepository productBatchRepository;
 
     @Mock
     private LaboratoryRepository laboratoryRepository;
@@ -55,6 +64,9 @@ class InventoryMovementServiceImplTest {
 
     @Mock
     private CurrentUserService currentUserService;
+
+    @Mock
+    private InventoryAlertService inventoryAlertService;
 
     @Mock
     private AuditLogService auditLogService;
@@ -81,6 +93,8 @@ class InventoryMovementServiceImplTest {
                 .code("PRD-9")
                 .name("Reactivo")
                 .currentStock(BigDecimal.ZERO)
+                .requiresBatchControl(Boolean.FALSE)
+                .requiresExpiration(Boolean.FALSE)
                 .active(Boolean.TRUE)
                 .build();
         User currentUser = User.builder()
@@ -136,6 +150,8 @@ class InventoryMovementServiceImplTest {
                 .id(9L)
                 .code("PRD-9")
                 .currentStock(new BigDecimal("10"))
+                .requiresBatchControl(Boolean.FALSE)
+                .requiresExpiration(Boolean.FALSE)
                 .active(Boolean.TRUE)
                 .build();
         User currentUser = User.builder()
@@ -153,6 +169,57 @@ class InventoryMovementServiceImplTest {
         assertThatThrownBy(() -> inventoryMovementService.create(request))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("Insufficient stock for product PRD-9");
+    }
+
+    @Test
+    void create_exitSubtractsStockAndPersistsMovement() {
+        InventoryMovementRequestDto request = new InventoryMovementRequestDto(
+                MovementType.EXIT,
+                3L,
+                "Salida controlada",
+                List.of(new InventoryMovementLineRequestDto(9L, new BigDecimal("25"), "Consumo autorizado")));
+        Laboratory laboratory = Laboratory.builder().id(3L).active(Boolean.TRUE).build();
+        Product product = Product.builder()
+                .id(9L)
+                .code("PRD-9")
+                .name("Reactivo")
+                .currentStock(new BigDecimal("100"))
+                .requiresBatchControl(Boolean.FALSE)
+                .requiresExpiration(Boolean.FALSE)
+                .active(Boolean.TRUE)
+                .build();
+        User currentUser = User.builder()
+                .id(2L)
+                .username("tech")
+                .accessScope(AccessScope.ALL_LABS)
+                .role(Role.builder().id(1L).name("LAB_TECHNICIAN").description("role").build())
+                .active(Boolean.TRUE)
+                .build();
+
+        when(laboratoryRepository.findByIdAndActiveTrue(3L)).thenReturn(Optional.of(laboratory));
+        when(productRepository.findByIdAndActiveTrue(9L)).thenReturn(Optional.of(product));
+        when(currentUserService.getAuthenticatedUser()).thenReturn(currentUser);
+        when(inventoryMovementRepository.save(any(InventoryMovement.class))).thenAnswer(invocation -> {
+            InventoryMovement movement = invocation.getArgument(0);
+            movement.setId(16L);
+            movement.getLines().get(0).setId(31L);
+            return movement;
+        });
+
+        InventoryMovementResponseDto response = inventoryMovementService.create(request);
+
+        assertThat(product.getCurrentStock()).isEqualByComparingTo("75");
+        assertThat(response.getId()).isEqualTo(16L);
+        assertThat(response.getMovementType()).isEqualTo(MovementType.EXIT);
+        assertThat(response.getLines()).hasSize(1);
+        assertThat(response.getLines().get(0).getQuantity()).isEqualByComparingTo("25");
+        verify(inventoryAlertService).synchronizeAlerts(3L, List.of(9L), List.of());
+        verify(inventoryMovementRepository).save(argThat(movement ->
+                movement.getMovementType() == MovementType.EXIT
+                        && movement.getLaboratory().getId().equals(3L)
+                        && movement.getPerformedBy().getId().equals(2L)
+                        && movement.getLines().size() == 1
+                        && movement.getLines().get(0).getProduct().getId().equals(9L)));
     }
 
     @Test

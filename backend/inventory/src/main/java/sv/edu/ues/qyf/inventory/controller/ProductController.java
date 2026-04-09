@@ -1,5 +1,7 @@
 package sv.edu.ues.qyf.inventory.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,8 @@ import sv.edu.ues.qyf.inventory.service.ProductService;
 
 @RestController
 @RequestMapping("/api/products")
+@Tag(name = "Products")
+@SecurityRequirement(name = "bearerAuth")
 public class ProductController {
 
     private final ProductService productService;

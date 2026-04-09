@@ -14,6 +14,8 @@ public class InventoryMovementLineResponseDto {
 
     private Long id;
     private Long productId;
+    private Long productBatchId;
+    private String batchCode;
     private String productCode;
     private String productName;
     private BigDecimal quantity;

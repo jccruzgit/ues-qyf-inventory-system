@@ -15,6 +15,15 @@ public class InventoryAlertMapper {
         return InventoryAlertResponseDto.builder()
                 .id(inventoryAlert.getId())
                 .laboratoryId(inventoryAlert.getLaboratory() != null ? inventoryAlert.getLaboratory().getId() : null)
+                .alertType(inventoryAlert.getAlertType())
+                .productId(inventoryAlert.getProduct() != null ? inventoryAlert.getProduct().getId() : null)
+                .productCode(inventoryAlert.getProduct() != null ? inventoryAlert.getProduct().getCode() : null)
+                .productBatchId(inventoryAlert.getProductBatch() != null ? inventoryAlert.getProductBatch().getId() : null)
+                .batchCode(inventoryAlert.getProductBatch() != null
+                        ? inventoryAlert.getProductBatch().getBatchCode()
+                        : null)
+                .message(inventoryAlert.getMessage())
+                .triggeredAt(inventoryAlert.getTriggeredAt())
                 .acknowledgedById(inventoryAlert.getAcknowledgedBy() != null
                         ? inventoryAlert.getAcknowledgedBy().getId()
                         : null)

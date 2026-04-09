@@ -38,17 +38,21 @@ public class InventoryMovementLine {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "movement_id")
+    @JoinColumn(name = "movement_id", nullable = false)
     private InventoryMovement movement;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "batch_id")
+    private ProductBatch productBatch;
 
     @NotNull
     @DecimalMin(value = "0.0", inclusive = false)
-    @Column(precision = 19, scale = 4)
+    @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal quantity;
 
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)

@@ -51,7 +51,9 @@ public class ProductBatchServiceImpl implements ProductBatchService {
     @Transactional(readOnly = true)
     public List<ProductBatchResponseDto> getActiveByProductAndLaboratory(Long productId, Long laboratoryId) {
         laboratoryAccessService.validateAccessToLaboratory(laboratoryId);
-        return productBatchRepository.findByProductIdAndLaboratoryIdAndActiveTrue(productId, laboratoryId).stream()
+        return productBatchRepository
+                .findByProductIdAndLaboratoryIdAndActiveTrueOrderByExpirationDateAscBatchCodeAsc(productId, laboratoryId)
+                .stream()
                 .map(productBatchMapper::toResponseDto)
                 .toList();
     }
@@ -125,6 +127,10 @@ public class ProductBatchServiceImpl implements ProductBatchService {
         state.put("productId", productBatch.getProduct() != null ? productBatch.getProduct().getId() : null);
         state.put("laboratoryId", productBatch.getLaboratory() != null ? productBatch.getLaboratory().getId() : null);
         state.put("batchCode", productBatch.getBatchCode());
+        state.put("status", productBatch.getStatus());
+        state.put("expirationDate", productBatch.getExpirationDate());
+        state.put("createdAt", productBatch.getCreatedAt());
+        state.put("updatedAt", productBatch.getUpdatedAt());
         state.put("active", productBatch.getActive());
         state.put("deletedAt", productBatch.getDeletedAt());
         state.put("deletedById", productBatch.getDeletedBy() != null ? productBatch.getDeletedBy().getId() : null);

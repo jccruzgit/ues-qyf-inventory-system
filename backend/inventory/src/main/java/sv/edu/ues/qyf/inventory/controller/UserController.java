@@ -1,5 +1,7 @@
 package sv.edu.ues.qyf.inventory.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,8 @@ import sv.edu.ues.qyf.inventory.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Users")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private final UserService userService;

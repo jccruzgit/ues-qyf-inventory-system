@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterEach;
@@ -23,8 +24,10 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import sv.edu.ues.qyf.inventory.InventoryBackendApplication;
 import sv.edu.ues.qyf.inventory.entity.AccessScope;
+import sv.edu.ues.qyf.inventory.entity.BatchStatus;
 import sv.edu.ues.qyf.inventory.entity.Category;
 import sv.edu.ues.qyf.inventory.entity.InventoryAlert;
+import sv.edu.ues.qyf.inventory.entity.InventoryAlertType;
 import sv.edu.ues.qyf.inventory.entity.InventoryMovement;
 import sv.edu.ues.qyf.inventory.entity.InventoryMovementLine;
 import sv.edu.ues.qyf.inventory.entity.Laboratory;
@@ -40,6 +43,7 @@ import sv.edu.ues.qyf.inventory.entity.User;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementLineRequestDto;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementRequestDto;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementResponseDto;
+import sv.edu.ues.qyf.inventory.dto.InventoryStockResponseDto;
 import sv.edu.ues.qyf.inventory.dto.ProductUpdateRequestDto;
 import sv.edu.ues.qyf.inventory.exception.BadRequestException;
 import sv.edu.ues.qyf.inventory.repository.InventoryAlertRepository;
@@ -47,8 +51,10 @@ import sv.edu.ues.qyf.inventory.repository.InventoryMovementRepository;
 import sv.edu.ues.qyf.inventory.repository.LaboratoryRepository;
 import sv.edu.ues.qyf.inventory.repository.ProductBatchRepository;
 import sv.edu.ues.qyf.inventory.repository.ProductRepository;
+import sv.edu.ues.qyf.inventory.service.InventoryAlertService;
 import sv.edu.ues.qyf.inventory.service.ProductService;
 import sv.edu.ues.qyf.inventory.service.InventoryMovementService;
+import sv.edu.ues.qyf.inventory.service.InventoryStockService;
 
 @SpringBootTest(
         classes = InventoryBackendApplication.class,
@@ -106,6 +112,12 @@ class PostgreSqlPersistenceIntegrationTest {
     private InventoryMovementService inventoryMovementService;
 
     @Autowired
+    private InventoryStockService inventoryStockService;
+
+    @Autowired
+    private InventoryAlertService inventoryAlertService;
+
+    @Autowired
     private ProductService productService;
 
     @AfterEach
@@ -116,7 +128,7 @@ class PostgreSqlPersistenceIntegrationTest {
     @Test
     void shouldApplyFlywayMigrationsAndCreateExpectedTables() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("8");
 
         Integer tableCount = jdbcTemplate.queryForObject(
                 """
@@ -142,16 +154,21 @@ class PostgreSqlPersistenceIntegrationTest {
 
         assertThat(laboratory.getId()).isNotNull();
         assertThat(laboratory.getActive()).isTrue();
+        assertThat(laboratory.getCode()).isNotBlank();
+        assertThat(laboratory.getName()).isNotBlank();
+        assertThat(laboratory.getCreatedAt()).isNotNull();
+        assertThat(laboratory.getUpdatedAt()).isNotNull();
 
         Laboratory persistedLaboratory = laboratoryRepository.findByIdAndActiveTrue(laboratory.getId()).orElseThrow();
         assertThat(persistedLaboratory.getId()).isEqualTo(laboratory.getId());
+        assertThat(persistedLaboratory.getCode()).isEqualTo(laboratory.getCode());
     }
 
     @Test
     void shouldPersistProductBatchLinkedToProductAndLaboratory() {
         Laboratory laboratory = persist(Laboratory.builder().build());
         User uploadedBy = persistUser("batch-doc-user");
-        Product product = persistProduct("BATCH-001");
+        Product product = persistProduct("BATCH-001", BigDecimal.TEN, false, true);
         ProductDocument certificateDocument = persist(ProductDocument.builder()
                 .product(product)
                 .fileName("batch-certificate.pdf")
@@ -167,7 +184,8 @@ class PostgreSqlPersistenceIntegrationTest {
                 .laboratory(laboratory)
                 .batchCode("LOT-2026-001")
                 .certificateDocument(certificateDocument)
-                .status("ACTIVE")
+                .status(BatchStatus.ACTIVE)
+                .expirationDate(LocalDate.of(2026, 12, 31))
                 .active(Boolean.TRUE)
                 .build());
         entityManager.flush();
@@ -177,6 +195,8 @@ class PostgreSqlPersistenceIntegrationTest {
         assertThat(persistedBatch.getProduct().getId()).isEqualTo(product.getId());
         assertThat(persistedBatch.getLaboratory().getId()).isEqualTo(laboratory.getId());
         assertThat(persistedBatch.getCertificateDocument().getId()).isEqualTo(certificateDocument.getId());
+        assertThat(persistedBatch.getStatus()).isEqualTo(BatchStatus.ACTIVE);
+        assertThat(persistedBatch.getExpirationDate()).isEqualTo(LocalDate.of(2026, 12, 31));
     }
 
     @Test
@@ -277,13 +297,22 @@ class PostgreSqlPersistenceIntegrationTest {
         Laboratory laboratory = persist(Laboratory.builder().build());
         User user = persistUser("persistence-user");
         Product product = persistProduct("MOVE-PERSIST", BigDecimal.ZERO);
+        ProductBatch productBatch = persist(ProductBatch.builder()
+                .product(product)
+                .laboratory(laboratory)
+                .batchCode("LOT-MOVE-001")
+                .status(BatchStatus.ACTIVE)
+                .expirationDate(LocalDate.of(2026, 10, 31))
+                .active(Boolean.TRUE)
+                .build());
         authenticate(user);
 
         InventoryMovementResponseDto response = inventoryMovementService.create(new InventoryMovementRequestDto(
                 MovementType.ENTRY,
                 laboratory.getId(),
                 "Movimiento con detalle",
-                List.of(new InventoryMovementLineRequestDto(product.getId(), new BigDecimal("100"), "Linea 1"))));
+                List.of(new InventoryMovementLineRequestDto(
+                        product.getId(), productBatch.getId(), new BigDecimal("100"), "Linea 1"))));
         entityManager.flush();
         entityManager.clear();
 
@@ -296,16 +325,32 @@ class PostgreSqlPersistenceIntegrationTest {
         assertThat(persistedMovement.getLines()).hasSize(1);
         InventoryMovementLine persistedLine = persistedMovement.getLines().get(0);
         assertThat(persistedLine.getProduct().getId()).isEqualTo(product.getId());
+        assertThat(persistedLine.getProductBatch().getId()).isEqualTo(productBatch.getId());
         assertThat(persistedLine.getQuantity()).isEqualByComparingTo("100");
         assertThat(persistedLine.getLineNotes()).isEqualTo("Linea 1");
+        assertThat(response.getLines().get(0).getProductBatchId()).isEqualTo(productBatch.getId());
+        assertThat(response.getLines().get(0).getBatchCode()).isEqualTo("LOT-MOVE-001");
     }
 
     @Test
     void shouldPersistInventoryAlertLinkedToLaboratory() {
         Laboratory laboratory = persist(Laboratory.builder().build());
+        Product product = persistProduct("ALT-001", BigDecimal.TEN, false, true);
+        ProductBatch productBatch = persist(ProductBatch.builder()
+                .product(product)
+                .laboratory(laboratory)
+                .batchCode("LOT-ALERT-001")
+                .status(BatchStatus.ACTIVE)
+                .expirationDate(LocalDate.of(2026, 9, 15))
+                .active(Boolean.TRUE)
+                .build());
 
         InventoryAlert inventoryAlert = inventoryAlertRepository.save(InventoryAlert.builder()
                 .laboratory(laboratory)
+                .alertType(InventoryAlertType.EXPIRING_BATCH)
+                .product(product)
+                .productBatch(productBatch)
+                .message("Batch expires within 30 days")
                 .build());
         entityManager.flush();
         entityManager.clear();
@@ -318,12 +363,17 @@ class PostgreSqlPersistenceIntegrationTest {
 
         assertThat(persistedAlert.getId()).isEqualTo(inventoryAlert.getId());
         assertThat(persistedAlert.getLaboratory().getId()).isEqualTo(laboratory.getId());
+        assertThat(persistedAlert.getProduct().getId()).isEqualTo(product.getId());
+        assertThat(persistedAlert.getProductBatch().getId()).isEqualTo(productBatch.getId());
+        assertThat(persistedAlert.getAlertType()).isEqualTo(InventoryAlertType.EXPIRING_BATCH);
+        assertThat(persistedAlert.getMessage()).isEqualTo("Batch expires within 30 days");
+        assertThat(persistedAlert.getTriggeredAt()).isNotNull();
         assertThat(persistedAlert.getAcknowledgedAt()).isNull();
     }
 
     @Test
     void shouldEnforceReferentialIntegrityForProductBatchLaboratory() {
-        Product product = persistProduct("FK-001");
+        Product product = persistProduct("FK-001", BigDecimal.TEN, false, true);
 
         assertThatThrownBy(() -> jdbcTemplate.update(
                 """
@@ -390,6 +440,117 @@ class PostgreSqlPersistenceIntegrationTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
+    @Test
+    void shouldCreateBatchOnEntryAndExposeStockByLaboratoryAndBatch() {
+        Laboratory laboratory = persist(Laboratory.builder().build());
+        User user = persistUser("batch-entry-user");
+        Product product = persistProduct("BATCH-MOVE-001", BigDecimal.ZERO, true, true);
+        authenticate(user);
+
+        InventoryMovementResponseDto response = inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.ENTRY,
+                laboratory.getId(),
+                "Entrada por lote",
+                List.of(new InventoryMovementLineRequestDto(
+                        product.getId(),
+                        null,
+                        "LOT-ENTRY-001",
+                        LocalDate.now().plusDays(20),
+                        new BigDecimal("40"),
+                        "Entrada lote"))));
+        entityManager.flush();
+        entityManager.clear();
+
+        ProductBatch persistedBatch = productBatchRepository
+                .findByProductIdAndLaboratoryIdAndBatchCode(product.getId(), laboratory.getId(), "LOT-ENTRY-001")
+                .orElseThrow();
+        List<InventoryStockResponseDto> stock = inventoryStockService.getStock(product.getId(), laboratory.getId(), persistedBatch.getId());
+
+        assertThat(response.getLines().get(0).getBatchCode()).isEqualTo("LOT-ENTRY-001");
+        assertThat(persistedBatch.getExpirationDate()).isEqualTo(LocalDate.now().plusDays(20));
+        assertThat(stock).hasSize(1);
+        assertThat(stock.get(0).getQuantityAvailable()).isEqualByComparingTo("40");
+        assertThat(stock.get(0).getProductBatchId()).isEqualTo(persistedBatch.getId());
+    }
+
+    @Test
+    void shouldConsultStockByProductAndLaboratory() {
+        Laboratory laboratory = persist(Laboratory.builder().build());
+        User user = persistUser("stock-query-user");
+        Product product = persistProduct("STOCK-QUERY-001", BigDecimal.ZERO);
+        authenticate(user);
+
+        inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.ENTRY,
+                laboratory.getId(),
+                "Entrada para consulta",
+                List.of(new InventoryMovementLineRequestDto(product.getId(), new BigDecimal("100"), "Ingreso"))));
+        inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.EXIT,
+                laboratory.getId(),
+                "Salida para consulta",
+                List.of(new InventoryMovementLineRequestDto(product.getId(), new BigDecimal("25"), "Consumo"))));
+        entityManager.flush();
+        entityManager.clear();
+
+        List<InventoryStockResponseDto> globalStock = inventoryStockService.getStock(product.getId(), null, null);
+        List<InventoryStockResponseDto> laboratoryStock = inventoryStockService.getStock(product.getId(), laboratory.getId(), null);
+
+        assertThat(globalStock).hasSize(1);
+        assertThat(globalStock.get(0).getQuantityAvailable()).isEqualByComparingTo("75");
+        assertThat(globalStock.get(0).getProductId()).isEqualTo(product.getId());
+
+        assertThat(laboratoryStock).hasSize(1);
+        assertThat(laboratoryStock.get(0).getLaboratoryId()).isEqualTo(laboratory.getId());
+        assertThat(laboratoryStock.get(0).getQuantityAvailable()).isEqualByComparingTo("75");
+        assertThat(laboratoryStock.get(0).getProductId()).isEqualTo(product.getId());
+    }
+
+    @Test
+    void shouldGenerateLowStockAndExpiringBatchAlerts() {
+        Laboratory laboratory = persist(Laboratory.builder().build());
+        User user = persistUser("alert-sync-user");
+        Product product = persistProduct("ALERT-SYNC-001", BigDecimal.ZERO, true, true);
+        product.setMinimumStock(new BigDecimal("40"));
+        entityManager.flush();
+        authenticate(user);
+
+        inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.ENTRY,
+                laboratory.getId(),
+                "Entrada para lote",
+                List.of(new InventoryMovementLineRequestDto(
+                        product.getId(),
+                        null,
+                        "LOT-ALERT-SYNC",
+                        LocalDate.now().plusDays(10),
+                        new BigDecimal("50"),
+                        "Ingreso"))));
+        ProductBatch batch = productBatchRepository
+                .findByProductIdAndLaboratoryIdAndBatchCode(product.getId(), laboratory.getId(), "LOT-ALERT-SYNC")
+                .orElseThrow();
+
+        inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.EXIT,
+                laboratory.getId(),
+                "Salida con alerta",
+                List.of(new InventoryMovementLineRequestDto(
+                        product.getId(),
+                        batch.getId(),
+                        null,
+                        null,
+                        new BigDecimal("20"),
+                        "Consumo"))));
+        entityManager.flush();
+        entityManager.clear();
+
+        List<sv.edu.ues.qyf.inventory.dto.InventoryAlertResponseDto> alerts =
+                inventoryAlertService.getAlerts(laboratory.getId(), null, true);
+
+        assertThat(alerts).extracting("alertType")
+                .contains(InventoryAlertType.LOW_STOCK, InventoryAlertType.EXPIRING_BATCH);
+    }
+
     private User persistUser(String username) {
         Role role = persist(Role.builder()
                 .name("ROLE_" + username.toUpperCase())
@@ -412,6 +573,14 @@ class PostgreSqlPersistenceIntegrationTest {
     }
 
     private Product persistProduct(String code, BigDecimal currentStock) {
+        return persistProduct(code, currentStock, false, false);
+    }
+
+    private Product persistProduct(
+            String code,
+            BigDecimal currentStock,
+            boolean requiresBatchControl,
+            boolean requiresExpiration) {
         Category category = persist(Category.builder()
                 .name("Category-" + code)
                 .description("Integration test category")
@@ -439,8 +608,8 @@ class PostgreSqlPersistenceIntegrationTest {
                 .currentStock(currentStock)
                 .location(location)
                 .active(Boolean.TRUE)
-                .requiresExpiration(Boolean.FALSE)
-                .requiresBatchControl(Boolean.TRUE)
+                .requiresExpiration(requiresExpiration)
+                .requiresBatchControl(requiresBatchControl)
                 .build());
     }
 

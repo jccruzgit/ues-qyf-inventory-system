@@ -7,9 +7,13 @@ import sv.edu.ues.qyf.inventory.entity.Laboratory;
 
 public interface LaboratoryRepository extends JpaRepository<Laboratory, Long> {
 
+    Optional<Laboratory> findByCode(String code);
+
     List<Laboratory> findByActiveTrue();
 
     List<Laboratory> findByIdInAndActiveTrue(List<Long> ids);
+
+    boolean existsByCodeIgnoreCase(String code);
 
     boolean existsByIdAndActiveTrue(Long id);
 

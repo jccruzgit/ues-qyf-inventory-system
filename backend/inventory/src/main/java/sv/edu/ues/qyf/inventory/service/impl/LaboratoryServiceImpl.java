@@ -124,7 +124,12 @@ public class LaboratoryServiceImpl implements LaboratoryService {
     private String serializeState(Laboratory laboratory) {
         Map<String, Object> state = new LinkedHashMap<>();
         state.put("id", laboratory.getId());
+        state.put("code", laboratory.getCode());
+        state.put("name", laboratory.getName());
+        state.put("description", laboratory.getDescription());
         state.put("active", laboratory.getActive());
+        state.put("createdAt", laboratory.getCreatedAt());
+        state.put("updatedAt", laboratory.getUpdatedAt());
         state.put("deletedAt", laboratory.getDeletedAt());
         state.put("deletedById", laboratory.getDeletedBy() != null ? laboratory.getDeletedBy().getId() : null);
         return writeJson(state);

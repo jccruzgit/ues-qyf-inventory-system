@@ -7,7 +7,15 @@ import sv.edu.ues.qyf.inventory.entity.ProductBatch;
 
 public interface ProductBatchRepository extends JpaRepository<ProductBatch, Long> {
 
-    List<ProductBatch> findByProductIdAndLaboratoryIdAndActiveTrue(Long productId, Long laboratoryId);
+    List<ProductBatch> findByProductIdAndLaboratoryIdAndActiveTrueOrderByExpirationDateAscBatchCodeAsc(
+            Long productId, Long laboratoryId);
+
+    List<ProductBatch> findByLaboratoryIdAndActiveTrueOrderByExpirationDateAsc(Long laboratoryId);
+
+    List<ProductBatch> findByLaboratoryIdAndExpirationDateLessThanEqualAndActiveTrueOrderByExpirationDateAsc(
+            Long laboratoryId, java.time.LocalDate expirationDate);
+
+    List<ProductBatch> findByLaboratoryIdAndExpirationDateIsNotNullAndActiveTrueOrderByExpirationDateAsc(Long laboratoryId);
 
     Optional<ProductBatch> findByProductIdAndLaboratoryIdAndBatchCode(Long productId, Long laboratoryId, String batchCode);
 

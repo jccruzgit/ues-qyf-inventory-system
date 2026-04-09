@@ -5,10 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import sv.edu.ues.qyf.inventory.dto.ApiResponse;
@@ -73,6 +75,30 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException exception) {
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error(exception.getMessage(), null));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException exception) {
+        String parameterName = exception.getName();
+        Object rejectedValue = exception.getValue();
+        String message = "Invalid value"
+                + (rejectedValue != null ? " '" + rejectedValue + "'" : "")
+                + " for parameter '" + parameterName + "'";
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(message, null));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadable(HttpMessageNotReadableException exception) {
+        String message = "Malformed request body";
+        if (exception.getMostSpecificCause() != null
+                && exception.getMostSpecificCause().getMessage() != null
+                && !exception.getMostSpecificCause().getMessage().isBlank()) {
+            message = exception.getMostSpecificCause().getMessage();
+        }
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(message, null));
     }
 
     @ExceptionHandler(Exception.class)

@@ -48,6 +48,8 @@ public class InventoryMovementMapper {
         return InventoryMovementLineResponseDto.builder()
                 .id(line.getId())
                 .productId(line.getProduct() != null ? line.getProduct().getId() : null)
+                .productBatchId(line.getProductBatch() != null ? line.getProductBatch().getId() : null)
+                .batchCode(line.getProductBatch() != null ? line.getProductBatch().getBatchCode() : null)
                 .productCode(line.getProduct() != null ? line.getProduct().getCode() : null)
                 .productName(line.getProduct() != null ? line.getProduct().getName() : null)
                 .quantity(line.getQuantity())
