@@ -11,16 +11,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementLineRequestDto;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementRequestDto;
-import sv.edu.ues.qyf.inventory.entity.AccessScope;
 import sv.edu.ues.qyf.inventory.entity.Category;
 import sv.edu.ues.qyf.inventory.entity.Laboratory;
 import sv.edu.ues.qyf.inventory.entity.Location;
 import sv.edu.ues.qyf.inventory.entity.MovementType;
 import sv.edu.ues.qyf.inventory.entity.Product;
-import sv.edu.ues.qyf.inventory.entity.Role;
 import sv.edu.ues.qyf.inventory.entity.UnitOfMeasure;
 import sv.edu.ues.qyf.inventory.entity.UnitType;
 import sv.edu.ues.qyf.inventory.entity.User;
@@ -29,9 +26,8 @@ import sv.edu.ues.qyf.inventory.repository.InventoryMovementRepository;
 import sv.edu.ues.qyf.inventory.repository.LaboratoryRepository;
 import sv.edu.ues.qyf.inventory.repository.LocationRepository;
 import sv.edu.ues.qyf.inventory.repository.ProductRepository;
-import sv.edu.ues.qyf.inventory.repository.RoleRepository;
 import sv.edu.ues.qyf.inventory.repository.UnitOfMeasureRepository;
-import sv.edu.ues.qyf.inventory.repository.UserRepository;
+import sv.edu.ues.qyf.inventory.service.DefaultAdminSeederService;
 import sv.edu.ues.qyf.inventory.service.InventoryMovementService;
 
 @Configuration
@@ -42,8 +38,6 @@ public class DemoDataInitializer {
     @Bean
     @ConditionalOnProperty(prefix = "app.demo.seed", name = "enabled", havingValue = "true")
     ApplicationRunner demoDataRunner(
-            RoleRepository roleRepository,
-            UserRepository userRepository,
             LaboratoryRepository laboratoryRepository,
             CategoryRepository categoryRepository,
             LocationRepository locationRepository,
@@ -51,24 +45,9 @@ public class DemoDataInitializer {
             ProductRepository productRepository,
             InventoryMovementRepository inventoryMovementRepository,
             InventoryMovementService inventoryMovementService,
-            PasswordEncoder passwordEncoder) {
+            DefaultAdminSeederService defaultAdminSeederService) {
         return args -> {
-            Role adminRole = roleRepository.findByName("ADMIN")
-                    .orElseGet(() -> roleRepository.save(Role.builder()
-                            .name("ADMIN")
-                            .description("System administrator")
-                            .build()));
-
-            User adminUser = userRepository.findByUsername("admin")
-                    .orElseGet(() -> userRepository.save(User.builder()
-                            .username("admin")
-                            .email("admin@qyf.local")
-                            .password(passwordEncoder.encode("Admin123*"))
-                            .fullName("Demo Administrator")
-                            .active(Boolean.TRUE)
-                            .accessScope(AccessScope.ALL_LABS)
-                            .role(adminRole)
-                            .build()));
+            User adminUser = defaultAdminSeederService.ensureDefaultAdminSilently();
 
             Laboratory laboratory = laboratoryRepository.findByCode("LAB-DEMO")
                     .orElseGet(() -> laboratoryRepository.save(Laboratory.builder()
