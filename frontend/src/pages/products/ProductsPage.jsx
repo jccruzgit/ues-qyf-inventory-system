@@ -10,6 +10,7 @@ import {
   ShieldPlus,
   Syringe,
 } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ProductCard from '../../components/products/ProductCard';
 import ProductFilters from '../../components/products/ProductFilters';
 import ProductListItem from '../../components/products/ProductListItem';
@@ -161,10 +162,13 @@ function ProductsErrorState({ message, onRetry }) {
 }
 
 function ProductsPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [category, setCategory] = useState('all');
   const [laboratory, setLaboratory] = useState('all');
   const [storageCondition, setStorageCondition] = useState('all');
@@ -189,6 +193,13 @@ function ProductsPage() {
   useEffect(() => {
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.notice) {
+      setNotice(location.state.notice);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   const categoryOptions = [
     { value: 'all', label: 'Todas las clasificaciones' },
@@ -221,15 +232,21 @@ function ProductsPage() {
         title="Productos"
         subtitle="Gestiona el catalogo operativo de insumos, equipos y reactivos del laboratorio."
         action={
-          <button
-            type="button"
+          <Link
+            to="/products/new"
             className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(14,47,103,0.2)] transition hover:-translate-y-0.5 hover:bg-[#0b2551]"
           >
             <Plus className="h-4 w-4" strokeWidth={2.4} />
             Nuevo producto
-          </button>
+          </Link>
         }
       />
+
+      {notice ? (
+        <div className="rounded-[24px] border border-[#d7f0e1] bg-[#eef9f2] px-4 py-3 text-sm font-semibold text-[#2fa36b]">
+          {notice}
+        </div>
+      ) : null}
 
       <ProductFilters
         category={category}

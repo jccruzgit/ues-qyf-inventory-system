@@ -19,6 +19,8 @@ function normalizeStorageCondition(value) {
   if (
     normalizedValue.includes('cold') ||
     normalizedValue.includes('refrig') ||
+    normalizedValue.includes('congel') ||
+    normalizedValue.includes('freeze') ||
     normalizedValue.includes('frio') ||
     normalizedValue.includes('2-8')
   ) {
@@ -138,6 +140,95 @@ function extractCollectionPayload(body) {
   };
 }
 
+function extractItemPayload(body) {
+  return body?.data ?? body;
+}
+
+function normalizeOptionalText(value) {
+  const normalizedValue = String(value ?? '').trim();
+  return normalizedValue ? normalizedValue : null;
+}
+
+function mapCategoryOption(category) {
+  return {
+    value: String(category.id),
+    label: category.name,
+    description: category.description ?? '',
+    raw: category,
+  };
+}
+
+function mapUnitOption(unit) {
+  return {
+    value: String(unit.id),
+    label: unit.symbol ? `${unit.name} (${unit.symbol})` : unit.name,
+    description: unit.type ?? '',
+    raw: unit,
+  };
+}
+
+function mapLocationOption(location) {
+  return {
+    value: String(location.id),
+    label: location.name,
+    description: location.description ?? '',
+    raw: location,
+  };
+}
+
+function translateValidationMessage(message) {
+  const normalizedMessage = String(message ?? '').trim();
+
+  const exactMessages = {
+    'Product code is required': 'El codigo del producto es obligatorio.',
+    'Product name is required': 'El nombre del producto es obligatorio.',
+    'Category id is required': 'La categoria es obligatoria.',
+    'Base unit id is required': 'La unidad base es obligatoria.',
+    'Minimum stock is required': 'El stock minimo es obligatorio.',
+    'Location id is required': 'La ubicacion es obligatoria.',
+    'Current stock must be greater than or equal to 0': 'El stock actual debe ser mayor o igual a 0.',
+    'Minimum stock must be greater than or equal to 0': 'El stock minimo debe ser mayor o igual a 0.',
+    'Product code must not exceed 50 characters': 'El codigo no debe exceder 50 caracteres.',
+    'Product name must not exceed 150 characters': 'El nombre no debe exceder 150 caracteres.',
+    'Product description must not exceed 500 characters': 'La descripcion no debe exceder 500 caracteres.',
+    'Storage condition must not exceed 120 characters': 'La condicion de almacenamiento no debe exceder 120 caracteres.',
+  };
+
+  if (exactMessages[normalizedMessage]) {
+    return exactMessages[normalizedMessage];
+  }
+
+  if (normalizedMessage.startsWith('Product code already exists')) {
+    return 'Ya existe un producto con ese codigo.';
+  }
+
+  if (normalizedMessage.startsWith('Category not found')) {
+    return 'La categoria seleccionada ya no esta disponible.';
+  }
+
+  if (normalizedMessage.startsWith('Unit of measure not found')) {
+    return 'La unidad base seleccionada ya no esta disponible.';
+  }
+
+  if (normalizedMessage.startsWith('Location not found')) {
+    return 'La ubicacion seleccionada ya no esta disponible.';
+  }
+
+  if (normalizedMessage === 'Validation failed') {
+    return 'Los datos del formulario no son validos.';
+  }
+
+  if (normalizedMessage === 'Access denied') {
+    return 'No tiene permisos para registrar productos.';
+  }
+
+  if (normalizedMessage === 'An unexpected error occurred') {
+    return 'Ocurrio un error inesperado al guardar el producto.';
+  }
+
+  return normalizedMessage;
+}
+
 export async function fetchProducts() {
   const response = await api.get('/products');
   const body = response.data;
@@ -155,6 +246,59 @@ export async function fetchProducts() {
   };
 }
 
+export async function fetchProductCatalogs() {
+  const [categoriesResponse, unitsResponse, locationsResponse] = await Promise.all([
+    api.get('/categories'),
+    api.get('/units'),
+    api.get('/locations'),
+  ]);
+
+  const categories = extractCollectionPayload(categoriesResponse.data).items
+    .filter((item) => item?.active !== false)
+    .map(mapCategoryOption);
+
+  const units = extractCollectionPayload(unitsResponse.data).items
+    .filter((item) => item?.active !== false)
+    .map(mapUnitOption);
+
+  const locations = extractCollectionPayload(locationsResponse.data).items
+    .filter((item) => item?.active !== false)
+    .map(mapLocationOption);
+
+  return {
+    categories,
+    units,
+    locations,
+  };
+}
+
+export async function createProduct(values) {
+  const payload = {
+    code: values.code.trim(),
+    name: values.name.trim(),
+    description: normalizeOptionalText(values.description),
+    categoryId: values.categoryId,
+    baseUnitId: values.baseUnitId,
+    minimumStock: values.minimumStock,
+    currentStock: values.currentStock ?? 0,
+    locationId: values.locationId,
+    observations: normalizeOptionalText(values.observations),
+    storageCondition: normalizeOptionalText(values.storageCondition),
+    requiresExpiration: values.requiresExpiration,
+    requiresBatchControl: values.requiresBatchControl,
+    active: values.active,
+  };
+
+  const response = await api.post('/products', payload);
+  const body = response.data;
+
+  if (body?.success === false) {
+    throw new Error(translateValidationMessage(body?.message ?? 'No se pudo crear el producto.'));
+  }
+
+  return adaptProductFromApi(extractItemPayload(body));
+}
+
 export function getProductsErrorMessage(error) {
   if (error?.response?.data?.message) {
     return error.response.data.message;
@@ -169,4 +313,46 @@ export function getProductsErrorMessage(error) {
   }
 
   return 'No fue posible cargar los productos.';
+}
+
+export function getProductCatalogsErrorMessage(error) {
+  if (error?.response?.status === 401) {
+    return 'La sesion ha expirado. Inicie sesion nuevamente.';
+  }
+
+  if (error?.response?.status === 403) {
+    return 'No tiene permisos para consultar los catalogos requeridos.';
+  }
+
+  return getProductsErrorMessage(error);
+}
+
+export function getCreateProductErrorDetails(error) {
+  const body = error?.response?.data;
+  const fieldErrors = {};
+
+  if (body?.data && typeof body.data === 'object' && !Array.isArray(body.data)) {
+    for (const [field, message] of Object.entries(body.data)) {
+      fieldErrors[field] = translateValidationMessage(message);
+    }
+  }
+
+  if (error?.response?.status === 401) {
+    return {
+      message: 'La sesion ha expirado. Inicie sesion nuevamente.',
+      fieldErrors,
+    };
+  }
+
+  if (error?.response?.status === 403) {
+    return {
+      message: 'No tiene permisos para registrar productos.',
+      fieldErrors,
+    };
+  }
+
+  return {
+    message: translateValidationMessage(body?.message ?? error?.message ?? 'No se pudo crear el producto.'),
+    fieldErrors,
+  };
 }

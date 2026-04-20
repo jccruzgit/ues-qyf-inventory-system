@@ -6,6 +6,7 @@ import LoginPage from './pages/auth/LoginPage';
 import AuthSupportPage from './pages/auth/AuthSupportPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ModulePlaceholderPage from './pages/modules/ModulePlaceholderPage';
+import ProductCreatePage from './pages/products/ProductCreatePage';
 import ProductsPage from './pages/products/ProductsPage';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/products" element={<ProductsPage />} />
+          <Route path="/products/new" element={<ProductCreatePage />} />
           <Route path="/inventory" element={<ModulePlaceholderPage />} />
           <Route path="/movements" element={<ModulePlaceholderPage />} />
           <Route path="/batches" element={<ModulePlaceholderPage />} />
