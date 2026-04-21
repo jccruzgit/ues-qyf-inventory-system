@@ -24,6 +24,7 @@ function toTitleCase(segment) {
 function ModulePlaceholderPage() {
   const location = useLocation();
   const moduleName = routeLabels[location.pathname] ?? toTitleCase(location.pathname) ?? 'Modulo';
+  const context = location.state?.context;
 
   return (
     <div className="space-y-6">
@@ -52,6 +53,13 @@ function ModulePlaceholderPage() {
             Siguiente paso sugerido: conectar tablas, filtros y consultas al backend cuando este
             modulo pase de placeholder a implementacion.
           </div>
+
+          {context ? (
+            <div className="rounded-[26px] border border-brand-teal/15 bg-brand-teal-soft/40 px-5 py-4 text-sm font-semibold text-copy">
+              Contexto recibido: <span className="text-brand-ink">{context.title}</span>
+              {context.description ? ` • ${context.description}` : ''}
+            </div>
+          ) : null}
         </div>
       </Card>
     </div>

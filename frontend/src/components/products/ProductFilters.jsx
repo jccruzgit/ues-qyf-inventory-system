@@ -1,6 +1,6 @@
 import { ChevronDown, Snowflake } from 'lucide-react';
 
-function FilterSelect({ label, value, options, onChange }) {
+export function FilterSelect({ label, value, options, onChange }) {
   return (
     <label className="min-w-0 flex-1">
       <span className="mb-2 block text-[0.68rem] font-extrabold uppercase tracking-[0.24em] text-copy-soft">
@@ -24,8 +24,8 @@ function FilterSelect({ label, value, options, onChange }) {
   );
 }
 
-function StorageToggle({ value, onChange }) {
-  const options = [
+export function StorageToggle({ value, onChange, label = 'Condicion de almacenamiento', options }) {
+  const toggleOptions = options ?? [
     { value: 'all', label: 'Todas' },
     { value: 'cold', label: 'Refrigerado' },
     { value: 'ambient', label: 'Ambiente' },
@@ -34,10 +34,10 @@ function StorageToggle({ value, onChange }) {
   return (
     <div className="min-w-0">
       <span className="mb-2 block text-[0.68rem] font-extrabold uppercase tracking-[0.24em] text-copy-soft">
-        Condicion de almacenamiento
+        {label}
       </span>
       <div className="inline-flex flex-wrap gap-2 rounded-full bg-white p-1.5 shadow-[0_12px_28px_rgba(14,47,103,0.06)]">
-        {options.map((option) => {
+        {toggleOptions.map((option) => {
           const isActive = option.value === value;
 
           return (

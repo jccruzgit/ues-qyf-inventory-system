@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, AlertTriangle, Boxes } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import InventoryEntryForm from '../../components/inventory/InventoryEntryForm';
 import Card from '../../components/ui/Card';
 import SectionHeader from '../../components/ui/SectionHeader';
@@ -27,6 +27,7 @@ const defaultValues = {
 };
 
 function InventoryEntryCreatePage() {
+  const location = useLocation();
   const navigate = useNavigate();
   const [catalogs, setCatalogs] = useState({
     products: [],
@@ -69,6 +70,22 @@ function InventoryEntryCreatePage() {
   useEffect(() => {
     loadCatalogs();
   }, []);
+
+  useEffect(() => {
+    const prefill = location.state?.prefill;
+
+    if (!prefill) {
+      return;
+    }
+
+    if (prefill.productId) {
+      setValue('productId', String(prefill.productId));
+    }
+
+    if (prefill.laboratoryId) {
+      setValue('laboratoryId', String(prefill.laboratoryId));
+    }
+  }, [location.state, setValue]);
 
   useEffect(() => {
     setValue('unitLabel', selectedProduct?.unit ?? '');
