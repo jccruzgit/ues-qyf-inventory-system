@@ -81,6 +81,8 @@ export function adaptProductFromApi(productDto) {
   const currentStock = toNumber(productDto?.currentStock);
   const minimumStock = toNumber(productDto?.minimumStock);
   const storageCondition = normalizeStorageCondition(productDto?.storageCondition);
+  const baseUnitName = productDto?.baseUnitName?.trim() || '';
+  const baseUnitSymbol = productDto?.baseUnitSymbol?.trim() || '';
 
   return {
     id: productDto?.id,
@@ -92,12 +94,16 @@ export function adaptProductFromApi(productDto) {
     stock: currentStock,
     maxStock: deriveMaxStock(currentStock, minimumStock),
     minimumStock,
-    unit: productDto?.baseUnitName?.trim() || productDto?.baseUnitSymbol?.trim() || 'Unidades',
+    unit: baseUnitName || baseUnitSymbol || 'Unidades',
+    unitName: baseUnitName || 'Unidades',
+    unitSymbol: baseUnitSymbol,
     laboratory: productDto?.locationName?.trim() || 'No asignado',
     storageCondition: storageCondition.key,
     storageConditionLabel: storageCondition.label,
     description: productDto?.description?.trim() || '',
     observations: productDto?.observations?.trim() || '',
+    requiresExpiration: Boolean(productDto?.requiresExpiration),
+    requiresBatchControl: Boolean(productDto?.requiresBatchControl),
     raw: productDto,
   };
 }

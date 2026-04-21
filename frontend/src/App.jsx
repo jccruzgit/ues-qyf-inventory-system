@@ -5,6 +5,8 @@ import AppLayout from './components/layout/AppLayout';
 import LoginPage from './pages/auth/LoginPage';
 import AuthSupportPage from './pages/auth/AuthSupportPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import InventoryEntryCreatePage from './pages/inventory/InventoryEntryCreatePage';
+import InventoryStockPage from './pages/inventory/InventoryStockPage';
 import ModulePlaceholderPage from './pages/modules/ModulePlaceholderPage';
 import ProductCreatePage from './pages/products/ProductCreatePage';
 import ProductsPage from './pages/products/ProductsPage';
@@ -29,7 +31,8 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/new" element={<ProductCreatePage />} />
-          <Route path="/inventory" element={<ModulePlaceholderPage />} />
+          <Route path="/inventory" element={<InventoryStockPage />} />
+          <Route path="/inventory/entries/new" element={<InventoryEntryCreatePage />} />
           <Route path="/movements" element={<ModulePlaceholderPage />} />
           <Route path="/batches" element={<ModulePlaceholderPage />} />
           <Route path="/alerts" element={<ModulePlaceholderPage />} />

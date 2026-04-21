@@ -10,7 +10,7 @@ import {
   TriangleAlert,
   X,
 } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import BrandMark from '../ui/BrandMark';
 
 const primaryItems = [
@@ -100,13 +100,14 @@ function Sidebar({ mobileOpen, onClose }) {
           ))}
         </nav>
 
-        <button
-          type="button"
+        <Link
+          to="/inventory/entries/new"
+          onClick={onClose}
           className="mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-5 py-4 text-sm font-extrabold text-white shadow-[0_20px_36px_rgba(14,47,103,0.22)] transition hover:-translate-y-0.5 hover:bg-[#0b2551]"
         >
           <Plus className="h-4 w-4" strokeWidth={2.5} />
-          Nuevo registro
-        </button>
+          Nueva entrada
+        </Link>
 
         <div className="mt-6 space-y-2 border-t border-brand-ink/[0.06] pt-5">
           {secondaryItems.map((item) => (
