@@ -8,6 +8,7 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import InventoryEntryCreatePage from './pages/inventory/InventoryEntryCreatePage';
 import InventoryStockPage from './pages/inventory/InventoryStockPage';
 import ModulePlaceholderPage from './pages/modules/ModulePlaceholderPage';
+import MovementsPage from './pages/movements/MovementsPage';
 import ProductCreatePage from './pages/products/ProductCreatePage';
 import ProductsPage from './pages/products/ProductsPage';
 
@@ -33,7 +34,7 @@ function App() {
           <Route path="/products/new" element={<ProductCreatePage />} />
           <Route path="/inventory" element={<InventoryStockPage />} />
           <Route path="/inventory/entries/new" element={<InventoryEntryCreatePage />} />
-          <Route path="/movements" element={<ModulePlaceholderPage />} />
+          <Route path="/movements" element={<MovementsPage />} />
           <Route path="/batches" element={<ModulePlaceholderPage />} />
           <Route path="/alerts" element={<ModulePlaceholderPage />} />
           <Route path="/support" element={<ModulePlaceholderPage />} />

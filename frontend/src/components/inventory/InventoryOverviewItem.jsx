@@ -195,6 +195,10 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
           <QuickActionLink
             to="/movements"
             state={{
+              prefill: {
+                productId: item.productId,
+                laboratoryId: item.laboratoryId,
+              },
               context: {
                 title: item.productName,
                 description: `${item.productCode} • ${item.laboratoryName}`,
