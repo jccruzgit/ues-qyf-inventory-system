@@ -9,8 +9,8 @@ services:
     runtime: docker
     plan: free
     rootDir: backend/inventory
-    dockerfilePath: ./backend/inventory/Dockerfile
-    dockerContext: ./backend/inventory
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     autoDeployTrigger: commit
     healthCheckPath: /api/health
     envVars:
