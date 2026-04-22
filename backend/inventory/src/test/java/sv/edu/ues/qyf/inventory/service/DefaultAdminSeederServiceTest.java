@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sv.edu.ues.qyf.inventory.dto.UserRequestDto;
@@ -34,11 +33,9 @@ class DefaultAdminSeederServiceTest {
     @Mock
     private UserService userService;
 
-    @InjectMocks
-    private DefaultAdminSeederService defaultAdminSeederService;
-
     @Test
     void ensureDefaultAdmin_createsAdminRoleAndUserWhenMissing() {
+        DefaultAdminSeederService defaultAdminSeederService = createSeederService();
         Role adminRole = Role.builder()
                 .id(1L)
                 .name("ADMIN")
@@ -47,32 +44,32 @@ class DefaultAdminSeederServiceTest {
         User persistedAdmin = User.builder()
                 .id(10L)
                 .username("admin")
-                .email("admin@qyf.local")
-                .fullName("Administrador del sistema")
+                .email("admin@qyf.demo")
+                .fullName("Administrador Demo")
                 .active(Boolean.TRUE)
                 .accessScope(AccessScope.ALL_LABS)
                 .role(adminRole)
                 .build();
 
         when(userRepository.findByUsername("admin")).thenReturn(Optional.empty());
-        when(userRepository.findByEmail("admin@qyf.local")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("admin@qyf.demo")).thenReturn(Optional.empty());
         when(roleRepository.findByName("ADMIN")).thenReturn(Optional.empty());
         when(roleRepository.save(any(Role.class))).thenReturn(adminRole);
         when(userService.createUser(any(UserRequestDto.class)))
                 .thenReturn(UserResponseDto.builder().id(10L).build());
         when(userRepository.findById(10L)).thenReturn(Optional.of(persistedAdmin));
 
-        User result = defaultAdminSeederService.ensureDefaultAdmin();
+        Optional<User> result = defaultAdminSeederService.ensureDefaultAdmin();
 
-        assertThat(result).isSameAs(persistedAdmin);
+        assertThat(result).containsSame(persistedAdmin);
         verify(roleRepository).save(argThat(role ->
                 "ADMIN".equals(role.getName())
                         && "System administrator".equals(role.getDescription())));
         verify(userService).createUser(argThat(request ->
                 "admin".equals(request.getUsername())
-                        && "admin@qyf.local".equals(request.getEmail())
-                        && "Admin123*".equals(request.getPassword())
-                        && "Administrador del sistema".equals(request.getFullName())
+                        && "admin@qyf.demo".equals(request.getEmail())
+                        && "TemporaryPass123*".equals(request.getPassword())
+                        && "Administrador Demo".equals(request.getFullName())
                         && Boolean.TRUE.equals(request.getActive())
                         && AccessScope.ALL_LABS == request.getAccessScope()
                         && "ADMIN".equals(request.getRoleName())));
@@ -80,6 +77,7 @@ class DefaultAdminSeederServiceTest {
 
     @Test
     void ensureDefaultAdmin_skipsCreationWhenAdminUsernameAlreadyExists() {
+        DefaultAdminSeederService defaultAdminSeederService = createSeederService();
         Role adminRole = Role.builder()
                 .id(1L)
                 .name("ADMIN")
@@ -88,8 +86,8 @@ class DefaultAdminSeederServiceTest {
         User existingAdmin = User.builder()
                 .id(10L)
                 .username("admin")
-                .email("admin@qyf.local")
-                .fullName("Administrador del sistema")
+                .email("admin@qyf.demo")
+                .fullName("Administrador Demo")
                 .active(Boolean.TRUE)
                 .accessScope(AccessScope.ALL_LABS)
                 .role(adminRole)
@@ -97,10 +95,22 @@ class DefaultAdminSeederServiceTest {
 
         when(userRepository.findByUsername("admin")).thenReturn(Optional.of(existingAdmin));
 
-        User result = defaultAdminSeederService.ensureDefaultAdmin();
+        Optional<User> result = defaultAdminSeederService.ensureDefaultAdmin();
 
-        assertThat(result).isSameAs(existingAdmin);
+        assertThat(result).containsSame(existingAdmin);
         verify(userRepository, never()).findByEmail(any());
         verifyNoInteractions(roleRepository, userService);
+    }
+
+    private DefaultAdminSeederService createSeederService() {
+        return new DefaultAdminSeederService(
+                userRepository,
+                roleRepository,
+                userService,
+                true,
+                "admin",
+                "admin@qyf.demo",
+                "TemporaryPass123*",
+                "Administrador Demo");
     }
 }

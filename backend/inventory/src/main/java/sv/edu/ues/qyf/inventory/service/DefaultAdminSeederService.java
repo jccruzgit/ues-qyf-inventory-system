@@ -4,6 +4,7 @@ import java.util.Locale;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sv.edu.ues.qyf.inventory.dto.UserRequestDto;
@@ -18,56 +19,78 @@ import sv.edu.ues.qyf.inventory.repository.UserRepository;
 public class DefaultAdminSeederService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAdminSeederService.class);
-
-    private static final String DEFAULT_ADMIN_USERNAME = "admin";
-    private static final String DEFAULT_ADMIN_EMAIL = "admin@qyf.local";
-    private static final String DEFAULT_ADMIN_PASSWORD = "Admin123*";
-    private static final String DEFAULT_ADMIN_FULL_NAME = "Administrador del sistema";
     private static final String DEFAULT_ADMIN_ROLE = "ADMIN";
     private static final String DEFAULT_ADMIN_ROLE_DESCRIPTION = "System administrator";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserService userService;
+    private final boolean defaultAdminEnabled;
+    private final String defaultAdminUsername;
+    private final String defaultAdminEmail;
+    private final String defaultAdminPassword;
+    private final String defaultAdminFullName;
 
     public DefaultAdminSeederService(
             UserRepository userRepository,
             RoleRepository roleRepository,
-            UserService userService) {
+            UserService userService,
+            @Value("${app.default-admin.enabled:false}") boolean defaultAdminEnabled,
+            @Value("${app.default-admin.username:admin}") String defaultAdminUsername,
+            @Value("${app.default-admin.email:admin@qyf.demo}") String defaultAdminEmail,
+            @Value("${app.default-admin.password:}") String defaultAdminPassword,
+            @Value("${app.default-admin.full-name:Administrador Demo}") String defaultAdminFullName) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userService = userService;
+        this.defaultAdminEnabled = defaultAdminEnabled;
+        this.defaultAdminUsername = defaultAdminUsername.trim();
+        this.defaultAdminEmail = defaultAdminEmail.trim();
+        this.defaultAdminPassword = defaultAdminPassword;
+        this.defaultAdminFullName = defaultAdminFullName.trim();
     }
 
     @Transactional
-    public User ensureDefaultAdmin() {
+    public Optional<User> ensureDefaultAdmin() {
         return ensureDefaultAdmin(true);
     }
 
     @Transactional
-    public User ensureDefaultAdminSilently() {
+    public Optional<User> ensureDefaultAdminSilently() {
         return ensureDefaultAdmin(false);
     }
 
-    private User ensureDefaultAdmin(boolean logWhenAlreadyExists) {
-        Optional<User> existingByUsername = userRepository.findByUsername(DEFAULT_ADMIN_USERNAME);
-        if (existingByUsername.isPresent()) {
-            return logExistingAdmin(existingByUsername.get(), "username", DEFAULT_ADMIN_USERNAME, logWhenAlreadyExists);
+    private Optional<User> ensureDefaultAdmin(boolean logWhenAlreadyExists) {
+        if (!defaultAdminEnabled) {
+            if (logWhenAlreadyExists) {
+                LOGGER.info("Default admin seeding is disabled.");
+            }
+            return Optional.empty();
         }
 
-        Optional<User> existingByEmail = userRepository.findByEmail(DEFAULT_ADMIN_EMAIL);
+        if (isInvalidConfiguration()) {
+            LOGGER.warn("Default admin seeding skipped because required configuration is missing.");
+            return Optional.empty();
+        }
+
+        Optional<User> existingByUsername = userRepository.findByUsername(defaultAdminUsername);
+        if (existingByUsername.isPresent()) {
+            return logExistingAdmin(existingByUsername.get(), "username", defaultAdminUsername, logWhenAlreadyExists);
+        }
+
+        Optional<User> existingByEmail = userRepository.findByEmail(defaultAdminEmail);
         if (existingByEmail.isPresent()) {
-            return logExistingAdmin(existingByEmail.get(), "email", DEFAULT_ADMIN_EMAIL, logWhenAlreadyExists);
+            return logExistingAdmin(existingByEmail.get(), "email", defaultAdminEmail, logWhenAlreadyExists);
         }
 
         Role adminRole = roleRepository.findByName(DEFAULT_ADMIN_ROLE)
                 .orElseGet(this::createAdminRole);
 
         UserResponseDto createdAdmin = userService.createUser(new UserRequestDto(
-                DEFAULT_ADMIN_USERNAME,
-                DEFAULT_ADMIN_EMAIL,
-                DEFAULT_ADMIN_PASSWORD,
-                DEFAULT_ADMIN_FULL_NAME,
+                defaultAdminUsername,
+                defaultAdminEmail,
+                defaultAdminPassword,
+                defaultAdminFullName,
                 Boolean.TRUE,
                 AccessScope.ALL_LABS,
                 adminRole.getName()));
@@ -80,7 +103,7 @@ public class DefaultAdminSeederService {
                 persistedAdmin.getUsername(),
                 persistedAdmin.getRole().getName());
 
-        return persistedAdmin;
+        return Optional.of(persistedAdmin);
     }
 
     private Role createAdminRole() {
@@ -93,7 +116,7 @@ public class DefaultAdminSeederService {
         return adminRole;
     }
 
-    private User logExistingAdmin(User user, String matchType, String matchValue, boolean logWhenAlreadyExists) {
+    private Optional<User> logExistingAdmin(User user, String matchType, String matchValue, boolean logWhenAlreadyExists) {
         String roleName = user.getRole() != null ? user.getRole().getName() : "UNKNOWN";
         if (!DEFAULT_ADMIN_ROLE.equals(roleName.toUpperCase(Locale.ROOT))) {
             LOGGER.warn(
@@ -101,7 +124,7 @@ public class DefaultAdminSeederService {
                     matchType,
                     matchValue,
                     roleName);
-            return user;
+            return Optional.of(user);
         }
 
         if (logWhenAlreadyExists) {
@@ -110,6 +133,14 @@ public class DefaultAdminSeederService {
                     matchType,
                     matchValue);
         }
-        return user;
+        return Optional.of(user);
+    }
+
+    private boolean isInvalidConfiguration() {
+        return defaultAdminUsername.isBlank()
+                || defaultAdminEmail.isBlank()
+                || defaultAdminPassword == null
+                || defaultAdminPassword.isBlank()
+                || defaultAdminFullName.isBlank();
     }
 }

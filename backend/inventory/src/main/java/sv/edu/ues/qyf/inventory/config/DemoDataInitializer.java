@@ -47,7 +47,9 @@ public class DemoDataInitializer {
             InventoryMovementService inventoryMovementService,
             DefaultAdminSeederService defaultAdminSeederService) {
         return args -> {
-            User adminUser = defaultAdminSeederService.ensureDefaultAdminSilently();
+            User adminUser = defaultAdminSeederService.ensureDefaultAdminSilently()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Demo seed requires APP_DEFAULT_ADMIN_ENABLED=true and a non-empty APP_DEFAULT_ADMIN_PASSWORD."));
 
             Laboratory laboratory = laboratoryRepository.findByCode("LAB-DEMO")
                     .orElseGet(() -> laboratoryRepository.save(Laboratory.builder()
@@ -142,7 +144,7 @@ public class DemoDataInitializer {
                 }
             }
 
-            LOGGER.info("Demo seed ready. Username: admin | Password: Admin123* | Laboratory: {}", laboratory.getCode());
+            LOGGER.info("Demo seed ready. Username: {} | Laboratory: {}", adminUser.getUsername(), laboratory.getCode());
         };
     }
 }
