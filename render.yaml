@@ -1,0 +1,44 @@
+databases:
+  - name: qyf-inventory-db-demo
+    plan: free
+    databaseName: qyf_inventory
+
+services:
+  - type: web
+    name: qyf-inventory-api-demo
+    runtime: docker
+    plan: free
+    rootDir: backend/inventory
+    dockerfilePath: ./backend/inventory/Dockerfile
+    dockerContext: ./backend/inventory
+    autoDeployTrigger: commit
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_DEMO_SEED_ENABLED
+        value: "true"
+      - key: APP_DEFAULT_ADMIN_ENABLED
+        value: "true"
+      - key: APP_DEFAULT_ADMIN_USERNAME
+        value: admin
+      - key: APP_DEFAULT_ADMIN_EMAIL
+        value: admin@qyf.demo
+      - key: APP_DEFAULT_ADMIN_PASSWORD
+        sync: false
+      - key: APP_DEFAULT_ADMIN_FULL_NAME
+        value: Administrador Demo
+      - key: APP_CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: DB_URL
+        fromDatabase:
+          name: qyf-inventory-db-demo
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: qyf-inventory-db-demo
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: qyf-inventory-db-demo
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
