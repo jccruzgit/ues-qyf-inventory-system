@@ -50,6 +50,8 @@ El `render.yaml` ya enlaza automaticamente:
 - `DB_USERNAME` desde `user`
 - `DB_PASSWORD` desde `password`
 
+El backend normaliza automaticamente el `connectionString` de Render (`postgresql://user:password@host:port/database`) al formato JDBC requerido por Spring Boot (`jdbc:postgresql://host:port/database`).
+
 ## 3. Frontend en Vercel
 
 Configura el proyecto de Vercel usando como raiz `frontend`.

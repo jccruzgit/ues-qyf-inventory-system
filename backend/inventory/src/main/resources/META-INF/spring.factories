@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+sv.edu.ues.qyf.inventory.config.DatabaseUrlEnvironmentPostProcessor
