@@ -103,16 +103,28 @@ public class DashboardServiceImpl implements DashboardService {
             return List.of();
         }
 
-        if (laboratoryAccessService.hasAccessToAllLaboratories()) {
-            return inventoryMovementRepository.search(null, null, null, performedFrom, performedTo);
-        }
+        List<InventoryMovement> movements = laboratoryAccessService.hasAccessToAllLaboratories()
+                ? inventoryMovementRepository.findAllByOrderByPerformedAtDescIdDesc()
+                : inventoryMovementRepository.findByLaboratoryIdInOrderByPerformedAtDescIdDesc(
+                        laboratories.stream().map(Laboratory::getId).toList());
 
-        return inventoryMovementRepository.searchByLaboratoryIds(
-                laboratories.stream().map(Laboratory::getId).toList(),
-                null,
-                null,
-                performedFrom,
-                performedTo);
+        return movements.stream()
+                .filter(movement -> isWithinRange(movement.getPerformedAt(), performedFrom, performedTo))
+                .toList();
+    }
+
+    private boolean isWithinRange(
+            LocalDateTime performedAt, LocalDateTime performedFrom, LocalDateTime performedTo) {
+        if (performedAt == null) {
+            return false;
+        }
+        if (performedFrom != null && performedAt.isBefore(performedFrom)) {
+            return false;
+        }
+        if (performedTo != null && !performedAt.isBefore(performedTo)) {
+            return false;
+        }
+        return true;
     }
 
     private long countLowStockProducts(Map<Long, List<InventoryStockResponseDto>> stockByLaboratory) {

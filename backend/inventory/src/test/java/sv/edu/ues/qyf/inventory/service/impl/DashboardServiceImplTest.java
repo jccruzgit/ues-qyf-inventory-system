@@ -2,7 +2,6 @@ package sv.edu.ues.qyf.inventory.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -124,9 +123,7 @@ class DashboardServiceImplTest {
         when(productBatchRepository.findByLaboratoryIdAndExpirationDateLessThanEqualAndActiveTrueOrderByExpirationDateAsc(
                         10L, LocalDate.now().plusDays(30)))
                 .thenReturn(List.of(expiringBatch));
-        when(inventoryMovementRepository.search(isNull(), isNull(), isNull(), any(LocalDateTime.class), any(LocalDateTime.class)))
-                .thenReturn(List.of(recentEntry, recentExit));
-        when(inventoryMovementRepository.search(isNull(), isNull(), isNull(), isNull(), isNull()))
+        when(inventoryMovementRepository.findAllByOrderByPerformedAtDescIdDesc())
                 .thenReturn(List.of(recentExit, recentEntry));
 
         DashboardSummaryResponseDto summary = dashboardService.getSummary();
