@@ -1,11 +1,28 @@
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { clearStoredSession, getStoredSession, saveStoredSession } from '../lib/storage';
+import { SESSION_EXPIRED_EVENT } from '../lib/api';
 import { loginRequest } from '../services/auth.service';
 
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(() => getStoredSession());
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const handleSessionExpired = () => {
+      setSession(null);
+    };
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+
+    return () => {
+      window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+    };
+  }, []);
 
   const login = async ({ email, password, rememberSession }) => {
     const payload = await loginRequest({ email, password });

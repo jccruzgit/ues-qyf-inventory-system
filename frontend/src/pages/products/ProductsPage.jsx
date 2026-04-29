@@ -225,6 +225,7 @@ function ProductsPage() {
 
     return matchesCategory && matchesLaboratory && matchesStorage;
   });
+  const hasRegisteredProducts = totalProducts > 0;
 
   return (
     <div className="space-y-6">
@@ -311,24 +312,37 @@ function ProductsPage() {
                 <SearchX className="h-8 w-8" strokeWidth={1.9} />
               </div>
               <h3 className="mt-6 text-2xl font-extrabold tracking-[-0.04em] text-brand-ink">
-                No se encontraron productos
+                {hasRegisteredProducts
+                  ? 'No se encontraron productos'
+                  : 'Aun no hay productos registrados'}
               </h3>
               <p className="mt-3 max-w-[520px] text-base leading-8 text-copy">
-                Ajusta la categoria, el laboratorio o la condicion de almacenamiento para ver
-                resultados disponibles en el catalogo.
+                {hasRegisteredProducts
+                  ? 'Ajusta la categoria, el laboratorio o la condicion de almacenamiento para ver resultados disponibles en el catalogo.'
+                  : 'Crea el primer producto del catalogo para habilitar el flujo de entradas, stock y movimientos de la demo.'}
               </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setCategory('all');
-                  setLaboratory('all');
-                  setStorageCondition('all');
-                }}
-                className="mt-7 inline-flex items-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
-              >
-                <Box className="h-4 w-4" />
-                Limpiar filtros
-              </button>
+              {hasRegisteredProducts ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategory('all');
+                    setLaboratory('all');
+                    setStorageCondition('all');
+                  }}
+                  className="mt-7 inline-flex items-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
+                >
+                  <Box className="h-4 w-4" />
+                  Limpiar filtros
+                </button>
+              ) : (
+                <Link
+                  to="/products/new"
+                  className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0b2551]"
+                >
+                  <Plus className="h-4 w-4" />
+                  Crear primer producto
+                </Link>
+              )}
             </div>
           </Card>
         )}
