@@ -97,6 +97,7 @@ export function adaptProductFromApi(productDto) {
     unit: baseUnitName || baseUnitSymbol || 'Unidades',
     unitName: baseUnitName || 'Unidades',
     unitSymbol: baseUnitSymbol,
+    locationName: productDto?.locationName?.trim() || '',
     laboratory: productDto?.locationName?.trim() || 'No asignado',
     storageCondition: storageCondition.key,
     storageConditionLabel: storageCondition.label,

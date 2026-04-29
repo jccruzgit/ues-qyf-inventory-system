@@ -50,7 +50,11 @@ function InventoryEntryCreatePage() {
   } = form;
 
   const selectedProductId = Number(watch('productId'));
+  const selectedLaboratoryId = String(watch('laboratoryId') ?? '');
   const selectedProduct = catalogs.products.find((product) => product.id === selectedProductId);
+  const selectedLaboratory = catalogs.laboratories.find(
+    (laboratory) => laboratory.value === selectedLaboratoryId,
+  );
 
   const loadCatalogs = async () => {
     setCatalogsLoading(true);
@@ -205,6 +209,7 @@ function InventoryEntryCreatePage() {
                 products={catalogs.products}
                 laboratories={catalogs.laboratories}
                 selectedProduct={selectedProduct}
+                selectedLaboratory={selectedLaboratory}
                 onSubmit={handleSubmit}
                 onCancel={() => navigate('/inventory')}
                 submitLabel={isSubmitting ? 'Registrando entrada...' : 'Registrar entrada'}

@@ -51,9 +51,9 @@ function MovementsLoadingState() {
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className="grid grid-cols-[1.1fr_0.7fr_1.3fr_0.9fr_0.6fr_0.6fr_1fr_0.8fr_1.4fr] gap-4 border-b border-brand-ink/[0.06] px-6 py-4"
+              className="grid grid-cols-[1.1fr_0.7fr_1.3fr_0.9fr_0.6fr_0.6fr_1fr_0.8fr_1.2fr_1.2fr] gap-4 border-b border-brand-ink/[0.06] px-6 py-4"
             >
-              {Array.from({ length: 9 }).map((__, cellIndex) => (
+              {Array.from({ length: 10 }).map((__, cellIndex) => (
                 <div key={cellIndex} className="h-4 rounded-full bg-surface-2" />
               ))}
             </div>
@@ -265,7 +265,7 @@ function MovementsPage() {
     <div className="space-y-6">
       <SectionHeader
         title="Movimientos de inventario"
-        subtitle="Revise entradas y salidas registradas por fecha, producto, lote, laboratorio y usuario."
+        subtitle="Revise entradas y salidas registradas por fecha, producto, lote, laboratorio, usuario y observaciones."
         action={
           <Link
             to="/inventory/entries/new"

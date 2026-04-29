@@ -102,7 +102,7 @@ function MovementTable({
       </div>
 
       <div className="max-h-[68vh] overflow-x-auto overflow-y-auto hide-scrollbar">
-        <table className="min-w-[1180px] border-separate border-spacing-0">
+        <table className="min-w-[1360px] border-separate border-spacing-0">
           <thead className="sticky top-0 z-10 bg-[#f8fbff]">
             <tr>
               {[
@@ -114,7 +114,8 @@ function MovementTable({
                 'Unidad',
                 'Laboratorio',
                 'Usuario',
-                'Observaciones',
+                'Observacion general',
+                'Nota por linea',
               ].map((column) => (
                 <th
                   key={column}
@@ -162,7 +163,10 @@ function MovementTable({
                   {row.username}
                 </td>
                 <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top text-sm font-semibold text-copy">
-                  <p className="max-w-[280px] leading-6">{row.observation}</p>
+                  <p className="max-w-[280px] leading-6">{row.movementObservation}</p>
+                </td>
+                <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top text-sm font-semibold text-copy">
+                  <p className="max-w-[280px] leading-6">{row.lineObservation}</p>
                 </td>
               </tr>
             ))}

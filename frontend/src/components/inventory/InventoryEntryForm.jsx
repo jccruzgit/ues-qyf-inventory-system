@@ -31,6 +31,7 @@ function InventoryEntryForm({
   products,
   laboratories,
   selectedProduct,
+  selectedLaboratory,
   onSubmit,
   onCancel,
   submitLabel,
@@ -45,6 +46,8 @@ function InventoryEntryForm({
 
   const productRequiresTracking =
     selectedProduct?.requiresBatchControl || selectedProduct?.requiresExpiration;
+  const productLocation = selectedProduct?.locationName?.trim() || 'Ubicacion no definida';
+  const laboratoryLabel = selectedLaboratory?.label || 'Laboratorio no definido';
 
   return (
     <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
@@ -74,9 +77,10 @@ function InventoryEntryForm({
         </Field>
 
         <Field
-          label="Laboratorio"
+          label="Laboratorio/Ubicacion"
           htmlFor="laboratoryId"
           required
+          hint="Seleccione el laboratorio destino. La ubicacion de referencia del producto se mostrara al seleccionar el producto."
           error={errors.laboratoryId?.message}
         >
           <select
@@ -111,6 +115,9 @@ function InventoryEntryForm({
               <p className="mt-2 text-sm leading-7 text-copy">
                 Codigo {selectedProduct.code}. Unidad base: {selectedProduct.unit}. Stock actual:{' '}
                 {selectedProduct.stock} {selectedProduct.unit}.
+              </p>
+              <p className="mt-2 text-sm font-semibold text-copy">
+                Destino visible: {laboratoryLabel} / {productLocation}
               </p>
             </div>
 

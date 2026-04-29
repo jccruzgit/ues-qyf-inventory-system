@@ -8,16 +8,6 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(parsedValue) ? parsedValue : fallback;
 }
 
-function combineObservations(movementObservation, lineObservation) {
-  const parts = [normalizeText(lineObservation), normalizeText(movementObservation)].filter(Boolean);
-
-  if (!parts.length) {
-    return 'Sin observaciones';
-  }
-
-  return [...new Set(parts)].join(' • ');
-}
-
 export function adaptInventoryMovementFromApi(movementDto) {
   return {
     id: movementDto?.id,
@@ -66,7 +56,8 @@ export function buildMovementRows(movements, products, laboratories) {
           laboratory?.raw?.name ?? 'Laboratorio no definido',
         ),
         username: movement.performedByUsername,
-        observation: combineObservations(movement.observation, line?.lineNotes),
+        movementObservation: normalizeText(movement.observation, 'Sin observaciones'),
+        lineObservation: normalizeText(line?.lineNotes, 'Sin observaciones'),
       };
     });
   });
