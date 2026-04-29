@@ -2,7 +2,7 @@ import { startTransition, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AtSign, Eye, EyeOff, LockKeyhole } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AuthShell from '../../layouts/AuthShell';
 import { useAuth } from '../../hooks/useAuth';
 import { loginSchema } from '../../schemas/auth.schema';
@@ -16,9 +16,11 @@ const defaultValues = {
 
 function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
+  const sessionExpired = new URLSearchParams(location.search).get('reason') === 'session-expired';
 
   const {
     register,
@@ -117,6 +119,12 @@ function LoginPage() {
           />
           <span>Mantener sesion activa</span>
         </label>
+
+        {sessionExpired ? (
+          <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+            Tu sesion expiro. Ingresa nuevamente para continuar.
+          </div>
+        ) : null}
 
         {serverError ? (
           <div className="rounded-[24px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">

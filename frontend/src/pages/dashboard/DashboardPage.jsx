@@ -6,8 +6,12 @@ import {
   Boxes,
   CalendarRange,
   FlaskConical,
+  PackagePlus,
+  PackageSearch,
+  Rows3,
   ShieldCheck,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Badge from '../../components/ui/Badge';
 import Card from '../../components/ui/Card';
 import ProgressBar from '../../components/ui/ProgressBar';
@@ -24,6 +28,44 @@ const activityToneClasses = {
   danger: 'bg-[#fdebec] text-[#d53a43]',
   neutral: 'bg-surface-2 text-copy-soft',
 };
+
+const emptyDashboardSummary = {
+  totalActiveProducts: 0,
+  lowStockProducts: 0,
+  expiringBatches: 0,
+  accessibleLaboratories: 0,
+  movementsLastSevenDays: 0,
+  movementSeries: [],
+  recentMovements: [],
+  inventoryByLaboratory: [],
+};
+
+const quickActions = [
+  {
+    title: 'Ver productos',
+    description: 'Consulta el catalogo operativo disponible.',
+    to: '/products',
+    icon: PackageSearch,
+  },
+  {
+    title: 'Registrar entrada',
+    description: 'Ingresa stock real por lote y vencimiento.',
+    to: '/inventory/entries/new',
+    icon: PackagePlus,
+  },
+  {
+    title: 'Revisar stock',
+    description: 'Valida niveles y lotes activos por laboratorio.',
+    to: '/inventory',
+    icon: Boxes,
+  },
+  {
+    title: 'Ver movimientos',
+    description: 'Audita entradas y salidas recientes.',
+    to: '/movements',
+    icon: Rows3,
+  },
+];
 
 function formatInteger(value) {
   return new Intl.NumberFormat('es-SV', {
@@ -70,27 +112,51 @@ function formatRelativeTime(value) {
 }
 
 function getActivityTone(movementType) {
-  return movementType === 'EXIT' ? 'danger' : 'teal';
+  if (movementType === 'EXIT') {
+    return 'danger';
+  }
+
+  if (movementType === 'ENTRY') {
+    return 'teal';
+  }
+
+  return 'neutral';
 }
 
 function getActivityTitle(item) {
-  if (item.lineCount > 1) {
-    return item.movementType === 'EXIT'
-      ? `Salida de ${item.lineCount} productos`
-      : `Entrada de ${item.lineCount} productos`;
+  const lineCount = Number(item?.lineCount ?? 0);
+
+  if (lineCount > 1) {
+    return item?.movementType === 'EXIT'
+      ? `Salida de ${lineCount} productos`
+      : `Entrada de ${lineCount} productos`;
   }
 
-  const productName = item.primaryProductName || 'producto';
+  const productName = item?.primaryProductName || 'producto';
 
-  return item.movementType === 'EXIT'
+  return item?.movementType === 'EXIT'
     ? `Salida: ${productName}`
     : `Entrada: ${productName}`;
 }
 
 function getActivityDetail(item) {
-  return `${item.performedByUsername} | ${item.laboratoryName} | ${formatQuantity(
-    item.totalQuantity,
+  return `${item?.performedByUsername || 'Sistema'} | ${
+    item?.laboratoryName || 'Laboratorio no definido'
+  } | ${formatQuantity(
+    item?.totalQuantity,
   )} unidades`;
+}
+
+function normalizeDashboardSummary(summary) {
+  return {
+    ...emptyDashboardSummary,
+    ...summary,
+    movementSeries: Array.isArray(summary?.movementSeries) ? summary.movementSeries : [],
+    recentMovements: Array.isArray(summary?.recentMovements) ? summary.recentMovements : [],
+    inventoryByLaboratory: Array.isArray(summary?.inventoryByLaboratory)
+      ? summary.inventoryByLaboratory
+      : [],
+  };
 }
 
 function DashboardChart({ movementSeries }) {
@@ -132,7 +198,7 @@ function DashboardChart({ movementSeries }) {
                 />
               </div>
               <span className="text-[0.68rem] font-extrabold tracking-[0.2em] text-copy-soft">
-                {point.dayLabel}
+                {point.dayLabel || '--'}
               </span>
             </div>
           );
@@ -239,16 +305,26 @@ function DashboardPage() {
     loadSummary();
   }, []);
 
-  const kpiCards = useMemo(() => {
-    if (!summary) {
-      return [];
-    }
+  const dashboardSummary = useMemo(() => normalizeDashboardSummary(summary), [summary]);
+  const dashboardHasOperationalData = useMemo(
+    () =>
+      dashboardSummary.totalActiveProducts > 0 ||
+      dashboardSummary.lowStockProducts > 0 ||
+      dashboardSummary.expiringBatches > 0 ||
+      dashboardSummary.accessibleLaboratories > 0 ||
+      dashboardSummary.movementsLastSevenDays > 0 ||
+      dashboardSummary.movementSeries.length > 0 ||
+      dashboardSummary.recentMovements.length > 0 ||
+      dashboardSummary.inventoryByLaboratory.length > 0,
+    [dashboardSummary],
+  );
 
+  const kpiCards = useMemo(() => {
     return [
       {
         title: 'Productos activos',
-        value: formatInteger(summary.totalActiveProducts),
-        meta: `${formatInteger(summary.accessibleLaboratories)} laboratorios`,
+        value: formatInteger(dashboardSummary.totalActiveProducts),
+        meta: `${formatInteger(dashboardSummary.accessibleLaboratories)} laboratorios`,
         metaVariant: 'navy',
         icon: Beaker,
         accent: 'bg-[#e9f3ff] text-brand-ink',
@@ -256,32 +332,32 @@ function DashboardPage() {
       },
       {
         title: 'Stock bajo',
-        value: formatInteger(summary.lowStockProducts),
-        meta: summary.lowStockProducts > 0 ? 'Requiere revision' : 'Controlado',
-        metaVariant: summary.lowStockProducts > 0 ? 'danger' : 'success',
+        value: formatInteger(dashboardSummary.lowStockProducts),
+        meta: dashboardSummary.lowStockProducts > 0 ? 'Requiere revision' : 'Controlado',
+        metaVariant: dashboardSummary.lowStockProducts > 0 ? 'danger' : 'success',
         icon: ShieldCheck,
         accent: 'bg-[#fdebec] text-[#d53a43]',
         illustration: Boxes,
       },
       {
         title: 'Lotes por vencer',
-        value: formatInteger(summary.expiringBatches),
+        value: formatInteger(dashboardSummary.expiringBatches),
         meta: 'Proximos 30 dias',
-        metaVariant: summary.expiringBatches > 0 ? 'warning' : 'success',
+        metaVariant: dashboardSummary.expiringBatches > 0 ? 'warning' : 'success',
         icon: CalendarRange,
         accent: 'bg-[#ebf8ef] text-[#65a96e]',
         illustration: Beaker,
       },
     ];
-  }, [summary]);
+  }, [dashboardSummary]);
 
   const maxLaboratoryQuantity = useMemo(
     () =>
       Math.max(
-        ...(summary?.inventoryByLaboratory?.map((item) => item.quantityAvailable) ?? []),
+        ...dashboardSummary.inventoryByLaboratory.map((item) => item.quantityAvailable),
         1,
       ),
-    [summary],
+    [dashboardSummary.inventoryByLaboratory],
   );
 
   if (loading) {
@@ -292,16 +368,44 @@ function DashboardPage() {
     return <DashboardErrorState message={error} onRetry={loadSummary} />;
   }
 
-  if (!summary) {
-    return null;
-  }
-
   return (
     <div className="space-y-6">
       <SectionHeader
         title="Resumen del laboratorio"
         subtitle="Estado en tiempo real del inventario de la Facultad de Quimica y Farmacia."
       />
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {quickActions.map((action) => {
+          const Icon = action.icon;
+
+          return (
+            <Link key={action.to} to={action.to}>
+              <Card className="h-full rounded-[28px] border border-brand-ink/[0.06] bg-white/90 p-5 transition hover:-translate-y-0.5 hover:border-brand-teal/30 hover:shadow-[0_16px_30px_rgba(14,47,103,0.08)]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-teal-soft text-brand-teal">
+                  <Icon className="h-5 w-5" strokeWidth={2.1} />
+                </div>
+                <h2 className="mt-5 text-lg font-extrabold tracking-[-0.03em] text-brand-ink">
+                  {action.title}
+                </h2>
+                <p className="mt-2 text-sm leading-7 text-copy">{action.description}</p>
+              </Card>
+            </Link>
+          );
+        })}
+      </section>
+
+      {!dashboardHasOperationalData ? (
+        <Card className="rounded-[28px] border border-amber-200 bg-[linear-gradient(135deg,_#fff9eb_0%,_#fffef8_100%)] p-6">
+          <h2 className="text-lg font-extrabold text-brand-ink">
+            Aun no hay datos operativos para resumir
+          </h2>
+          <p className="mt-2 text-sm leading-7 text-copy">
+            La API respondio sin registros consolidados para el dashboard. Puede crear productos o
+            registrar una entrada para poblar esta vista antes de la demo.
+          </p>
+        </Card>
+      ) : null}
 
       <section className="grid gap-4 xl:grid-cols-3">
         {kpiCards.map((card) => {
@@ -334,18 +438,22 @@ function DashboardPage() {
             }
           />
 
-          <DashboardChart movementSeries={summary.movementSeries} />
+          <DashboardChart movementSeries={dashboardSummary.movementSeries} />
         </Card>
 
         <Card className="p-6 sm:p-7">
           <SectionHeader
             title="Actividad reciente"
-            action={<Badge variant="teal">{formatInteger(summary.recentMovements.length)} eventos</Badge>}
+            action={
+              <Badge variant="teal">
+                {formatInteger(dashboardSummary.recentMovements.length)} eventos
+              </Badge>
+            }
           />
 
           <div className="mt-6 space-y-5">
-            {summary.recentMovements.length ? (
-              summary.recentMovements.map((item) => (
+            {dashboardSummary.recentMovements.length ? (
+              dashboardSummary.recentMovements.map((item) => (
                 <article key={item.id} className="flex items-start gap-4">
                   <div
                     className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
@@ -388,24 +496,30 @@ function DashboardPage() {
           </h2>
           <p className="mt-4 max-w-[280px] text-sm leading-7 text-white/72">
             {`El dashboard consolida ${formatInteger(
-              summary.movementsLastSevenDays,
+              dashboardSummary.movementsLastSevenDays,
             )} movimientos en los ultimos siete dias sobre ${formatInteger(
-              summary.accessibleLaboratories,
+              dashboardSummary.accessibleLaboratories,
             )} laboratorios accesibles.`}
           </p>
 
           <div className="mt-8 space-y-3 text-sm text-white/84">
             <div className="flex items-center justify-between gap-4">
               <span>Productos con stock bajo</span>
-              <span className="font-extrabold">{formatInteger(summary.lowStockProducts)}</span>
+              <span className="font-extrabold">
+                {formatInteger(dashboardSummary.lowStockProducts)}
+              </span>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span>Lotes por vencer</span>
-              <span className="font-extrabold">{formatInteger(summary.expiringBatches)}</span>
+              <span className="font-extrabold">
+                {formatInteger(dashboardSummary.expiringBatches)}
+              </span>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span>Movimientos recientes</span>
-              <span className="font-extrabold">{formatInteger(summary.recentMovements.length)}</span>
+              <span className="font-extrabold">
+                {formatInteger(dashboardSummary.recentMovements.length)}
+              </span>
             </div>
           </div>
         </Card>
@@ -430,8 +544,8 @@ function DashboardPage() {
           </p>
 
           <div className="mt-7 space-y-4">
-            {summary.inventoryByLaboratory.length ? (
-              summary.inventoryByLaboratory.map((item) => (
+            {dashboardSummary.inventoryByLaboratory.length ? (
+              dashboardSummary.inventoryByLaboratory.map((item) => (
                 <article
                   key={item.laboratoryId}
                   className="rounded-[24px] border border-white/70 bg-white/70 px-5 py-4 shadow-[0_12px_24px_rgba(14,47,103,0.06)] backdrop-blur"
