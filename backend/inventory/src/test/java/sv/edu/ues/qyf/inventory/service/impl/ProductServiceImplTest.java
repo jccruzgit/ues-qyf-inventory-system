@@ -12,11 +12,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sv.edu.ues.qyf.inventory.dto.ProductRequestDto;
 import sv.edu.ues.qyf.inventory.dto.ProductResponseDto;
@@ -55,14 +54,26 @@ class ProductServiceImplTest {
     @Mock
     private AuditLogService auditLogService;
 
-    @Spy
-    private ProductMapper productMapper = new ProductMapper();
+    private ProductMapper productMapper;
 
-    @Spy
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
 
-    @InjectMocks
     private ProductServiceImpl productService;
+
+    @BeforeEach
+    void setUp() {
+        productMapper = new ProductMapper();
+        objectMapper = new ObjectMapper();
+        productService = new ProductServiceImpl(
+                productRepository,
+                categoryRepository,
+                unitOfMeasureRepository,
+                locationRepository,
+                productMapper,
+                currentUserService,
+                auditLogService,
+                objectMapper);
+    }
 
     @Test
     void create_setsInitialStockToOneHundredAndWritesAuditLog() {

@@ -10,10 +10,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sv.edu.ues.qyf.inventory.dto.InventoryAlertResponseDto;
@@ -36,7 +36,6 @@ class InventoryAlertServiceImplTest {
     @Mock
     private InventoryAlertRepository inventoryAlertRepository;
 
-    @Mock
     private InventoryAlertMapper inventoryAlertMapper;
 
     @Mock
@@ -54,31 +53,57 @@ class InventoryAlertServiceImplTest {
     @Mock
     private LaboratoryAccessService laboratoryAccessService;
 
-    @InjectMocks
     private InventoryAlertServiceImpl inventoryAlertService;
+
+    @BeforeEach
+    void setUp() {
+        inventoryAlertMapper = new InventoryAlertMapper();
+        inventoryAlertService = new InventoryAlertServiceImpl(
+                inventoryAlertRepository,
+                inventoryAlertMapper,
+                productRepository,
+                productBatchRepository,
+                inventoryMovementLineRepository,
+                laboratoryRepository,
+                laboratoryAccessService);
+    }
 
     @Test
     void getPendingByLaboratory_validatesAccessBeforeLoadingAlerts() {
-        InventoryAlert alert = InventoryAlert.builder().id(6L).build();
-        InventoryAlertResponseDto response = InventoryAlertResponseDto.builder().id(6L).laboratoryId(12L).build();
+        Laboratory laboratory = Laboratory.builder().id(12L).build();
+        Product product = Product.builder().id(9L).code("PRD-9").build();
+        ProductBatch batch = ProductBatch.builder().id(21L).batchCode("LOT-21").build();
+        InventoryAlert alert = InventoryAlert.builder()
+                .id(6L)
+                .laboratory(laboratory)
+                .alertType(InventoryAlertType.EXPIRING_BATCH)
+                .product(product)
+                .productBatch(batch)
+                .message("Batch LOT-21 is close to expiration")
+                .build();
 
         when(inventoryMovementLineRepository.findDistinctProductIdsByLaboratoryId(12L)).thenReturn(List.of());
         when(inventoryAlertRepository.findByLaboratoryIdAndAcknowledgedAtIsNullOrderByIdDesc(12L))
                 .thenReturn(List.of(alert));
-        when(inventoryAlertMapper.toResponseDto(alert)).thenReturn(response);
 
         List<InventoryAlertResponseDto> result = inventoryAlertService.getPendingByLaboratory(12L);
 
-        assertThat(result).containsExactly(response);
-        InOrder inOrder = inOrder(
-                laboratoryAccessService,
-                inventoryMovementLineRepository,
-                inventoryAlertRepository,
-                inventoryAlertMapper);
+        assertThat(result).hasSize(1);
+        InventoryAlertResponseDto response = result.get(0);
+        assertThat(response.getId()).isEqualTo(6L);
+        assertThat(response.getLaboratoryId()).isEqualTo(12L);
+        assertThat(response.getAlertType()).isEqualTo(InventoryAlertType.EXPIRING_BATCH);
+        assertThat(response.getProductId()).isEqualTo(9L);
+        assertThat(response.getProductCode()).isEqualTo("PRD-9");
+        assertThat(response.getProductBatchId()).isEqualTo(21L);
+        assertThat(response.getBatchCode()).isEqualTo("LOT-21");
+        assertThat(response.getMessage()).isEqualTo("Batch LOT-21 is close to expiration");
+
+        InOrder inOrder = inOrder(laboratoryAccessService, inventoryMovementLineRepository, inventoryAlertRepository);
         inOrder.verify(laboratoryAccessService).validateAccessToLaboratory(12L);
         inOrder.verify(inventoryMovementLineRepository).findDistinctProductIdsByLaboratoryId(12L);
+        inOrder.verify(laboratoryAccessService).validateAccessToLaboratory(12L);
         inOrder.verify(inventoryAlertRepository).findByLaboratoryIdAndAcknowledgedAtIsNullOrderByIdDesc(12L);
-        inOrder.verify(inventoryAlertMapper).toResponseDto(alert);
     }
 
     @Test
