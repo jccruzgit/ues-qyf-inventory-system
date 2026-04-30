@@ -26,8 +26,8 @@ const stockStateMeta = {
     label: 'Stock completo',
     badgeVariant: 'success',
     progressTone: 'success',
-    toneClassName: 'text-[#2fa36b]',
-    accentClassName: 'bg-[#e5f7ef] text-[#249b66]',
+    toneClassName: 'text-[#2d7a49]',
+    accentClassName: 'bg-[#e7f4eb] text-[#2d7a49]',
   },
 };
 

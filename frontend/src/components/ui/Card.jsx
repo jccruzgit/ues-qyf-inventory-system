@@ -1,7 +1,7 @@
 function Card({ children, className = '' }) {
   return (
     <section
-      className={`rounded-[30px] border border-white/75 bg-white p-6 shadow-[0_18px_38px_rgba(14,47,103,0.08)] ${className}`}
+      className={`institutional-surface rounded-[30px] border border-white/80 p-6 shadow-[0_18px_38px_rgba(23,61,44,0.08)] ${className}`}
     >
       {children}
     </section>

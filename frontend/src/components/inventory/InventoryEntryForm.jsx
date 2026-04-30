@@ -103,7 +103,7 @@ function InventoryEntryForm({
       </div>
 
       {selectedProduct ? (
-        <div className="rounded-[30px] border border-brand-ink/[0.06] bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-5">
+        <div className="rounded-[30px] border border-brand-ink/[0.06] bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
@@ -298,7 +298,7 @@ function InventoryEntryForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(14,47,103,0.18)] transition hover:bg-[#0b2551] disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex items-center justify-center rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
         >
           {submitLabel}
         </button>

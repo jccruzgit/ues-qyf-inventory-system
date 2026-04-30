@@ -110,9 +110,9 @@ function ProductCreatePage() {
         />
       </div>
 
-      <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-0">
+      <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-0">
         <div className="grid gap-0 lg:grid-cols-[minmax(260px,0.34fr)_minmax(0,0.66fr)]">
-          <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#0d2d63_0%,_#112b58_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
+          <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
               <PackagePlus className="h-5 w-5" strokeWidth={2.2} />
             </div>
@@ -160,7 +160,7 @@ function ProductCreatePage() {
                     <button
                       type="button"
                       onClick={loadCatalogs}
-                      className="mt-4 inline-flex rounded-full bg-brand-ink px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#0b2551]"
+                      className="mt-4 inline-flex rounded-full bg-brand-ink px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong"
                     >
                       Reintentar
                     </button>

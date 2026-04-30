@@ -14,6 +14,7 @@ import {
 import { Link } from 'react-router-dom';
 import Badge from '../../components/ui/Badge';
 import Card from '../../components/ui/Card';
+import InstitutionalBrand from '../../components/ui/InstitutionalBrand';
 import ProgressBar from '../../components/ui/ProgressBar';
 import SectionHeader from '../../components/ui/SectionHeader';
 import StatCard from '../../components/ui/StatCard';
@@ -24,7 +25,7 @@ import {
 
 const activityToneClasses = {
   teal: 'bg-brand-teal-soft text-brand-teal',
-  success: 'bg-[#ebf8ef] text-[#57a763]',
+  success: 'bg-[#e7f4eb] text-[#2d7a49]',
   danger: 'bg-[#fdebec] text-[#d53a43]',
   neutral: 'bg-surface-2 text-copy-soft',
 };
@@ -189,11 +190,11 @@ function DashboardChart({ movementSeries }) {
             >
               <div className="flex h-full items-end gap-1.5 sm:gap-2">
                 <div
-                  className="w-3 rounded-full bg-[#dde4ef] transition hover:bg-[#c8d5ea] sm:w-4"
+                  className="w-3 rounded-full bg-[#cadacc] transition hover:bg-[#b7cbb9] sm:w-4"
                   style={{ height: `${entryHeight}%` }}
                 />
                 <div
-                  className="w-3 rounded-full bg-brand-teal transition hover:bg-[#0a787b] sm:w-4"
+                  className="w-3 rounded-full bg-brand-teal transition hover:bg-[#195a37] sm:w-4"
                   style={{ height: `${exitHeight}%` }}
                 />
               </div>
@@ -207,7 +208,7 @@ function DashboardChart({ movementSeries }) {
 
       <div className="mt-6 flex flex-wrap items-center gap-5 border-t border-brand-ink/[0.06] pt-4">
         <div className="flex items-center gap-2 text-xs font-bold text-copy">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#dde4ef]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#cadacc]" />
           Ingresos
         </div>
         <div className="flex items-center gap-2 text-xs font-bold text-copy">
@@ -260,7 +261,7 @@ function DashboardLoadingState() {
 
 function DashboardErrorState({ message, onRetry }) {
   return (
-    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f9fbff_100%)] p-8 sm:p-10">
+    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-8 sm:p-10">
       <div className="flex flex-col items-center justify-center text-center">
         <div className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-[28px] bg-[#fdebec] text-[#d53a43]">
           <AlertTriangle className="h-8 w-8" strokeWidth={1.9} />
@@ -272,7 +273,7 @@ function DashboardErrorState({ message, onRetry }) {
         <button
           type="button"
           onClick={onRetry}
-          className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0b2551]"
+          className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong"
         >
           Reintentar
         </button>
@@ -325,9 +326,9 @@ function DashboardPage() {
         title: 'Productos activos',
         value: formatInteger(dashboardSummary.totalActiveProducts),
         meta: `${formatInteger(dashboardSummary.accessibleLaboratories)} laboratorios`,
-        metaVariant: 'navy',
+        metaVariant: 'teal',
         icon: Beaker,
-        accent: 'bg-[#e9f3ff] text-brand-ink',
+        accent: 'bg-brand-teal-soft text-brand-teal',
         illustration: FlaskConical,
       },
       {
@@ -345,7 +346,7 @@ function DashboardPage() {
         meta: 'Proximos 30 dias',
         metaVariant: dashboardSummary.expiringBatches > 0 ? 'warning' : 'success',
         icon: CalendarRange,
-        accent: 'bg-[#ebf8ef] text-[#65a96e]',
+        accent: 'bg-[#e7f4eb] text-[#2d7a49]',
         illustration: Beaker,
       },
     ];
@@ -375,13 +376,36 @@ function DashboardPage() {
         subtitle="Estado en tiempo real del inventario de la Facultad de Quimica y Farmacia."
       />
 
+      <Card className="relative overflow-hidden bg-[linear-gradient(135deg,_#153828_0%,_#1f6d41_55%,_#2a8452_100%)] p-6 text-white sm:p-8">
+        <div className="absolute -left-8 top-0 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-48 w-48 rounded-full bg-[#a8cfb4]/18 blur-3xl" />
+        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div>
+            <p className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[0.68rem] font-extrabold uppercase tracking-[0.24em] text-white/78">
+              Identidad institucional
+            </p>
+            <h2 className="mt-5 max-w-[640px] text-[1.9rem] font-extrabold tracking-[-0.04em] text-white sm:text-[2.3rem]">
+              Demo visual alineada con la Facultad de Quimica y Farmacia.
+            </h2>
+            <p className="mt-4 max-w-[620px] text-sm leading-7 text-white/78 sm:text-base">
+              La interfaz conserva el flujo actual del sistema y refuerza la presentacion con
+              una paleta verde institucional sobria para la rama demo.
+            </p>
+          </div>
+
+          <div className="rounded-[28px] border border-white/14 bg-white/10 p-4 backdrop-blur-sm">
+            <InstitutionalBrand size="compact" theme="inverse" />
+          </div>
+        </div>
+      </Card>
+
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {quickActions.map((action) => {
           const Icon = action.icon;
 
           return (
             <Link key={action.to} to={action.to}>
-              <Card className="h-full rounded-[28px] border border-brand-ink/[0.06] bg-white/90 p-5 transition hover:-translate-y-0.5 hover:border-brand-teal/30 hover:shadow-[0_16px_30px_rgba(14,47,103,0.08)]">
+              <Card className="h-full rounded-[28px] border border-brand-ink/[0.06] bg-white/90 p-5 transition hover:-translate-y-0.5 hover:border-brand-teal/30 hover:shadow-[0_16px_30px_rgba(23,61,44,0.08)]">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-teal-soft text-brand-teal">
                   <Icon className="h-5 w-5" strokeWidth={2.1} />
                 </div>
@@ -486,7 +510,7 @@ function DashboardPage() {
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(320px,0.78fr)_minmax(0,1.22fr)]">
-        <Card className="overflow-hidden bg-[linear-gradient(160deg,_#0d2d63_0%,_#112b58_100%)] p-7 text-white">
+        <Card className="overflow-hidden bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-7 text-white">
           <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12">
             <Boxes className="h-5 w-5" strokeWidth={2.2} />
           </div>
@@ -524,9 +548,9 @@ function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="relative overflow-hidden bg-[linear-gradient(135deg,_#dff4f4_0%,_#dff2f7_100%)] p-7 sm:p-8">
+        <Card className="relative overflow-hidden bg-[linear-gradient(135deg,_#e7f3ea_0%,_#f3f8f4_100%)] p-7 sm:p-8">
           <div className="absolute -right-6 bottom-0 h-44 w-44 rounded-full bg-white/35 blur-2xl" />
-          <div className="absolute right-5 top-5 flex h-14 w-14 items-center justify-center rounded-full bg-brand-ink text-white shadow-[0_14px_28px_rgba(14,47,103,0.18)]">
+          <div className="absolute right-5 top-5 flex h-14 w-14 items-center justify-center rounded-full bg-brand-ink text-white shadow-[0_14px_28px_rgba(23,61,44,0.18)]">
             <Boxes className="h-6 w-6" strokeWidth={2.1} />
           </div>
 
@@ -548,7 +572,7 @@ function DashboardPage() {
               dashboardSummary.inventoryByLaboratory.map((item) => (
                 <article
                   key={item.laboratoryId}
-                  className="rounded-[24px] border border-white/70 bg-white/70 px-5 py-4 shadow-[0_12px_24px_rgba(14,47,103,0.06)] backdrop-blur"
+                  className="rounded-[24px] border border-white/70 bg-white/70 px-5 py-4 shadow-[0_12px_24px_rgba(23,61,44,0.06)] backdrop-blur"
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>

@@ -13,7 +13,7 @@ function ProductListItem({
   const ProductIcon = product.icon;
 
   return (
-    <Card className="group rounded-[28px] px-5 py-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_42px_rgba(14,47,103,0.1)] sm:px-6">
+    <Card className="group rounded-[28px] px-5 py-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_42px_rgba(23,61,44,0.1)] sm:px-6">
       <div className="grid items-center gap-4 lg:grid-cols-[minmax(280px,1.55fr)_minmax(160px,0.72fr)_minmax(170px,0.82fr)_minmax(220px,0.8fr)_44px]">
         <div className="flex min-w-0 items-center gap-4">
           <div

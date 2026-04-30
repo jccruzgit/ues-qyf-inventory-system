@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import BrandMark from '../ui/BrandMark';
 
 function getInitials(fullName) {
   if (!fullName) {
@@ -50,7 +51,7 @@ function Topbar({ onOpenSidebar }) {
 
   return (
     <header className="px-4 pt-4 sm:px-6 lg:px-8 lg:pt-6">
-      <div className="flex items-center gap-3 rounded-[28px] border border-white/70 bg-white/75 px-4 py-3 shadow-[0_14px_32px_rgba(14,47,103,0.08)] backdrop-blur-xl sm:px-5">
+      <div className="flex items-center gap-3 rounded-[28px] border border-white/75 bg-white/82 px-4 py-3 shadow-[0_14px_32px_rgba(23,61,44,0.08)] backdrop-blur-xl sm:px-5">
         <button
           type="button"
           onClick={onOpenSidebar}
@@ -59,6 +60,18 @@ function Topbar({ onOpenSidebar }) {
         >
           <Menu className="h-5 w-5" />
         </button>
+
+        <div className="hidden items-center gap-3 xl:flex">
+          <BrandMark className="h-11 w-11" />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-extrabold tracking-tight text-brand-ink">
+              Facultad de Quimica y Farmacia
+            </p>
+            <p className="text-[0.62rem] font-bold uppercase tracking-[0.24em] text-copy-soft">
+              UES
+            </p>
+          </div>
+        </div>
 
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute left-4 top-1/2 h-[1.125rem] w-[1.125rem] -translate-y-1/2 text-copy-soft" />
@@ -94,7 +107,7 @@ function Topbar({ onOpenSidebar }) {
             <p className="text-xs font-semibold text-copy-soft">{profile.role}</p>
           </div>
 
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-ink text-sm font-extrabold text-white shadow-[0_10px_20px_rgba(14,47,103,0.24)]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-ink text-sm font-extrabold text-white shadow-[0_10px_20px_rgba(23,61,44,0.24)]">
             {profile.initials}
           </div>
         </div>

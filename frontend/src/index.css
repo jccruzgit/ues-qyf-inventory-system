@@ -3,17 +3,19 @@
 
 @theme {
   --font-sans: "Manrope", "Segoe UI", sans-serif;
-  --color-brand-ink: #0e2f67;
-  --color-brand-teal: #0d8c8f;
-  --color-brand-teal-soft: #d8f1f0;
-  --color-copy: #4d5c73;
-  --color-copy-soft: #7d8899;
-  --color-surface-0: #f5f8fb;
+  --color-brand-ink: #173d2c;
+  --color-brand-ink-strong: #0f2b1f;
+  --color-brand-teal: #217346;
+  --color-brand-teal-soft: #d9eddf;
+  --color-brand-teal-muted: #eef6f0;
+  --color-copy: #496050;
+  --color-copy-soft: #738574;
+  --color-surface-0: #f3f7f3;
   --color-surface-1: #ffffff;
-  --color-surface-2: #eef3f7;
-  --color-line-soft: rgba(14, 47, 103, 0.08);
-  --shadow-soft-xl: 0 28px 56px rgba(14, 47, 103, 0.14);
-  --shadow-soft-lg: 0 18px 36px rgba(14, 47, 103, 0.1);
+  --color-surface-2: #ebf2ec;
+  --color-line-soft: rgba(23, 61, 44, 0.08);
+  --shadow-soft-xl: 0 28px 56px rgba(23, 61, 44, 0.14);
+  --shadow-soft-lg: 0 18px 36px rgba(23, 61, 44, 0.1);
 }
 
 @layer base {
@@ -24,9 +26,9 @@
   body {
     min-height: 100vh;
     background:
-      radial-gradient(circle at top right, rgba(108, 215, 219, 0.24), transparent 28%),
-      radial-gradient(circle at bottom left, rgba(102, 158, 217, 0.18), transparent 36%),
-      linear-gradient(135deg, #fbfdff 0%, #f4f8fb 48%, #ebf7f7 100%);
+      radial-gradient(circle at top right, rgba(86, 158, 108, 0.2), transparent 28%),
+      radial-gradient(circle at bottom left, rgba(190, 218, 198, 0.24), transparent 36%),
+      linear-gradient(135deg, #fbfdfb 0%, #f3f7f3 48%, #e8f2ea 100%);
     color: var(--color-brand-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -52,7 +54,7 @@
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
     -webkit-text-fill-color: var(--color-brand-ink);
-    -webkit-box-shadow: 0 0 0 1000px #eef3f7 inset;
+    -webkit-box-shadow: 0 0 0 1000px #ebf2ec inset;
     transition: background-color 9999s ease-out 0s;
   }
 }
@@ -61,8 +63,8 @@
   .glass-panel {
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.42);
-    background: rgba(255, 255, 255, 0.58);
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(16px);
   }
 
@@ -84,5 +86,15 @@
 
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  .institutional-surface {
+    background: linear-gradient(135deg, #ffffff 0%, #f4f8f4 100%);
+  }
+
+  .institutional-shell {
+    background:
+      radial-gradient(circle at top right, rgba(132, 181, 143, 0.16), transparent 28%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.62));
   }
 }

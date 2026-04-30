@@ -25,7 +25,7 @@ export function InventoryLoadingState() {
 
 export function InventoryErrorState({ message, onRetry }) {
   return (
-    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f9fbff_100%)] p-8 sm:p-10">
+    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-8 sm:p-10">
       <div className="flex flex-col items-center justify-center text-center">
         <div className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-[28px] bg-[#fdebec] text-[#d53a43]">
           <AlertTriangle className="h-8 w-8" strokeWidth={1.9} />
@@ -37,7 +37,7 @@ export function InventoryErrorState({ message, onRetry }) {
         <button
           type="button"
           onClick={onRetry}
-          className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0b2551]"
+          className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong"
         >
           Reintentar
         </button>
@@ -48,7 +48,7 @@ export function InventoryErrorState({ message, onRetry }) {
 
 export function InventoryEmptyState({ isFiltered, onReset }) {
   return (
-    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-8 sm:p-10">
+    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-8 sm:p-10">
       <div className="flex flex-col items-center justify-center text-center">
         <div className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-[28px] bg-surface-2 text-copy-soft">
           <SearchX className="h-8 w-8" strokeWidth={1.9} />
@@ -72,7 +72,7 @@ export function InventoryEmptyState({ isFiltered, onReset }) {
         ) : (
           <Link
             to="/inventory/entries/new"
-            className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0b2551]"
+            className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong"
           >
             <PackagePlus className="h-4 w-4" />
             Registrar primera entrada

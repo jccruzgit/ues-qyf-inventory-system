@@ -20,7 +20,7 @@ export const productsMock = [
     storageCondition: 'cold',
     stockState: 'success',
     icon: FlaskConical,
-    iconTone: 'bg-[#e7efff] text-brand-ink',
+    iconTone: 'bg-brand-teal-soft text-brand-teal',
   },
   {
     id: 2,
@@ -52,7 +52,7 @@ export const productsMock = [
     storageCondition: 'ambient',
     stockState: 'success',
     icon: Syringe,
-    iconTone: 'bg-[#e7f8ea] text-[#2fa36b]',
+    iconTone: 'bg-[#e7f4eb] text-[#2d7a49]',
   },
   {
     id: 4,
@@ -68,7 +68,7 @@ export const productsMock = [
     storageCondition: 'ambient',
     stockState: 'success',
     icon: Beaker,
-    iconTone: 'bg-[#eef3fb] text-copy',
+    iconTone: 'bg-[#eef4ef] text-copy',
   },
   {
     id: 5,

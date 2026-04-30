@@ -49,7 +49,7 @@ function AuthSupportPage({ mode }) {
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
             to={content.primaryAction.to}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3.5 text-sm font-extrabold text-white transition hover:bg-[#0b2551]"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3.5 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong"
           >
             <ArrowLeft className="h-4 w-4" />
             {content.primaryAction.label}

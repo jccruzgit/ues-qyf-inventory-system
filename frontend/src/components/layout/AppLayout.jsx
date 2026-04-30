@@ -7,7 +7,7 @@ function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f6f8fc] text-brand-ink">
+    <div className="min-h-screen bg-surface-0 text-brand-ink">
       <div className="mx-auto flex min-h-screen max-w-[1600px]">
         <Sidebar
           mobileOpen={sidebarOpen}

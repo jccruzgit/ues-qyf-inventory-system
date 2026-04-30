@@ -10,7 +10,7 @@ export function FilterSelect({ label, value, options, onChange }) {
         <select
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="w-full appearance-none rounded-full border border-transparent bg-white px-4 py-3.5 pr-11 text-sm font-bold text-brand-ink shadow-[0_12px_28px_rgba(14,47,103,0.06)] outline-none transition focus:border-brand-teal/25 focus:ring-4 focus:ring-brand-teal/10"
+          className="w-full appearance-none rounded-full border border-transparent bg-white px-4 py-3.5 pr-11 text-sm font-bold text-brand-ink shadow-[0_12px_28px_rgba(23,61,44,0.06)] outline-none transition focus:border-brand-teal/25 focus:ring-4 focus:ring-brand-teal/10"
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -36,7 +36,7 @@ export function StorageToggle({ value, onChange, label = 'Condicion de almacenam
       <span className="mb-2 block text-[0.68rem] font-extrabold uppercase tracking-[0.24em] text-copy-soft">
         {label}
       </span>
-      <div className="inline-flex flex-wrap gap-2 rounded-full bg-white p-1.5 shadow-[0_12px_28px_rgba(14,47,103,0.06)]">
+      <div className="inline-flex flex-wrap gap-2 rounded-full bg-white p-1.5 shadow-[0_12px_28px_rgba(23,61,44,0.06)]">
         {toggleOptions.map((option) => {
           const isActive = option.value === value;
 
@@ -47,7 +47,7 @@ export function StorageToggle({ value, onChange, label = 'Condicion de almacenam
               onClick={() => onChange(option.value)}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-extrabold transition ${
                 isActive
-                  ? 'bg-brand-ink text-white shadow-[0_10px_22px_rgba(14,47,103,0.18)]'
+                  ? 'bg-brand-ink text-white shadow-[0_10px_22px_rgba(23,61,44,0.18)]'
                   : 'text-copy hover:bg-surface-2 hover:text-brand-ink'
               }`}
             >

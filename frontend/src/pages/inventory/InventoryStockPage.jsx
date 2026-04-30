@@ -111,7 +111,7 @@ function InventoryStockPage() {
         action={
           <Link
             to="/inventory/entries/new"
-            className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(14,47,103,0.2)] transition hover:-translate-y-0.5 hover:bg-[#0b2551]"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(23,61,44,0.2)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong"
           >
             <PackagePlus className="h-4 w-4" strokeWidth={2.4} />
             Nueva entrada
@@ -120,7 +120,7 @@ function InventoryStockPage() {
       />
 
       {notice ? (
-        <div className="rounded-[24px] border border-[#d7f0e1] bg-[#eef9f2] px-4 py-3 text-sm font-semibold text-[#2fa36b]">
+        <div className="rounded-[24px] border border-[#d2e6d8] bg-[#eef6f0] px-4 py-3 text-sm font-semibold text-[#2d7a49]">
           {notice}
         </div>
       ) : null}
@@ -131,8 +131,8 @@ function InventoryStockPage() {
           value={filteredItems.length}
           icon={Boxes}
           meta="Vista actual"
-          metaVariant="navy"
-          accent="bg-[#e7efff] text-brand-ink"
+          metaVariant="teal"
+          accent="bg-brand-teal-soft text-brand-teal"
         />
         <StatCard
           title="Stock critico"
@@ -160,7 +160,7 @@ function InventoryStockPage() {
         />
       </section>
 
-      <Card className="space-y-5 bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)]">
+      <Card className="space-y-5 bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">

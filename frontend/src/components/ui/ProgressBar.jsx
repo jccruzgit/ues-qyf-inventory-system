@@ -1,5 +1,5 @@
 const toneClasses = {
-  success: 'bg-[#2fa36b]',
+  success: 'bg-[#2d7a49]',
   danger: 'bg-[#d53a43]',
   warning: 'bg-[#d28a19]',
   info: 'bg-brand-teal',

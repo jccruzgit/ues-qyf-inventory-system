@@ -275,7 +275,7 @@ function ProductForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(14,47,103,0.18)] transition hover:bg-[#0b2551] disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex items-center justify-center rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
         >
           {submitLabel}
         </button>

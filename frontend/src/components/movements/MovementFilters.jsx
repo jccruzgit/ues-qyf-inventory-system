@@ -14,7 +14,7 @@ function DateField({ label, value, onChange, max, min }) {
           onChange={(event) => onChange(event.target.value)}
           max={max}
           min={min}
-          className="w-full rounded-full border border-transparent bg-white px-4 py-3.5 pr-11 text-sm font-bold text-brand-ink shadow-[0_12px_28px_rgba(14,47,103,0.06)] outline-none transition focus:border-brand-teal/25 focus:ring-4 focus:ring-brand-teal/10"
+          className="w-full rounded-full border border-transparent bg-white px-4 py-3.5 pr-11 text-sm font-bold text-brand-ink shadow-[0_12px_28px_rgba(23,61,44,0.06)] outline-none transition focus:border-brand-teal/25 focus:ring-4 focus:ring-brand-teal/10"
         />
         <CalendarRange className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-copy-soft" />
       </div>

@@ -71,7 +71,7 @@ function MovementsLoadingState() {
 
 function MovementsErrorState({ message, onRetry }) {
   return (
-    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f9fbff_100%)] p-8 sm:p-10">
+    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-8 sm:p-10">
       <div className="flex flex-col items-center justify-center text-center">
         <div className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-[28px] bg-[#fdebec] text-[#d53a43]">
           <AlertTriangle className="h-8 w-8" strokeWidth={1.9} />
@@ -83,7 +83,7 @@ function MovementsErrorState({ message, onRetry }) {
         <button
           type="button"
           onClick={onRetry}
-          className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0b2551]"
+          className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong"
         >
           Reintentar
         </button>
@@ -94,7 +94,7 @@ function MovementsErrorState({ message, onRetry }) {
 
 function MovementsEmptyState({ isFiltered, onReset }) {
   return (
-    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-8 sm:p-10">
+    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-8 sm:p-10">
       <div className="flex flex-col items-center justify-center text-center">
         <div className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-[28px] bg-surface-2 text-copy-soft">
           <Rows3 className="h-8 w-8" strokeWidth={1.9} />
@@ -118,7 +118,7 @@ function MovementsEmptyState({ isFiltered, onReset }) {
         ) : (
           <Link
             to="/inventory/entries/new"
-            className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0b2551]"
+            className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong"
           >
             <PackagePlus className="h-4 w-4" />
             Registrar primera entrada
@@ -144,7 +144,7 @@ function ReverseMovementModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-ink/45 px-4 py-6 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-[32px] bg-white p-6 shadow-[0_28px_80px_rgba(14,47,103,0.28)] sm:p-8">
+      <div className="w-full max-w-2xl rounded-[32px] bg-white p-6 shadow-[0_28px_80px_rgba(23,61,44,0.28)] sm:p-8">
         <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
           Reversion trazable
         </p>
@@ -189,7 +189,7 @@ function ReverseMovementModal({
             type="button"
             onClick={onConfirm}
             disabled={submitting}
-            className="inline-flex items-center justify-center rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0b2551] disabled:cursor-not-allowed disabled:opacity-45"
+            className="inline-flex items-center justify-center rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-45"
           >
             {submitting ? 'Procesando...' : 'Crear reversion'}
           </button>
@@ -441,7 +441,7 @@ function MovementsPage() {
         action={
           <Link
             to="/inventory/entries/new"
-            className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(14,47,103,0.2)] transition hover:-translate-y-0.5 hover:bg-[#0b2551]"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(23,61,44,0.2)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong"
           >
             <PackagePlus className="h-4 w-4" strokeWidth={2.4} />
             Nueva entrada
@@ -459,7 +459,7 @@ function MovementsPage() {
         <div
           className={`rounded-[24px] px-4 py-3 text-sm font-semibold ${
             feedback.type === 'success'
-              ? 'border border-[#cfe9db] bg-[#eef9f2] text-[#1f7a4d]'
+              ? 'border border-[#d2e6d8] bg-[#eef6f0] text-[#2d7a49]'
               : 'border border-[#f4c7cb] bg-[#fff3f4] text-[#b73945]'
           }`}
         >
@@ -473,8 +473,8 @@ function MovementsPage() {
           value={movementRows.length}
           icon={Rows3}
           meta="Consulta actual"
-          metaVariant="navy"
-          accent="bg-[#e7efff] text-brand-ink"
+          metaVariant="teal"
+          accent="bg-brand-teal-soft text-brand-teal"
         />
         <StatCard
           title="Entradas"
@@ -482,7 +482,7 @@ function MovementsPage() {
           icon={PackagePlus}
           meta="Abastecimiento"
           metaVariant="success"
-          accent="bg-[#e5f7ef] text-[#249b66]"
+          accent="bg-[#e7f4eb] text-[#2d7a49]"
         />
         <StatCard
           title="Salidas"
@@ -502,7 +502,7 @@ function MovementsPage() {
         />
       </section>
 
-      <Card className="space-y-5 bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)]">
+      <Card className="space-y-5 bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">

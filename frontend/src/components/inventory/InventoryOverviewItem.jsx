@@ -48,7 +48,7 @@ function getExpirationCopy(batch) {
 function QuickActionLink({ to, state, icon: Icon, children, variant = 'primary' }) {
   const className =
     variant === 'primary'
-      ? 'bg-brand-ink text-white hover:bg-[#0b2551]'
+      ? 'bg-brand-ink text-white hover:bg-brand-ink-strong'
       : 'border border-brand-ink/[0.08] bg-white text-brand-ink hover:border-brand-teal/30 hover:text-brand-teal';
 
   return (
@@ -72,7 +72,7 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
       : 'neutral';
 
   return (
-    <Card className="rounded-[28px] px-5 py-5 transition hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(14,47,103,0.1)] sm:px-6">
+    <Card className="rounded-[28px] px-5 py-5 transition hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(23,61,44,0.1)] sm:px-6">
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,1fr)_auto] xl:items-start">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -120,7 +120,7 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-brand-ink/[0.06] bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-4">
+        <div className="rounded-[24px] border border-brand-ink/[0.06] bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-4">
           <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
             Trazabilidad
           </p>
@@ -269,7 +269,7 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
                 {item.batches.map((batch) => (
                   <div
                     key={batch.id}
-                    className="rounded-[22px] border border-brand-ink/[0.06] bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] px-4 py-3"
+                    className="rounded-[22px] border border-brand-ink/[0.06] bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] px-4 py-3"
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>

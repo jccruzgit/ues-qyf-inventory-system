@@ -7,7 +7,7 @@ function ProductCard({ product, typeVariant, riskVariant, stockTone, stockLabel 
   const ProductIcon = product.icon;
 
   return (
-    <Card className="group p-5 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_42px_rgba(14,47,103,0.12)]">
+    <Card className="group p-5 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_42px_rgba(23,61,44,0.12)]">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 gap-4">
           <div

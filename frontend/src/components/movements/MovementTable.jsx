@@ -267,7 +267,7 @@ function MovementTable({
                 onClick={() => onPageChange(pageNumber)}
                 className={`inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-extrabold transition ${
                   pageNumber === page
-                    ? 'bg-brand-ink text-white shadow-[0_14px_30px_rgba(14,47,103,0.18)]'
+                    ? 'bg-brand-ink text-white shadow-[0_14px_30px_rgba(23,61,44,0.18)]'
                     : 'border border-brand-ink/[0.08] bg-white text-brand-ink hover:border-brand-teal/30 hover:text-brand-teal'
                 }`}
               >

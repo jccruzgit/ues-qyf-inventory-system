@@ -1,6 +1,6 @@
 const variantClasses = {
   neutral: 'bg-surface-2 text-copy',
-  success: 'bg-[#e5f7ef] text-[#249b66]',
+  success: 'bg-[#e7f4eb] text-[#2d7a49]',
   danger: 'bg-[#fdebec] text-[#d53a43]',
   warning: 'bg-[#fff3dd] text-[#d28a19]',
   navy: 'bg-brand-ink text-white',

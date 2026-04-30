@@ -33,7 +33,7 @@ function ModulePlaceholderPage() {
         subtitle="Este modulo base ya esta listo para la siguiente fase de implementacion."
       />
 
-      <Card className="min-h-[360px] bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)]">
+      <Card className="min-h-[360px] bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)]">
         <div className="flex h-full min-h-[300px] flex-col justify-between">
           <div>
             <p className="inline-flex rounded-full bg-brand-teal-soft px-3 py-1 text-xs font-extrabold text-brand-teal">

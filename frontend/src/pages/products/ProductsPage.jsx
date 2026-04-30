@@ -35,7 +35,7 @@ const badgeVariantByRisk = {
 };
 
 const stockTextToneByState = {
-  success: 'text-[#2fa36b]',
+  success: 'text-[#2d7a49]',
   danger: 'text-[#d53a43]',
   warning: 'text-[#d28a19]',
   info: 'text-brand-teal',
@@ -44,7 +44,7 @@ const stockTextToneByState = {
 const categoryVisualMap = {
   Reactivos: {
     icon: FlaskConical,
-    iconTone: 'bg-[#e7efff] text-brand-ink',
+    iconTone: 'bg-brand-teal-soft text-brand-teal',
   },
   Proteccion: {
     icon: ShieldPlus,
@@ -52,11 +52,11 @@ const categoryVisualMap = {
   },
   Farmaceuticos: {
     icon: Syringe,
-    iconTone: 'bg-[#e7f8ea] text-[#2fa36b]',
+    iconTone: 'bg-[#e7f4eb] text-[#2d7a49]',
   },
   Equipos: {
     icon: Beaker,
-    iconTone: 'bg-[#eef3fb] text-copy',
+    iconTone: 'bg-[#eef4ef] text-copy',
   },
 };
 
@@ -139,7 +139,7 @@ function ProductsLoadingState() {
 
 function ProductsErrorState({ message, onRetry }) {
   return (
-    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f9fbff_100%)] p-8 sm:p-10">
+    <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-8 sm:p-10">
       <div className="flex flex-col items-center justify-center text-center">
         <div className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-[28px] bg-[#fdebec] text-[#d53a43]">
           <AlertTriangle className="h-8 w-8" strokeWidth={1.9} />
@@ -151,7 +151,7 @@ function ProductsErrorState({ message, onRetry }) {
         <button
           type="button"
           onClick={onRetry}
-          className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0b2551]"
+          className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong"
         >
           <RefreshCcw className="h-4 w-4" />
           Reintentar
@@ -235,7 +235,7 @@ function ProductsPage() {
         action={
           <Link
             to="/products/new"
-            className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(14,47,103,0.2)] transition hover:-translate-y-0.5 hover:bg-[#0b2551]"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(23,61,44,0.2)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong"
           >
             <Plus className="h-4 w-4" strokeWidth={2.4} />
             Nuevo producto
@@ -244,7 +244,7 @@ function ProductsPage() {
       />
 
       {notice ? (
-        <div className="rounded-[24px] border border-[#d7f0e1] bg-[#eef9f2] px-4 py-3 text-sm font-semibold text-[#2fa36b]">
+        <div className="rounded-[24px] border border-[#d2e6d8] bg-[#eef6f0] px-4 py-3 text-sm font-semibold text-[#2d7a49]">
           {notice}
         </div>
       ) : null}
@@ -306,7 +306,7 @@ function ProductsPage() {
             </div>
           </>
         ) : (
-          <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-8 sm:p-10">
+          <Card className="bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-8 sm:p-10">
             <div className="flex flex-col items-center justify-center text-center">
               <div className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-[28px] bg-surface-2 text-copy-soft">
                 <SearchX className="h-8 w-8" strokeWidth={1.9} />
@@ -337,7 +337,7 @@ function ProductsPage() {
               ) : (
                 <Link
                   to="/products/new"
-                  className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0b2551]"
+                  className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong"
                 >
                   <Plus className="h-4 w-4" />
                   Crear primer producto

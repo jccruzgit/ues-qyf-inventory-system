@@ -135,7 +135,7 @@ function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-full bg-brand-ink px-6 py-4 text-base font-extrabold text-white shadow-[0_18px_32px_rgba(14,47,103,0.24)] transition hover:-translate-y-0.5 hover:bg-[#0b2551] disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-full bg-brand-ink px-6 py-4 text-base font-extrabold text-white shadow-[0_18px_32px_rgba(23,61,44,0.22)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isSubmitting ? 'Validando acceso...' : 'Autorizar ingreso'}
         </button>
