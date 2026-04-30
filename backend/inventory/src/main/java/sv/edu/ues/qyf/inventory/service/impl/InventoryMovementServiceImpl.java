@@ -18,12 +18,14 @@ import sv.edu.ues.qyf.inventory.dto.InventoryMovementLineRequestDto;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementRequestDto;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementResponseDto;
 import sv.edu.ues.qyf.inventory.entity.BatchStatus;
+import sv.edu.ues.qyf.inventory.entity.CorrectionType;
 import sv.edu.ues.qyf.inventory.entity.InventoryMovement;
 import sv.edu.ues.qyf.inventory.entity.InventoryMovementLine;
 import sv.edu.ues.qyf.inventory.entity.Laboratory;
 import sv.edu.ues.qyf.inventory.entity.MovementType;
 import sv.edu.ues.qyf.inventory.entity.Product;
 import sv.edu.ues.qyf.inventory.entity.ProductBatch;
+import sv.edu.ues.qyf.inventory.entity.UnitOfMeasure;
 import sv.edu.ues.qyf.inventory.entity.User;
 import sv.edu.ues.qyf.inventory.exception.BadRequestException;
 import sv.edu.ues.qyf.inventory.exception.ResourceNotFoundException;
@@ -33,6 +35,7 @@ import sv.edu.ues.qyf.inventory.repository.InventoryMovementRepository;
 import sv.edu.ues.qyf.inventory.repository.LaboratoryRepository;
 import sv.edu.ues.qyf.inventory.repository.ProductBatchRepository;
 import sv.edu.ues.qyf.inventory.repository.ProductRepository;
+import sv.edu.ues.qyf.inventory.repository.UnitOfMeasureRepository;
 import sv.edu.ues.qyf.inventory.service.AuditLogService;
 import sv.edu.ues.qyf.inventory.service.CurrentUserService;
 import sv.edu.ues.qyf.inventory.service.InventoryAlertService;
@@ -44,6 +47,7 @@ import sv.edu.ues.qyf.inventory.service.LaboratoryAccessService;
 public class InventoryMovementServiceImpl implements InventoryMovementService {
 
     private static final String ACTION_CREATE = "CREATE";
+    private static final String ACTION_REVERSE = "REVERSE";
     private static final String TABLE_NAME = "inventory_movements";
 
     private final InventoryMovementRepository inventoryMovementRepository;
@@ -51,6 +55,7 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
     private final ProductRepository productRepository;
     private final ProductBatchRepository productBatchRepository;
     private final LaboratoryRepository laboratoryRepository;
+    private final UnitOfMeasureRepository unitOfMeasureRepository;
     private final InventoryMovementMapper inventoryMovementMapper;
     private final LaboratoryAccessService laboratoryAccessService;
     private final CurrentUserService currentUserService;
@@ -64,6 +69,7 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
             ProductRepository productRepository,
             ProductBatchRepository productBatchRepository,
             LaboratoryRepository laboratoryRepository,
+            UnitOfMeasureRepository unitOfMeasureRepository,
             InventoryMovementMapper inventoryMovementMapper,
             LaboratoryAccessService laboratoryAccessService,
             CurrentUserService currentUserService,
@@ -75,6 +81,7 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
         this.productRepository = productRepository;
         this.productBatchRepository = productBatchRepository;
         this.laboratoryRepository = laboratoryRepository;
+        this.unitOfMeasureRepository = unitOfMeasureRepository;
         this.inventoryMovementMapper = inventoryMovementMapper;
         this.laboratoryAccessService = laboratoryAccessService;
         this.currentUserService = currentUserService;
@@ -85,6 +92,37 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
 
     @Override
     public InventoryMovementResponseDto create(InventoryMovementRequestDto request) {
+        return createInternal(request, CorrectionType.NORMAL, null, null);
+    }
+
+    @Override
+    public InventoryMovementResponseDto reverse(Long id, String reason) {
+        String normalizedReason = normalizeRequiredReason(reason);
+        InventoryMovement originalMovement = inventoryMovementRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory movement not found with id: " + id));
+
+        laboratoryAccessService.validateAccessToLaboratory(originalMovement.getLaboratory().getId());
+
+        if (resolveCorrectionType(originalMovement) == CorrectionType.REVERSAL) {
+            throw new BadRequestException("Reversal movements cannot be reversed again");
+        }
+
+        if (inventoryMovementRepository.existsByRelatedMovementIdAndCorrectionType(id, CorrectionType.REVERSAL)) {
+            throw new BadRequestException("This movement has already been reversed");
+        }
+
+        return createInternal(
+                buildReversalRequest(originalMovement),
+                CorrectionType.REVERSAL,
+                originalMovement,
+                normalizedReason);
+    }
+
+    private InventoryMovementResponseDto createInternal(
+            InventoryMovementRequestDto request,
+            CorrectionType correctionType,
+            InventoryMovement relatedMovement,
+            String correctionReason) {
         laboratoryAccessService.validateAccessToLaboratory(request.getLaboratoryId());
 
         Laboratory laboratory = laboratoryRepository.findByIdAndActiveTrue(request.getLaboratoryId())
@@ -95,8 +133,11 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
 
         InventoryMovement movement = InventoryMovement.builder()
                 .movementType(request.getMovementType())
+                .correctionType(correctionType)
                 .laboratory(laboratory)
                 .performedBy(currentUser)
+                .relatedMovement(relatedMovement)
+                .correctionReason(correctionType == CorrectionType.REVERSAL ? correctionReason : null)
                 .observation(normalizeNullable(request.getObservation()))
                 .build();
 
@@ -107,6 +148,7 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
             Product product = productRepository.findByIdAndActiveTrue(lineRequest.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Product not found with id: " + lineRequest.getProductId()));
+            UnitOfMeasure priceUnit = resolvePriceUnit(lineRequest, product, request.getMovementType(), correctionType);
             ProductBatch productBatch =
                     resolveProductBatch(lineRequest, laboratory, product, request.getMovementType());
 
@@ -117,6 +159,8 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
                     .product(product)
                     .productBatch(productBatch)
                     .quantity(lineRequest.getQuantity())
+                    .unitPrice(lineRequest.getUnitPrice())
+                    .priceUnit(priceUnit)
                     .lineNotes(normalizeNullable(lineRequest.getLineNotes()))
                     .build();
             movement.getLines().add(line);
@@ -132,11 +176,13 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
         auditLogService.logAction(
                 TABLE_NAME,
                 savedMovement.getId(),
-                ACTION_CREATE,
+                correctionType == CorrectionType.REVERSAL ? ACTION_REVERSE : ACTION_CREATE,
                 savedMovement.getLaboratory() != null ? savedMovement.getLaboratory().getId() : null,
                 null,
                 serializeState(savedMovement),
-                "Inventory movement registered");
+                correctionType == CorrectionType.REVERSAL
+                        ? "Inventory movement reversed"
+                        : "Inventory movement registered");
 
         return inventoryMovementMapper.toResponseDto(savedMovement);
     }
@@ -265,6 +311,43 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
         return productBatchRepository.save(productBatch);
     }
 
+    private UnitOfMeasure resolvePriceUnit(
+            InventoryMovementLineRequestDto lineRequest,
+            Product product,
+            MovementType movementType,
+            CorrectionType correctionType) {
+        if (movementType == MovementType.ENTRY && correctionType != CorrectionType.REVERSAL) {
+            if (lineRequest.getUnitPrice() == null) {
+                throw new BadRequestException("Unit price is required for entry movements");
+            }
+            if (lineRequest.getPriceUnitId() == null) {
+                throw new BadRequestException("Price unit id is required when unit price is informed");
+            }
+        }
+
+        if (lineRequest.getUnitPrice() == null) {
+            return null;
+        }
+
+        if (lineRequest.getUnitPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new BadRequestException("Unit price must be greater than or equal to 0");
+        }
+
+        if (lineRequest.getPriceUnitId() == null) {
+            throw new BadRequestException("Price unit id is required when unit price is informed");
+        }
+
+        UnitOfMeasure priceUnit = unitOfMeasureRepository.findById(lineRequest.getPriceUnitId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Unit of measure not found with id: " + lineRequest.getPriceUnitId()));
+
+        if (product.getBaseUnit() != null && !product.getBaseUnit().getId().equals(priceUnit.getId())) {
+            throw new BadRequestException("Price unit must match the product base unit");
+        }
+
+        return priceUnit;
+    }
+
     private void validateBatchOwnership(ProductBatch productBatch, Long laboratoryId, Long productId) {
         if (!productBatch.getLaboratory().getId().equals(laboratoryId)) {
             throw new BadRequestException("Product batch does not belong to the selected laboratory");
@@ -376,6 +459,9 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
         Map<String, Object> state = new LinkedHashMap<>();
         state.put("id", movement.getId());
         state.put("movementType", movement.getMovementType());
+        state.put("correctionType", resolveCorrectionType(movement));
+        state.put("relatedMovementId", movement.getRelatedMovement() != null ? movement.getRelatedMovement().getId() : null);
+        state.put("correctionReason", movement.getCorrectionReason());
         state.put("laboratoryId", movement.getLaboratory() != null ? movement.getLaboratory().getId() : null);
         state.put("performedById", movement.getPerformedBy() != null ? movement.getPerformedBy().getId() : null);
         state.put("performedAt", movement.getPerformedAt());
@@ -393,6 +479,8 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
         state.put("productId", line.getProduct().getId());
         state.put("productBatchId", line.getProductBatch() != null ? line.getProductBatch().getId() : null);
         state.put("quantity", line.getQuantity());
+        state.put("unitPrice", line.getUnitPrice());
+        state.put("priceUnitId", line.getPriceUnit() != null ? line.getPriceUnit().getId() : null);
         state.put("lineNotes", line.getLineNotes());
         return state;
     }
@@ -403,5 +491,37 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
         } catch (JsonProcessingException exception) {
             throw new IllegalStateException("Failed to serialize inventory movement audit state", exception);
         }
+    }
+
+    private InventoryMovementRequestDto buildReversalRequest(InventoryMovement originalMovement) {
+        List<InventoryMovementLineRequestDto> reversedLines = originalMovement.getLines().stream()
+                .map(line -> new InventoryMovementLineRequestDto(
+                        line.getProduct() != null ? line.getProduct().getId() : null,
+                        line.getProductBatch() != null ? line.getProductBatch().getId() : null,
+                        line.getProductBatch() != null ? line.getProductBatch().getBatchCode() : null,
+                        line.getProductBatch() != null ? line.getProductBatch().getExpirationDate() : null,
+                        line.getQuantity(),
+                        line.getUnitPrice(),
+                        line.getPriceUnit() != null ? line.getPriceUnit().getId() : null,
+                        line.getLineNotes()))
+                .toList();
+
+        return new InventoryMovementRequestDto(
+                originalMovement.getMovementType() == MovementType.ENTRY ? MovementType.EXIT : MovementType.ENTRY,
+                originalMovement.getLaboratory().getId(),
+                "Reversion del movimiento " + originalMovement.getId(),
+                reversedLines);
+    }
+
+    private String normalizeRequiredReason(String reason) {
+        String normalizedReason = normalizeNullable(reason);
+        if (normalizedReason == null) {
+            throw new BadRequestException("Reason is required");
+        }
+        return normalizedReason;
+    }
+
+    private CorrectionType resolveCorrectionType(InventoryMovement movement) {
+        return movement.getCorrectionType() != null ? movement.getCorrectionType() : CorrectionType.NORMAL;
     }
 }

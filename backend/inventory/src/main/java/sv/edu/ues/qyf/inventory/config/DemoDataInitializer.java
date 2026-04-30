@@ -131,6 +131,8 @@ public class DemoDataInitializer {
                                             "DEMO-ALCO-001",
                                             LocalDate.now().plusDays(10),
                                             new BigDecimal("20"),
+                                            new BigDecimal("1.2500"),
+                                            unit.getId(),
                                             "Seeded demo batch"),
                                     new InventoryMovementLineRequestDto(
                                             acetone.getId(),
@@ -138,6 +140,8 @@ public class DemoDataInitializer {
                                             "DEMO-ACET-001",
                                             LocalDate.now().plusDays(120),
                                             new BigDecimal("100"),
+                                            new BigDecimal("0.8500"),
+                                            unit.getId(),
                                             "Seeded demo batch"))));
                 } finally {
                     SecurityContextHolder.clearContext();

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sv.edu.ues.qyf.inventory.entity.CorrectionType;
 import sv.edu.ues.qyf.inventory.entity.MovementType;
 
 @Getter
@@ -20,6 +21,9 @@ public class InventoryMovementResponseDto {
     private Long performedById;
     private String performedByUsername;
     private LocalDateTime performedAt;
+    private CorrectionType correctionType;
+    private Long relatedMovementId;
+    private String correctionReason;
     private String observation;
     private Long attachmentDocumentId;
     private List<InventoryMovementLineResponseDto> lines;

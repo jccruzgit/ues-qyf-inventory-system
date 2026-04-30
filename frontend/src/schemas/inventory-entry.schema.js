@@ -47,6 +47,19 @@ export const inventoryEntrySchema = z
         .number({ required_error: 'Ingrese la cantidad ingresada.' })
         .positive('La cantidad ingresada debe ser mayor que 0.'),
     ),
+    unitPrice: z.preprocess(
+      parseRequiredNumber,
+      z
+        .number({ required_error: 'Ingrese el precio por unidad de medida.' })
+        .min(0, 'El precio por unidad de medida debe ser mayor o igual a 0.'),
+    ),
+    priceUnitId: z.preprocess(
+      parseRequiredNumber,
+      z
+        .number({ required_error: 'La unidad del precio es obligatoria.' })
+        .positive('La unidad del precio es obligatoria.'),
+    ),
+    priceUnitLabel: z.string().optional(),
     unitLabel: z.string().optional(),
     batchCode: z
       .string()
@@ -84,6 +97,22 @@ export const inventoryEntrySchema = z
         code: z.ZodIssueCode.custom,
         path: ['expirationDate'],
         message: 'La fecha de vencimiento es obligatoria para el producto seleccionado.',
+      });
+    }
+
+    if (values.unitPrice === undefined || values.unitPrice === null) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['unitPrice'],
+        message: 'Ingrese el precio por unidad de medida.',
+      });
+    }
+
+    if (!values.priceUnitId) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['priceUnitId'],
+        message: 'La unidad del precio es obligatoria.',
       });
     }
   });

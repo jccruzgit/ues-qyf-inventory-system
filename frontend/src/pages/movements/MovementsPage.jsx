@@ -11,14 +11,19 @@ import MovementTable from '../../components/movements/MovementTable';
 import Card from '../../components/ui/Card';
 import SectionHeader from '../../components/ui/SectionHeader';
 import StatCard from '../../components/ui/StatCard';
+import { useAuth } from '../../hooks/useAuth';
 import {
   fetchInventoryCatalogs,
   getInventoryCatalogsErrorMessage,
 } from '../../services/inventoryService';
 import {
   fetchInventoryMovements,
+  getInventoryMovementActionErrorMessage,
   getInventoryMovementsErrorMessage,
+  reverseInventoryMovement,
 } from '../../services/movementsService';
+
+const reverseRoles = new Set(['ADMIN', 'INVENTORY_MANAGER', 'LAB_TECHNICIAN']);
 
 const defaultFilters = {
   dateFrom: '',
@@ -51,9 +56,9 @@ function MovementsLoadingState() {
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className="grid grid-cols-[1.1fr_0.7fr_1.3fr_0.9fr_0.6fr_0.6fr_1fr_0.8fr_1.2fr_1.2fr] gap-4 border-b border-brand-ink/[0.06] px-6 py-4"
+              className="grid grid-cols-[1.1fr_0.7fr_1fr_1.3fr_0.9fr_0.6fr_0.6fr_0.8fr_0.8fr_1fr_0.8fr_1.2fr_1.2fr_1fr] gap-4 border-b border-brand-ink/[0.06] px-6 py-4"
             >
-              {Array.from({ length: 10 }).map((__, cellIndex) => (
+              {Array.from({ length: 14 }).map((__, cellIndex) => (
                 <div key={cellIndex} className="h-4 rounded-full bg-surface-2" />
               ))}
             </div>
@@ -124,9 +129,114 @@ function MovementsEmptyState({ isFiltered, onReset }) {
   );
 }
 
+function ReverseMovementModal({
+  movement,
+  reason,
+  error,
+  submitting,
+  onReasonChange,
+  onClose,
+  onConfirm,
+}) {
+  if (!movement) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-ink/45 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-2xl rounded-[32px] bg-white p-6 shadow-[0_28px_80px_rgba(14,47,103,0.28)] sm:p-8">
+        <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
+          Reversion trazable
+        </p>
+        <h3 className="mt-3 text-2xl font-extrabold tracking-[-0.04em] text-brand-ink">
+          Confirmar reversion del movimiento #{movement.movementId}
+        </h3>
+        <p className="mt-3 text-sm leading-7 text-copy">
+          Esta accion no elimina el movimiento original. Creara un movimiento compensatorio
+          para mantener la trazabilidad.
+        </p>
+        <div className="mt-5 rounded-[24px] border border-[#f7d7b5] bg-[#fff7eb] px-4 py-3 text-sm font-semibold leading-6 text-[#915b10]">
+          Tipo original: {movement.movementTypeLabel}. Producto de referencia: {movement.productName}.
+        </div>
+
+        <label className="mt-6 block">
+          <span className="text-sm font-extrabold text-brand-ink">Motivo de la reversion</span>
+          <textarea
+            value={reason}
+            onChange={(event) => onReasonChange(event.target.value)}
+            rows={4}
+            placeholder="Explique por que este movimiento debe revertirse."
+            className="mt-3 w-full rounded-[24px] border border-brand-ink/[0.08] bg-white px-4 py-3 text-sm text-brand-ink outline-none transition focus:border-brand-teal/30 focus:ring-4 focus:ring-brand-teal/10"
+          />
+        </label>
+
+        {error ? (
+          <div className="mt-4 rounded-[20px] border border-[#f4c7cb] bg-[#fff3f4] px-4 py-3 text-sm font-semibold text-[#b73945]">
+            {error}
+          </div>
+        ) : null}
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="inline-flex items-center justify-center rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={submitting}
+            className="inline-flex items-center justify-center rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0b2551] disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            {submitting ? 'Procesando...' : 'Crear reversion'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function normalizeRole(role) {
+  return String(role ?? '')
+    .trim()
+    .replace(/^ROLE_/, '');
+}
+
+function resolveReverseState(row, canManageReversals, reversedMovementIds) {
+  if (!canManageReversals) {
+    return {
+      canReverse: false,
+      reverseDisabledReason: 'Sin permisos para reversar.',
+    };
+  }
+
+  if (row.correctionType === 'REVERSAL') {
+    return {
+      canReverse: false,
+      reverseDisabledReason: 'Ya es una reversion.',
+    };
+  }
+
+  if (reversedMovementIds.has(row.movementId)) {
+    return {
+      canReverse: false,
+      reverseDisabledReason: 'Ya tiene reversion registrada.',
+    };
+  }
+
+  return {
+    canReverse: true,
+    reverseDisabledReason: '',
+  };
+}
+
 function MovementsPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [catalogs, setCatalogs] = useState({
     products: [],
     laboratories: [],
@@ -141,6 +251,11 @@ function MovementsPage() {
   const [catalogsReady, setCatalogsReady] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [feedback, setFeedback] = useState(null);
+  const [reverseModalMovement, setReverseModalMovement] = useState(null);
+  const [reverseReason, setReverseReason] = useState('');
+  const [reverseError, setReverseError] = useState('');
+  const [reversing, setReversing] = useState(false);
 
   const loadCatalogs = async () => {
     setCatalogsLoading(true);
@@ -213,6 +328,19 @@ function MovementsPage() {
     () => buildMovementProductOptions(catalogs.products),
     [catalogs.products],
   );
+  const canManageReversals = useMemo(
+    () => reverseRoles.has(normalizeRole(user?.role)),
+    [user?.role],
+  );
+  const reversedMovementIds = useMemo(
+    () =>
+      new Set(
+        movements
+          .map((movement) => movement.relatedMovementId)
+          .filter((movementId) => movementId !== null && movementId !== undefined),
+      ),
+    [movements],
+  );
   const laboratoryOptions = useMemo(
     () => [
       { value: 'all', label: 'Todos los laboratorios' },
@@ -220,10 +348,12 @@ function MovementsPage() {
     ],
     [catalogs.laboratories],
   );
-  const movementRows = useMemo(
-    () => buildMovementRows(movements, catalogs.products, catalogs.laboratories),
-    [catalogs.laboratories, catalogs.products, movements],
-  );
+  const movementRows = useMemo(() => {
+    return buildMovementRows(movements, catalogs.products, catalogs.laboratories).map((row) => ({
+      ...row,
+      ...resolveReverseState(row, canManageReversals, reversedMovementIds),
+    }));
+  }, [canManageReversals, catalogs.laboratories, catalogs.products, movements, reversedMovementIds]);
   const sortedRows = useMemo(
     () => sortMovementRowsByDate(movementRows, sortDirection),
     [movementRows, sortDirection],
@@ -261,11 +391,53 @@ function MovementsPage() {
     }
   };
 
+  const handleOpenReverseModal = (row) => {
+    setReverseModalMovement(row);
+    setReverseReason('');
+    setReverseError('');
+  };
+
+  const handleCloseReverseModal = () => {
+    setReverseModalMovement(null);
+    setReverseReason('');
+    setReverseError('');
+  };
+
+  const handleConfirmReverse = async () => {
+    const normalizedReason = reverseReason.trim();
+
+    if (!normalizedReason) {
+      setReverseError('El motivo de la reversion es obligatorio.');
+      return;
+    }
+
+    if (!reverseModalMovement) {
+      return;
+    }
+
+    setReversing(true);
+    setReverseError('');
+
+    try {
+      await reverseInventoryMovement(reverseModalMovement.movementId, normalizedReason);
+      setFeedback({
+        type: 'success',
+        message: `Se registro la reversion del movimiento #${reverseModalMovement.movementId}.`,
+      });
+      handleCloseReverseModal();
+      await loadMovements(filters);
+    } catch (requestError) {
+      setReverseError(getInventoryMovementActionErrorMessage(requestError));
+    } finally {
+      setReversing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <SectionHeader
         title="Movimientos de inventario"
-        subtitle="Revise entradas y salidas registradas por fecha, producto, lote, laboratorio, usuario y observaciones."
+        subtitle="Revise entradas, salidas y reversiones por fecha, producto, lote, laboratorio, usuario y observaciones."
         action={
           <Link
             to="/inventory/entries/new"
@@ -280,6 +452,18 @@ function MovementsPage() {
       {notice ? (
         <div className="rounded-[24px] border border-brand-teal/15 bg-brand-teal-soft/40 px-4 py-3 text-sm font-semibold text-copy">
           {notice}
+        </div>
+      ) : null}
+
+      {feedback ? (
+        <div
+          className={`rounded-[24px] px-4 py-3 text-sm font-semibold ${
+            feedback.type === 'success'
+              ? 'border border-[#cfe9db] bg-[#eef9f2] text-[#1f7a4d]'
+              : 'border border-[#f4c7cb] bg-[#fff3f4] text-[#b73945]'
+          }`}
+        >
+          {feedback.message}
         </div>
       ) : null}
 
@@ -362,12 +546,24 @@ function MovementsPage() {
           totalItems={sortedRows.length}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
+          onReverseRequest={handleOpenReverseModal}
         />
       ) : (
         <MovementsEmptyState isFiltered={isFiltered} onReset={() => setFilters(defaultFilters)} />
       )}
+
+      <ReverseMovementModal
+        movement={reverseModalMovement}
+        reason={reverseReason}
+        error={reverseError}
+        submitting={reversing}
+        onReasonChange={setReverseReason}
+        onClose={handleCloseReverseModal}
+        onConfirm={handleConfirmReverse}
+      />
     </div>
   );
 }
 
 export default MovementsPage;
+

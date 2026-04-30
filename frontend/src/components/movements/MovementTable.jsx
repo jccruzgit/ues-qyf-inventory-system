@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ChevronsUpDown, FileClock } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronsUpDown, FileClock, RotateCcw } from 'lucide-react';
 import Badge from '../ui/Badge';
 import Card from '../ui/Card';
 
@@ -23,6 +23,17 @@ function formatNumber(value) {
   return new Intl.NumberFormat('es-SV', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
+  }).format(Number(value) || 0);
+}
+
+function formatPrice(value) {
+  if (value === null || value === undefined) {
+    return 'No aplica';
+  }
+
+  return new Intl.NumberFormat('es-SV', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
   }).format(Number(value) || 0);
 }
 
@@ -68,6 +79,7 @@ function MovementTable({
   totalItems,
   onPageChange,
   onPageSizeChange,
+  onReverseRequest,
 }) {
   return (
     <Card className="overflow-hidden p-0">
@@ -102,20 +114,24 @@ function MovementTable({
       </div>
 
       <div className="max-h-[68vh] overflow-x-auto overflow-y-auto hide-scrollbar">
-        <table className="min-w-[1360px] border-separate border-spacing-0">
+        <table className="min-w-[1880px] border-separate border-spacing-0">
           <thead className="sticky top-0 z-10 bg-[#f8fbff]">
             <tr>
               {[
                 'Fecha',
                 'Tipo',
+                'Estado',
                 'Producto',
                 'Lote',
                 'Cantidad',
                 'Unidad',
+                'Precio unitario',
+                'Unidad precio',
                 'Laboratorio',
                 'Usuario',
                 'Observacion general',
                 'Nota por linea',
+                'Acciones',
               ].map((column) => (
                 <th
                   key={column}
@@ -142,6 +158,17 @@ function MovementTable({
                   <Badge variant={row.movementTypeVariant}>{row.movementTypeLabel}</Badge>
                 </td>
                 <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top">
+                  <div className="min-w-[180px]">
+                    <Badge variant={row.correctionTypeVariant}>{row.correctionTypeLabel}</Badge>
+                    {row.correctionType === 'REVERSAL' ? (
+                      <p className="mt-2 text-xs font-semibold leading-5 text-copy-soft">
+                        Relacionado con movimiento ID {row.relatedMovementId}.<br />
+                        Motivo: {row.correctionReason}
+                      </p>
+                    ) : null}
+                  </div>
+                </td>
+                <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top">
                   <div className="min-w-[210px]">
                     <p className="text-sm font-extrabold text-brand-ink">{row.productName}</p>
                     <p className="mt-1 text-sm font-semibold text-copy-soft">{row.productCode}</p>
@@ -156,6 +183,12 @@ function MovementTable({
                 <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top text-sm font-semibold text-copy">
                   {row.unit}
                 </td>
+                <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top text-sm font-extrabold text-brand-ink">
+                  {formatPrice(row.unitPrice)}
+                </td>
+                <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top text-sm font-semibold text-copy">
+                  {row.unitPrice == null ? 'No aplica' : row.priceUnitLabel}
+                </td>
                 <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top text-sm font-semibold text-copy">
                   {row.laboratoryName}
                 </td>
@@ -167,6 +200,26 @@ function MovementTable({
                 </td>
                 <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top text-sm font-semibold text-copy">
                   <p className="max-w-[280px] leading-6">{row.lineObservation}</p>
+                </td>
+                <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top">
+                  {row.isFirstLine ? (
+                    row.canReverse ? (
+                      <button
+                        type="button"
+                        onClick={() => onReverseRequest(row)}
+                        className="inline-flex items-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                        Reversar movimiento
+                      </button>
+                    ) : (
+                      <p className="max-w-[220px] text-xs font-semibold leading-5 text-copy-soft">
+                        {row.reverseDisabledReason}
+                      </p>
+                    )
+                  ) : (
+                    <span className="text-xs font-semibold text-copy-soft">Usar la fila principal</span>
+                  )}
                 </td>
               </tr>
             ))}

@@ -18,6 +18,7 @@ public class ProductResponseDto {
     private String name;
     private String description;
     private String categoryName;
+    private Long baseUnitId;
     private String baseUnitName;
     private String baseUnitSymbol;
     private BigDecimal minimumStock;

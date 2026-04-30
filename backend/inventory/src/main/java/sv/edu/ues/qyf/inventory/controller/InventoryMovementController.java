@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sv.edu.ues.qyf.inventory.dto.ApiResponse;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementFilterDto;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementRequestDto;
+import sv.edu.ues.qyf.inventory.dto.InventoryMovementReverseRequestDto;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementResponseDto;
 import sv.edu.ues.qyf.inventory.entity.MovementType;
 import sv.edu.ues.qyf.inventory.service.InventoryMovementService;
@@ -42,6 +43,16 @@ public class InventoryMovementController {
         InventoryMovementResponseDto response = inventoryMovementService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Inventory movement registered successfully", response));
+    }
+
+    @PostMapping("/{id}/reverse")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTORY_MANAGER', 'LAB_TECHNICIAN')")
+    public ResponseEntity<ApiResponse<InventoryMovementResponseDto>> reverse(
+            @PathVariable Long id,
+            @Valid @RequestBody InventoryMovementReverseRequestDto request) {
+        InventoryMovementResponseDto response = inventoryMovementService.reverse(id, request.getReason());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Inventory movement reversed successfully", response));
     }
 
     @GetMapping

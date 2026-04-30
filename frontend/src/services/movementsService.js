@@ -25,6 +25,11 @@ function normalizeMovementMessage(message) {
   const exactMessages = {
     'Access denied': 'No tiene permisos para consultar movimientos de inventario.',
     'An unexpected error occurred': 'Ocurrio un error inesperado al consultar movimientos.',
+    'Reason is required': 'El motivo de la reversión es obligatorio.',
+    'This movement has already been reversed':
+      'Este movimiento ya tiene una reversión registrada.',
+    'Reversal movements cannot be reversed again':
+      'No se puede reversar un movimiento que ya es una reversión.',
   };
 
   if (exactMessages[normalizedMessage]) {
@@ -67,6 +72,14 @@ export async function fetchInventoryMovements(filters = {}) {
   return items.map(adaptInventoryMovementFromApi);
 }
 
+export async function reverseInventoryMovement(movementId, reason) {
+  const response = await api.post(`/inventory-movements/${movementId}/reverse`, {
+    reason: String(reason ?? '').trim(),
+  });
+
+  return adaptInventoryMovementFromApi(response?.data?.data ?? response?.data);
+}
+
 export function getInventoryMovementsErrorMessage(error) {
   if (error?.response?.status === 401) {
     return 'La sesion ha expirado. Inicie sesion nuevamente.';
@@ -89,4 +102,28 @@ export function getInventoryMovementsErrorMessage(error) {
   }
 
   return 'No fue posible cargar el historial de movimientos.';
+}
+
+export function getInventoryMovementActionErrorMessage(error) {
+  if (error?.response?.status === 401) {
+    return 'La sesion ha expirado. Inicie sesion nuevamente.';
+  }
+
+  if (error?.response?.status === 403) {
+    return 'No tiene permisos para reversar movimientos de inventario.';
+  }
+
+  if (error?.response?.data?.message) {
+    return normalizeMovementMessage(error.response.data.message);
+  }
+
+  if (error?.response?.data?.error) {
+    return normalizeMovementMessage(error.response.data.error);
+  }
+
+  if (error?.message) {
+    return normalizeMovementMessage(error.message);
+  }
+
+  return 'No fue posible reversar el movimiento seleccionado.';
 }

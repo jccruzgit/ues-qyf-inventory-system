@@ -49,6 +49,7 @@ public class ProductMapper {
                 .name(product.getName())
                 .description(product.getDescription())
                 .categoryName(product.getCategory().getName())
+                .baseUnitId(product.getBaseUnit().getId())
                 .baseUnitName(product.getBaseUnit().getName())
                 .baseUnitSymbol(product.getBaseUnit().getSymbol())
                 .minimumStock(product.getMinimumStock())

@@ -80,6 +80,7 @@ function translateInventoryMessage(message) {
     'Product id is required': 'El producto es obligatorio.',
     'Quantity is required': 'La cantidad ingresada es obligatoria.',
     'Quantity must be greater than 0': 'La cantidad ingresada debe ser mayor que 0.',
+    'Unit price must be greater than or equal to 0': 'El precio por unidad de medida debe ser mayor o igual a 0.',
     'Validation failed': 'Los datos del formulario no son validos.',
     'Constraint violation': 'Los datos enviados no cumplen las reglas requeridas.',
     'Access denied': 'No tiene permisos para registrar entradas de inventario.',
@@ -107,8 +108,24 @@ function translateInventoryMessage(message) {
     return 'La fecha de vencimiento es obligatoria para el producto seleccionado.';
   }
 
+  if (normalizedMessage.startsWith('Unit price is required for entry movements')) {
+    return 'El precio por unidad de medida es obligatorio para entradas.';
+  }
+
+  if (normalizedMessage.startsWith('Price unit id is required when unit price is informed')) {
+    return 'La unidad del precio es obligatoria cuando se informa el precio.';
+  }
+
+  if (normalizedMessage.startsWith('Price unit must match the product base unit')) {
+    return 'La unidad del precio debe coincidir con la unidad base del producto.';
+  }
+
   if (normalizedMessage.startsWith('Expiration date does not match the existing batch data')) {
     return 'La fecha de vencimiento no coincide con la registrada para ese lote.';
+  }
+
+  if (normalizedMessage.startsWith('Unit of measure not found with id:')) {
+    return 'La unidad del precio seleccionada ya no esta disponible.';
   }
 
   if (normalizedMessage.startsWith('Product batch does not belong to the selected laboratory')) {
@@ -142,6 +159,8 @@ function mapFieldErrorPath(fieldPath) {
     observation: 'observations',
     'lines[0].productId': 'productId',
     'lines[0].quantity': 'quantity',
+    'lines[0].unitPrice': 'unitPrice',
+    'lines[0].priceUnitId': 'priceUnitId',
     'lines[0].batchCode': 'batchCode',
     'lines[0].expirationDate': 'expirationDate',
     'lines[0].lineNotes': 'observations',
@@ -226,6 +245,8 @@ export async function createInventoryEntry(values) {
         batchCode: normalizeOptionalText(values.batchCode),
         expirationDate: values.expirationDate || null,
         quantity: values.quantity,
+        unitPrice: values.unitPrice,
+        priceUnitId: values.priceUnitId,
         lineNotes: null,
       },
     ],

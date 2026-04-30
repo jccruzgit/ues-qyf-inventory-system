@@ -6,26 +6,29 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import sv.edu.ues.qyf.inventory.entity.CorrectionType;
 import sv.edu.ues.qyf.inventory.entity.InventoryMovement;
 import sv.edu.ues.qyf.inventory.entity.MovementType;
 
 public interface InventoryMovementRepository extends JpaRepository<InventoryMovement, Long> {
 
-    @EntityGraph(attributePaths = {"laboratory", "performedBy", "attachmentDocument", "lines", "lines.product", "lines.productBatch"})
+    @EntityGraph(attributePaths = {"laboratory", "performedBy", "relatedMovement", "attachmentDocument", "lines", "lines.product", "lines.productBatch", "lines.priceUnit"})
     List<InventoryMovement> findByAttachmentDocumentId(Long documentId);
 
-    @EntityGraph(attributePaths = {"laboratory", "performedBy", "attachmentDocument", "lines", "lines.product", "lines.productBatch"})
+    @EntityGraph(attributePaths = {"laboratory", "performedBy", "relatedMovement", "attachmentDocument", "lines", "lines.product", "lines.productBatch", "lines.priceUnit"})
     List<InventoryMovement> findByLaboratoryIdOrderByPerformedAtDescIdDesc(Long laboratoryId);
 
-    @EntityGraph(attributePaths = {"laboratory", "performedBy", "attachmentDocument", "lines", "lines.product", "lines.productBatch"})
+    @EntityGraph(attributePaths = {"laboratory", "performedBy", "relatedMovement", "attachmentDocument", "lines", "lines.product", "lines.productBatch", "lines.priceUnit"})
     List<InventoryMovement> findAllByOrderByPerformedAtDescIdDesc();
 
-    @EntityGraph(attributePaths = {"laboratory", "performedBy", "attachmentDocument", "lines", "lines.product", "lines.productBatch"})
+    @EntityGraph(attributePaths = {"laboratory", "performedBy", "relatedMovement", "attachmentDocument", "lines", "lines.product", "lines.productBatch", "lines.priceUnit"})
     List<InventoryMovement> findByLaboratoryIdInOrderByPerformedAtDescIdDesc(List<Long> laboratoryIds);
 
     @Override
-    @EntityGraph(attributePaths = {"laboratory", "performedBy", "attachmentDocument", "lines", "lines.product", "lines.productBatch"})
+    @EntityGraph(attributePaths = {"laboratory", "performedBy", "relatedMovement", "attachmentDocument", "lines", "lines.product", "lines.productBatch", "lines.priceUnit"})
     Optional<InventoryMovement> findById(Long id);
+
+    boolean existsByRelatedMovementIdAndCorrectionType(Long relatedMovementId, CorrectionType correctionType);
 
     @Query(
             """
@@ -33,10 +36,12 @@ public interface InventoryMovementRepository extends JpaRepository<InventoryMove
             from InventoryMovement m
             left join fetch m.laboratory
             left join fetch m.performedBy
+            left join fetch m.relatedMovement
             left join fetch m.attachmentDocument
             left join fetch m.lines l
             left join fetch l.product
             left join fetch l.productBatch
+            left join fetch l.priceUnit
             where (:laboratoryId is null or m.laboratory.id = :laboratoryId)
               and (:movementType is null or m.movementType = :movementType)
               and (:performedFrom is null or m.performedAt >= :performedFrom)
@@ -62,10 +67,12 @@ public interface InventoryMovementRepository extends JpaRepository<InventoryMove
             from InventoryMovement m
             left join fetch m.laboratory
             left join fetch m.performedBy
+            left join fetch m.relatedMovement
             left join fetch m.attachmentDocument
             left join fetch m.lines l
             left join fetch l.product
             left join fetch l.productBatch
+            left join fetch l.priceUnit
             where m.laboratory.id in :laboratoryIds
               and (:movementType is null or m.movementType = :movementType)
               and (:performedFrom is null or m.performedAt >= :performedFrom)

@@ -12,6 +12,9 @@ export function adaptInventoryMovementFromApi(movementDto) {
   return {
     id: movementDto?.id,
     movementType: normalizeText(movementDto?.movementType, 'ENTRY'),
+    correctionType: normalizeText(movementDto?.correctionType, 'NORMAL'),
+    relatedMovementId: movementDto?.relatedMovementId ?? null,
+    correctionReason: normalizeText(movementDto?.correctionReason),
     laboratoryId: movementDto?.laboratoryId ?? null,
     performedById: movementDto?.performedById ?? null,
     performedByUsername: normalizeText(movementDto?.performedByUsername, 'Sistema'),
@@ -44,12 +47,27 @@ export function buildMovementRows(movements, products, laboratories) {
         movementType: movement.movementType,
         movementTypeLabel: movement.movementType === 'EXIT' ? 'Salida' : 'Entrada',
         movementTypeVariant: movement.movementType === 'EXIT' ? 'danger' : 'success',
+        correctionType: movement.correctionType,
+        correctionTypeLabel:
+          movement.correctionType === 'REVERSAL' ? 'Reversion' : 'Normal',
+        correctionTypeVariant:
+          movement.correctionType === 'REVERSAL' ? 'warning' : 'navy',
+        relatedMovementId: movement.relatedMovementId,
+        correctionReason: normalizeText(
+          movement.correctionReason,
+          movement.correctionType === 'REVERSAL' ? 'Sin motivo registrado' : 'Sin observaciones',
+        ),
         productId: line?.productId ?? null,
         productName: normalizeText(line?.productName, product?.name ?? 'Producto no disponible'),
         productCode: normalizeText(line?.productCode, product?.code ?? 'SIN-CODIGO'),
         batchCode: normalizeText(line?.batchCode, 'Sin lote'),
         quantity: toNumber(line?.quantity),
         unit: normalizeText(product?.unitSymbol, product?.unit ?? 'Unidades'),
+        unitPrice: line?.unitPrice == null ? null : toNumber(line.unitPrice),
+        priceUnitLabel: normalizeText(
+          line?.priceUnitSymbol,
+          normalizeText(line?.priceUnitName, 'No aplica'),
+        ),
         laboratoryId: movement.laboratoryId,
         laboratoryName: normalizeText(
           laboratory?.label,
@@ -58,6 +76,7 @@ export function buildMovementRows(movements, products, laboratories) {
         username: movement.performedByUsername,
         movementObservation: normalizeText(movement.observation, 'Sin observaciones'),
         lineObservation: normalizeText(line?.lineNotes, 'Sin observaciones'),
+        isFirstLine: index === 0,
       };
     });
   });

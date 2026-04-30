@@ -26,6 +26,7 @@ import sv.edu.ues.qyf.inventory.InventoryBackendApplication;
 import sv.edu.ues.qyf.inventory.entity.AccessScope;
 import sv.edu.ues.qyf.inventory.entity.BatchStatus;
 import sv.edu.ues.qyf.inventory.entity.Category;
+import sv.edu.ues.qyf.inventory.entity.CorrectionType;
 import sv.edu.ues.qyf.inventory.entity.InventoryAlert;
 import sv.edu.ues.qyf.inventory.entity.InventoryAlertType;
 import sv.edu.ues.qyf.inventory.entity.InventoryMovement;
@@ -128,7 +129,7 @@ class PostgreSqlPersistenceIntegrationTest {
     @Test
     void shouldApplyFlywayMigrationsAndCreateExpectedTables() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("8");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
 
         Integer tableCount = jdbcTemplate.queryForObject(
                 """
@@ -210,7 +211,7 @@ class PostgreSqlPersistenceIntegrationTest {
                 MovementType.ENTRY,
                 laboratory.getId(),
                 "Entrada inicial",
-                List.of(new InventoryMovementLineRequestDto(product.getId(), new BigDecimal("100"), "Ingreso"))));
+                List.of(buildEntryLineRequest(product, new BigDecimal("100"), new BigDecimal("1.2500"), "Ingreso"))));
         entityManager.flush();
         entityManager.clear();
 
@@ -311,8 +312,8 @@ class PostgreSqlPersistenceIntegrationTest {
                 MovementType.ENTRY,
                 laboratory.getId(),
                 "Movimiento con detalle",
-                List.of(new InventoryMovementLineRequestDto(
-                        product.getId(), productBatch.getId(), new BigDecimal("100"), "Linea 1"))));
+                List.of(buildEntryBatchLineRequest(
+                        product, productBatch.getId(), new BigDecimal("100"), new BigDecimal("1.2500"), "Linea 1"))));
         entityManager.flush();
         entityManager.clear();
 
@@ -457,6 +458,8 @@ class PostgreSqlPersistenceIntegrationTest {
                         "LOT-ENTRY-001",
                         LocalDate.now().plusDays(20),
                         new BigDecimal("40"),
+                        new BigDecimal("0.9500"),
+                        product.getBaseUnit().getId(),
                         "Entrada lote"))));
         entityManager.flush();
         entityManager.clear();
@@ -484,7 +487,7 @@ class PostgreSqlPersistenceIntegrationTest {
                 MovementType.ENTRY,
                 laboratory.getId(),
                 "Entrada para consulta",
-                List.of(new InventoryMovementLineRequestDto(product.getId(), new BigDecimal("100"), "Ingreso"))));
+                List.of(buildEntryLineRequest(product, new BigDecimal("100"), new BigDecimal("1.0500"), "Ingreso"))));
         inventoryMovementService.create(new InventoryMovementRequestDto(
                 MovementType.EXIT,
                 laboratory.getId(),
@@ -507,6 +510,95 @@ class PostgreSqlPersistenceIntegrationTest {
     }
 
     @Test
+    void shouldReverseEntryMovementAsCompensatingExitAndKeepBatchStockConsistent() {
+        Laboratory laboratory = persist(Laboratory.builder().build());
+        User user = persistUser("reverse-entry-user");
+        Product product = persistProduct("REVERSE-ENTRY-001", BigDecimal.ZERO, true, true);
+        authenticate(user);
+
+        InventoryMovementResponseDto entryResponse = inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.ENTRY,
+                laboratory.getId(),
+                "Entrada a revertir",
+                List.of(new InventoryMovementLineRequestDto(
+                        product.getId(),
+                        null,
+                        "LOT-REV-001",
+                        LocalDate.now().plusDays(15),
+                        new BigDecimal("40"),
+                        new BigDecimal("1.4000"),
+                        product.getBaseUnit().getId(),
+                        "Ingreso"))));
+        ProductBatch batch = productBatchRepository
+                .findByProductIdAndLaboratoryIdAndBatchCode(product.getId(), laboratory.getId(), "LOT-REV-001")
+                .orElseThrow();
+
+        InventoryMovementResponseDto reversalResponse =
+                inventoryMovementService.reverse(entryResponse.getId(), "Ingreso equivocado");
+        entityManager.flush();
+        entityManager.clear();
+
+        Product persistedProduct = entityManager.find(Product.class, product.getId());
+        InventoryMovement reversedMovement = inventoryMovementRepository.findById(reversalResponse.getId()).orElseThrow();
+        List<InventoryStockResponseDto> globalStock = inventoryStockService.getStock(product.getId(), null, null);
+        List<InventoryStockResponseDto> laboratoryStock =
+                inventoryStockService.getStock(product.getId(), laboratory.getId(), null);
+        List<InventoryStockResponseDto> batchStock =
+                inventoryStockService.getStock(product.getId(), laboratory.getId(), batch.getId());
+
+        assertThat(persistedProduct.getCurrentStock()).isEqualByComparingTo("0");
+        assertThat(reversedMovement.getMovementType()).isEqualTo(MovementType.EXIT);
+        assertThat(reversedMovement.getCorrectionType()).isEqualTo(CorrectionType.REVERSAL);
+        assertThat(reversedMovement.getRelatedMovement().getId()).isEqualTo(entryResponse.getId());
+        assertThat(reversedMovement.getCorrectionReason()).isEqualTo("Ingreso equivocado");
+        assertThat(globalStock).hasSize(1);
+        assertThat(globalStock.get(0).getQuantityAvailable()).isEqualByComparingTo("0");
+        assertThat(laboratoryStock).isEmpty();
+        assertThat(batchStock).hasSize(1);
+        assertThat(batchStock.get(0).getQuantityAvailable()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void shouldReverseExitMovementAsCompensatingEntry() {
+        Laboratory laboratory = persist(Laboratory.builder().build());
+        User user = persistUser("reverse-exit-user");
+        Product product = persistProduct("REVERSE-EXIT-001", BigDecimal.ZERO);
+        authenticate(user);
+
+        inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.ENTRY,
+                laboratory.getId(),
+                "Entrada base",
+                List.of(buildEntryLineRequest(product, new BigDecimal("100"), new BigDecimal("1.1500"), "Ingreso base"))));
+
+        InventoryMovementResponseDto exitResponse = inventoryMovementService.create(new InventoryMovementRequestDto(
+                MovementType.EXIT,
+                laboratory.getId(),
+                "Salida a revertir",
+                List.of(new InventoryMovementLineRequestDto(product.getId(), new BigDecimal("25"), "Consumo"))));
+
+        InventoryMovementResponseDto reversalResponse =
+                inventoryMovementService.reverse(exitResponse.getId(), "Descargo erroneo");
+        entityManager.flush();
+        entityManager.clear();
+
+        Product persistedProduct = entityManager.find(Product.class, product.getId());
+        InventoryMovement reversedMovement = inventoryMovementRepository.findById(reversalResponse.getId()).orElseThrow();
+        List<InventoryStockResponseDto> globalStock = inventoryStockService.getStock(product.getId(), null, null);
+        List<InventoryStockResponseDto> laboratoryStock =
+                inventoryStockService.getStock(product.getId(), laboratory.getId(), null);
+
+        assertThat(persistedProduct.getCurrentStock()).isEqualByComparingTo("100");
+        assertThat(reversedMovement.getMovementType()).isEqualTo(MovementType.ENTRY);
+        assertThat(reversedMovement.getCorrectionType()).isEqualTo(CorrectionType.REVERSAL);
+        assertThat(reversedMovement.getRelatedMovement().getId()).isEqualTo(exitResponse.getId());
+        assertThat(globalStock).hasSize(1);
+        assertThat(globalStock.get(0).getQuantityAvailable()).isEqualByComparingTo("100");
+        assertThat(laboratoryStock).hasSize(1);
+        assertThat(laboratoryStock.get(0).getQuantityAvailable()).isEqualByComparingTo("100");
+    }
+
+    @Test
     void shouldGenerateLowStockAndExpiringBatchAlerts() {
         Laboratory laboratory = persist(Laboratory.builder().build());
         User user = persistUser("alert-sync-user");
@@ -525,6 +617,8 @@ class PostgreSqlPersistenceIntegrationTest {
                         "LOT-ALERT-SYNC",
                         LocalDate.now().plusDays(10),
                         new BigDecimal("50"),
+                        new BigDecimal("1.1000"),
+                        product.getBaseUnit().getId(),
                         "Ingreso"))));
         ProductBatch batch = productBatchRepository
                 .findByProductIdAndLaboratoryIdAndBatchCode(product.getId(), laboratory.getId(), "LOT-ALERT-SYNC")
@@ -537,8 +631,6 @@ class PostgreSqlPersistenceIntegrationTest {
                 List.of(new InventoryMovementLineRequestDto(
                         product.getId(),
                         batch.getId(),
-                        null,
-                        null,
                         new BigDecimal("20"),
                         "Consumo"))));
         entityManager.flush();
@@ -617,6 +709,34 @@ class PostgreSqlPersistenceIntegrationTest {
         entityManager.persist(entity);
         entityManager.flush();
         return entity;
+    }
+
+    private InventoryMovementLineRequestDto buildEntryLineRequest(
+            Product product,
+            BigDecimal quantity,
+            BigDecimal unitPrice,
+            String lineNotes) {
+        return new InventoryMovementLineRequestDto(
+                product.getId(),
+                quantity,
+                unitPrice,
+                product.getBaseUnit().getId(),
+                lineNotes);
+    }
+
+    private InventoryMovementLineRequestDto buildEntryBatchLineRequest(
+            Product product,
+            Long productBatchId,
+            BigDecimal quantity,
+            BigDecimal unitPrice,
+            String lineNotes) {
+        return new InventoryMovementLineRequestDto(
+                product.getId(),
+                productBatchId,
+                quantity,
+                unitPrice,
+                product.getBaseUnit().getId(),
+                lineNotes);
     }
 
     private void authenticate(User user) {

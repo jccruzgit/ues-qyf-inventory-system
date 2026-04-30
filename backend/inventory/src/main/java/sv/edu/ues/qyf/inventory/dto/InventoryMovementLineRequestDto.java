@@ -28,11 +28,29 @@ public class InventoryMovementLineRequestDto {
     @DecimalMin(value = "0.0", inclusive = false, message = "Quantity must be greater than 0")
     private BigDecimal quantity;
 
+    @DecimalMin(value = "0.0", inclusive = true, message = "Unit price must be greater than or equal to 0")
+    private BigDecimal unitPrice;
+
+    private Long priceUnitId;
+
     private String lineNotes;
 
     public InventoryMovementLineRequestDto(Long productId, BigDecimal quantity, String lineNotes) {
         this.productId = productId;
         this.quantity = quantity;
+        this.lineNotes = lineNotes;
+    }
+
+    public InventoryMovementLineRequestDto(
+            Long productId,
+            BigDecimal quantity,
+            BigDecimal unitPrice,
+            Long priceUnitId,
+            String lineNotes) {
+        this.productId = productId;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+        this.priceUnitId = priceUnitId;
         this.lineNotes = lineNotes;
     }
 
@@ -44,6 +62,21 @@ public class InventoryMovementLineRequestDto {
         this.productId = productId;
         this.productBatchId = productBatchId;
         this.quantity = quantity;
+        this.lineNotes = lineNotes;
+    }
+
+    public InventoryMovementLineRequestDto(
+            Long productId,
+            Long productBatchId,
+            BigDecimal quantity,
+            BigDecimal unitPrice,
+            Long priceUnitId,
+            String lineNotes) {
+        this.productId = productId;
+        this.productBatchId = productBatchId;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+        this.priceUnitId = priceUnitId;
         this.lineNotes = lineNotes;
     }
 }

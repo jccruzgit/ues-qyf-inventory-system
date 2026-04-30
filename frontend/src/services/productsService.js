@@ -94,6 +94,7 @@ export function adaptProductFromApi(productDto) {
     stock: currentStock,
     maxStock: deriveMaxStock(currentStock, minimumStock),
     minimumStock,
+    baseUnitId: productDto?.baseUnitId ?? null,
     unit: baseUnitName || baseUnitSymbol || 'Unidades',
     unitName: baseUnitName || 'Unidades',
     unitSymbol: baseUnitSymbol,

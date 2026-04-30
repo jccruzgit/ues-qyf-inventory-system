@@ -159,7 +159,7 @@ function InventoryEntryForm({
         </div>
       ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-4">
         <Field label="Numero de lote" htmlFor="batchCode" error={errors.batchCode?.message}>
           <input
             id="batchCode"
@@ -202,9 +202,28 @@ function InventoryEntryForm({
             {...register('quantity')}
           />
         </Field>
+
+        <Field
+          label="Precio por unidad de medida"
+          htmlFor="unitPrice"
+          required
+          hint="Registre manualmente el precio usando la unidad base del producto."
+          error={errors.unitPrice?.message}
+        >
+          <input
+            id="unitPrice"
+            type="number"
+            min="0"
+            step="0.0001"
+            placeholder="0.0000"
+            className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+            aria-invalid={Boolean(errors.unitPrice)}
+            {...register('unitPrice')}
+          />
+        </Field>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,0.36fr)_minmax(0,0.64fr)]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,0.24fr)_minmax(0,0.24fr)_minmax(0,0.52fr)]">
         <Field
           label="Unidad"
           htmlFor="unitLabel"
@@ -217,6 +236,23 @@ function InventoryEntryForm({
             className="w-full cursor-not-allowed rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink/80 outline-none"
             {...register('unitLabel')}
           />
+        </Field>
+
+        <Field
+          label="Unidad del precio"
+          htmlFor="priceUnitLabel"
+          required
+          hint="En esta primera version, el precio se registra en la misma unidad base del producto."
+          error={errors.priceUnitId?.message}
+        >
+          <input
+            id="priceUnitLabel"
+            type="text"
+            readOnly
+            className="w-full cursor-not-allowed rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink/80 outline-none"
+            {...register('priceUnitLabel')}
+          />
+          <input type="hidden" {...register('priceUnitId')} />
         </Field>
 
         <Field

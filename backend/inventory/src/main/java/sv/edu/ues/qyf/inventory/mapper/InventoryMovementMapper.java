@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementLineResponseDto;
 import sv.edu.ues.qyf.inventory.dto.InventoryMovementResponseDto;
+import sv.edu.ues.qyf.inventory.entity.CorrectionType;
 import sv.edu.ues.qyf.inventory.entity.InventoryMovement;
 import sv.edu.ues.qyf.inventory.entity.InventoryMovementLine;
 
@@ -25,6 +26,13 @@ public class InventoryMovementMapper {
                         ? inventoryMovement.getPerformedBy().getUsername()
                         : null)
                 .performedAt(inventoryMovement.getPerformedAt())
+                .correctionType(inventoryMovement.getCorrectionType() != null
+                        ? inventoryMovement.getCorrectionType()
+                        : CorrectionType.NORMAL)
+                .relatedMovementId(inventoryMovement.getRelatedMovement() != null
+                        ? inventoryMovement.getRelatedMovement().getId()
+                        : null)
+                .correctionReason(inventoryMovement.getCorrectionReason())
                 .observation(inventoryMovement.getObservation())
                 .attachmentDocumentId(inventoryMovement.getAttachmentDocument() != null
                         ? inventoryMovement.getAttachmentDocument().getId()
@@ -53,6 +61,10 @@ public class InventoryMovementMapper {
                 .productCode(line.getProduct() != null ? line.getProduct().getCode() : null)
                 .productName(line.getProduct() != null ? line.getProduct().getName() : null)
                 .quantity(line.getQuantity())
+                .unitPrice(line.getUnitPrice())
+                .priceUnitId(line.getPriceUnit() != null ? line.getPriceUnit().getId() : null)
+                .priceUnitName(line.getPriceUnit() != null ? line.getPriceUnit().getName() : null)
+                .priceUnitSymbol(line.getPriceUnit() != null ? line.getPriceUnit().getSymbol() : null)
                 .lineNotes(line.getLineNotes())
                 .build();
     }

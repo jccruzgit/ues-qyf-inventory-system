@@ -9,6 +9,8 @@ public interface InventoryMovementService {
 
     InventoryMovementResponseDto create(InventoryMovementRequestDto request);
 
+    InventoryMovementResponseDto reverse(Long id, String reason);
+
     List<InventoryMovementResponseDto> getAll();
 
     List<InventoryMovementResponseDto> search(InventoryMovementFilterDto filter);

@@ -47,6 +47,10 @@ public class InventoryMovement {
     @Column(name = "movement_type", nullable = false, length = 20)
     private MovementType movementType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "correction_type", length = 20)
+    private CorrectionType correctionType;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lab_id")
@@ -62,6 +66,14 @@ public class InventoryMovement {
 
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     private String observation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "related_movement_id")
+    private InventoryMovement relatedMovement;
+
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    @Column(name = "correction_reason")
+    private String correctionReason;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attachment_document_id")

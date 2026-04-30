@@ -55,6 +55,13 @@ public class InventoryMovementLine {
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal quantity;
 
+    @Column(name = "unit_price", precision = 19, scale = 4)
+    private BigDecimal unitPrice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "price_unit_id")
+    private UnitOfMeasure priceUnit;
+
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "line_notes")
     private String lineNotes;

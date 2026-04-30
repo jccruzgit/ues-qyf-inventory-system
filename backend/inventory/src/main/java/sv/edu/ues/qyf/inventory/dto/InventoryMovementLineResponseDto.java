@@ -19,5 +19,9 @@ public class InventoryMovementLineResponseDto {
     private String productCode;
     private String productName;
     private BigDecimal quantity;
+    private BigDecimal unitPrice;
+    private Long priceUnitId;
+    private String priceUnitName;
+    private String priceUnitSymbol;
     private String lineNotes;
 }

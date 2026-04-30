@@ -18,6 +18,9 @@ const defaultValues = {
   productId: '',
   laboratoryId: '',
   quantity: '',
+  unitPrice: '',
+  priceUnitId: '',
+  priceUnitLabel: '',
   unitLabel: '',
   batchCode: '',
   expirationDate: '',
@@ -93,6 +96,8 @@ function InventoryEntryCreatePage() {
 
   useEffect(() => {
     setValue('unitLabel', selectedProduct?.unit ?? '');
+    setValue('priceUnitLabel', selectedProduct?.unit ?? '');
+    setValue('priceUnitId', selectedProduct?.baseUnitId ? String(selectedProduct.baseUnitId) : '');
     setValue('requiresBatchControl', Boolean(selectedProduct?.requiresBatchControl));
     setValue('requiresExpiration', Boolean(selectedProduct?.requiresExpiration));
   }, [selectedProduct, setValue]);
@@ -152,7 +157,7 @@ function InventoryEntryCreatePage() {
 
             <div className="mt-8 space-y-3 text-sm text-white/78">
               <p>1. Seleccione un producto y el laboratorio destino.</p>
-              <p>2. Registre lote, vencimiento y cantidad ingresada.</p>
+              <p>2. Registre lote, vencimiento, cantidad y precio por unidad.</p>
               <p>3. Guarde para revisar el inventario consolidado por lote.</p>
             </div>
           </aside>
