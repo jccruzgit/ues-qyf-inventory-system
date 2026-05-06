@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import sv.edu.ues.qyf.inventory.dto.ApiResponse;
+import sv.edu.ues.qyf.inventory.dto.ProductBatchOverviewResponseDto;
 import sv.edu.ues.qyf.inventory.dto.ProductBatchResponseDto;
 import sv.edu.ues.qyf.inventory.service.ProductBatchService;
 
@@ -24,6 +25,16 @@ public class ProductBatchController {
 
     public ProductBatchController(ProductBatchService productBatchService) {
         this.productBatchService = productBatchService;
+    }
+
+    @GetMapping("/overview")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<ProductBatchOverviewResponseDto>>> getOverview(
+            @RequestParam(required = false) Long productId,
+            @RequestParam(required = false) Long laboratoryId) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Product batches overview retrieved successfully",
+                productBatchService.getOverview(productId, laboratoryId)));
     }
 
     @GetMapping
