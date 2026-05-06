@@ -1,5 +1,6 @@
 import {
   Archive,
+  ArrowDownCircle,
   BellRing,
   Boxes,
   ChevronRight,
@@ -118,6 +119,15 @@ function Sidebar({ mobileOpen, onClose }) {
         >
           <Plus className="h-4 w-4" strokeWidth={2.5} />
           Nueva entrada
+        </Link>
+
+        <Link
+          to="/inventory/exits/new"
+          onClick={onClose}
+          className="mt-3 inline-flex items-center justify-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-5 py-4 text-sm font-extrabold text-brand-ink shadow-[0_16px_28px_rgba(23,61,44,0.08)] transition hover:-translate-y-0.5 hover:border-brand-teal/30 hover:text-brand-teal"
+        >
+          <ArrowDownCircle className="h-4 w-4" strokeWidth={2.4} />
+          Registrar salida
         </Link>
 
         <div className="mt-5 space-y-1.5 border-t border-brand-ink/[0.06] pt-4">

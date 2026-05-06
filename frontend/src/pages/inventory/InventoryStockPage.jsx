@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   AlertOctagon,
   ArchiveX,
+  ArrowDownCircle,
   Boxes,
   CalendarClock,
   PackagePlus,
@@ -109,13 +110,22 @@ function InventoryStockPage() {
         title="Niveles de stock"
         subtitle="Consulta inventario real por producto, laboratorio y lote para anticipar faltantes y vencimientos."
         action={
-          <Link
-            to="/inventory/entries/new"
-            className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(23,61,44,0.2)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong"
-          >
-            <PackagePlus className="h-4 w-4" strokeWidth={2.4} />
-            Nueva entrada
-          </Link>
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <Link
+              to="/inventory/exits/new"
+              className="inline-flex items-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink shadow-[0_12px_24px_rgba(23,61,44,0.08)] transition hover:-translate-y-0.5 hover:border-brand-teal/30 hover:text-brand-teal"
+            >
+              <ArrowDownCircle className="h-4 w-4" strokeWidth={2.4} />
+              Registrar salida
+            </Link>
+            <Link
+              to="/inventory/entries/new"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(23,61,44,0.2)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong"
+            >
+              <PackagePlus className="h-4 w-4" strokeWidth={2.4} />
+              Nueva entrada
+            </Link>
+          </div>
         }
       />
 

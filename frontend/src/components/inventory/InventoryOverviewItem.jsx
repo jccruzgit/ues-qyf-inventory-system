@@ -1,4 +1,5 @@
 import {
+  ArrowDownCircle,
   CalendarClock,
   ChevronDown,
   ChevronUp,
@@ -191,6 +192,19 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
             icon={PackagePlus}
           >
             Nueva entrada
+          </QuickActionLink>
+          <QuickActionLink
+            to="/inventory/exits/new"
+            state={{
+              prefill: {
+                productId: item.productId,
+                laboratoryId: item.laboratoryId,
+              },
+            }}
+            icon={ArrowDownCircle}
+            variant="secondary"
+          >
+            Registrar salida
           </QuickActionLink>
           <QuickActionLink
             to="/movements"

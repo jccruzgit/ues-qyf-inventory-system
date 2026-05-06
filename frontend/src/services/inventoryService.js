@@ -28,6 +28,10 @@ function normalizeOptionalText(value) {
   return normalizedValue ? normalizedValue : null;
 }
 
+function normalizeMovementErrorMessage(message) {
+  return translateInventoryMessage(message);
+}
+
 function mapLaboratoryOption(laboratory) {
   return {
     value: String(laboratory.id),
@@ -83,8 +87,8 @@ function translateInventoryMessage(message) {
     'Unit price must be greater than or equal to 0': 'El precio por unidad de medida debe ser mayor o igual a 0.',
     'Validation failed': 'Los datos del formulario no son validos.',
     'Constraint violation': 'Los datos enviados no cumplen las reglas requeridas.',
-    'Access denied': 'No tiene permisos para registrar entradas de inventario.',
-    'An unexpected error occurred': 'Ocurrio un error inesperado al registrar la entrada.',
+    'Access denied': 'No tiene permisos para realizar este movimiento de inventario.',
+    'An unexpected error occurred': 'Ocurrio un error inesperado al procesar el movimiento.',
     'Malformed request body': 'La solicitud enviada no tiene un formato valido.',
   };
 
@@ -128,6 +132,14 @@ function translateInventoryMessage(message) {
     return 'La unidad del precio seleccionada ya no esta disponible.';
   }
 
+  if (normalizedMessage.startsWith('Product batch not found with id:')) {
+    return 'El lote seleccionado ya no esta disponible.';
+  }
+
+  if (normalizedMessage.startsWith('Product batch not found for product')) {
+    return 'No se encontro un lote disponible para el producto seleccionado.';
+  }
+
   if (normalizedMessage.startsWith('Product batch does not belong to the selected laboratory')) {
     return 'El lote indicado no pertenece al laboratorio seleccionado.';
   }
@@ -161,9 +173,10 @@ function mapFieldErrorPath(fieldPath) {
     'lines[0].quantity': 'quantity',
     'lines[0].unitPrice': 'unitPrice',
     'lines[0].priceUnitId': 'priceUnitId',
+    'lines[0].productBatchId': 'selectedBatchKey',
     'lines[0].batchCode': 'batchCode',
     'lines[0].expirationDate': 'expirationDate',
-    'lines[0].lineNotes': 'observations',
+    'lines[0].lineNotes': 'lineObservation',
   };
 
   return fieldMap[normalizedPath] ?? normalizedPath;
@@ -264,6 +277,35 @@ export async function createInventoryEntry(values) {
   return extractItemPayload(body);
 }
 
+export async function createInventoryExit(values, selectedBatch) {
+  const payload = {
+    movementType: 'EXIT',
+    laboratoryId: values.laboratoryId,
+    observation: normalizeOptionalText(values.observations),
+    lines: [
+      {
+        productId: values.productId,
+        productBatchId: selectedBatch?.productBatchId ?? null,
+        quantity: values.quantity,
+        unitPrice: null,
+        priceUnitId: null,
+        lineNotes: normalizeOptionalText(values.lineObservation),
+      },
+    ],
+  };
+
+  const response = await api.post('/inventory-movements', payload);
+  const body = response.data;
+
+  if (body?.success === false) {
+    throw new Error(
+      translateInventoryMessage(body?.message ?? 'No se pudo registrar la salida de inventario.'),
+    );
+  }
+
+  return extractItemPayload(body);
+}
+
 export function getInventoryCatalogsErrorMessage(error) {
   if (error?.response?.status === 401) {
     return 'La sesion ha expirado. Inicie sesion nuevamente.';
@@ -319,6 +361,38 @@ export function getCreateInventoryEntryErrorDetails(error) {
   return {
     message: translateInventoryMessage(
       body?.message ?? error?.message ?? 'No se pudo registrar la entrada de inventario.',
+    ),
+    fieldErrors,
+  };
+}
+
+export function getCreateInventoryExitErrorDetails(error) {
+  const body = error?.response?.data;
+  const fieldErrors = {};
+
+  if (body?.data && typeof body.data === 'object' && !Array.isArray(body.data)) {
+    for (const [field, message] of Object.entries(body.data)) {
+      fieldErrors[mapFieldErrorPath(field)] = normalizeMovementErrorMessage(message);
+    }
+  }
+
+  if (error?.response?.status === 401) {
+    return {
+      message: 'La sesion ha expirado. Inicie sesion nuevamente.',
+      fieldErrors,
+    };
+  }
+
+  if (error?.response?.status === 403) {
+    return {
+      message: 'No tiene permisos para registrar salidas de inventario.',
+      fieldErrors,
+    };
+  }
+
+  return {
+    message: normalizeMovementErrorMessage(
+      body?.message ?? error?.message ?? 'No se pudo registrar la salida de inventario.',
     ),
     fieldErrors,
   };
