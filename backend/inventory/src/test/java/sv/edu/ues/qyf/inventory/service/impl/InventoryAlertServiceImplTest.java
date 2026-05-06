@@ -20,6 +20,7 @@ import sv.edu.ues.qyf.inventory.dto.InventoryAlertResponseDto;
 import sv.edu.ues.qyf.inventory.entity.InventoryAlert;
 import sv.edu.ues.qyf.inventory.entity.InventoryAlertType;
 import sv.edu.ues.qyf.inventory.entity.Laboratory;
+import sv.edu.ues.qyf.inventory.entity.MovementType;
 import sv.edu.ues.qyf.inventory.entity.Product;
 import sv.edu.ues.qyf.inventory.entity.ProductBatch;
 import sv.edu.ues.qyf.inventory.mapper.InventoryAlertMapper;
@@ -112,7 +113,7 @@ class InventoryAlertServiceImplTest {
         Product product = Product.builder()
                 .id(9L)
                 .code("PRD-9")
-                .currentStock(new BigDecimal("10"))
+                .currentStock(new BigDecimal("20"))
                 .minimumStock(new BigDecimal("20"))
                 .active(Boolean.TRUE)
                 .build();
@@ -132,7 +133,7 @@ class InventoryAlertServiceImplTest {
                 .save(argThat(alert -> alert.getLaboratory().getId().equals(12L)
                         && alert.getProduct().getId().equals(9L)
                         && alert.getAlertType() == InventoryAlertType.LOW_STOCK
-                        && alert.getMessage().contains("PRD-9")));
+                        && alert.getMessage().contains("at or below minimum stock")));
     }
 
     @Test
@@ -158,16 +159,47 @@ class InventoryAlertServiceImplTest {
         when(productBatchRepository.findByIdAndActiveTrue(22L)).thenReturn(Optional.of(batch));
         when(productBatchRepository.findByLaboratoryIdAndExpirationDateIsNotNullAndActiveTrueOrderByExpirationDateAsc(12L))
                 .thenReturn(List.of());
+        when(inventoryMovementLineRepository.calculateCurrentStockByBatchId(22L, MovementType.ENTRY))
+                .thenReturn(new BigDecimal("15"));
 
         inventoryAlertService.synchronizeAlerts(12L, List.of(9L), List.of(22L));
 
         verify(inventoryAlertRepository)
-                .deleteByLaboratoryIdAndAlertTypeAndProductIdAndProductBatchIsNullAndAcknowledgedAtIsNull(
-                        12L, InventoryAlertType.LOW_STOCK, 9L);
+                .deleteByLaboratoryIdAndAlertTypeInAndProductIdAndProductBatchIsNullAndAcknowledgedAtIsNull(
+                        12L, List.of(InventoryAlertType.LOW_STOCK, InventoryAlertType.OUT_OF_STOCK), 9L);
         verify(inventoryAlertRepository)
                 .save(argThat(alert -> alert.getLaboratory().getId().equals(12L)
                         && alert.getProductBatch().getId().equals(22L)
                         && alert.getAlertType() == InventoryAlertType.EXPIRING_BATCH
                         && alert.getMessage().contains("LOT-22")));
+    }
+
+    @Test
+    void synchronizeAlerts_createsOutOfStockAlertWhenProductHasNoAvailableStock() {
+        Laboratory laboratory = Laboratory.builder().id(12L).build();
+        Product product = Product.builder()
+                .id(9L)
+                .code("PRD-9")
+                .currentStock(BigDecimal.ZERO)
+                .minimumStock(new BigDecimal("20"))
+                .active(Boolean.TRUE)
+                .build();
+
+        when(productRepository.findByIdAndActiveTrue(9L)).thenReturn(Optional.of(product));
+        when(laboratoryRepository.findByIdAndActiveTrue(12L)).thenReturn(Optional.of(laboratory));
+        when(inventoryAlertRepository
+                        .findFirstByLaboratoryIdAndAlertTypeAndProductIdAndProductBatchIsNullAndAcknowledgedAtIsNull(
+                                12L, InventoryAlertType.OUT_OF_STOCK, 9L))
+                .thenReturn(Optional.empty());
+        when(productBatchRepository.findByLaboratoryIdAndExpirationDateIsNotNullAndActiveTrueOrderByExpirationDateAsc(12L))
+                .thenReturn(List.of());
+
+        inventoryAlertService.synchronizeAlerts(12L, List.of(9L), List.of());
+
+        verify(inventoryAlertRepository)
+                .save(argThat(alert -> alert.getLaboratory().getId().equals(12L)
+                        && alert.getProduct().getId().equals(9L)
+                        && alert.getAlertType() == InventoryAlertType.OUT_OF_STOCK
+                        && alert.getMessage().contains("out of stock")));
     }
 }

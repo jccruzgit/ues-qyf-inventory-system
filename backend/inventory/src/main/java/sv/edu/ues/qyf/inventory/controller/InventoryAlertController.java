@@ -29,7 +29,7 @@ public class InventoryAlertController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<InventoryAlertResponseDto>>> getAlerts(
-            @RequestParam Long laboratoryId,
+            @RequestParam(required = false) Long laboratoryId,
             @RequestParam(required = false) InventoryAlertType alertType,
             @RequestParam(defaultValue = "true") Boolean pendingOnly) {
         return ResponseEntity.ok(ApiResponse.success(

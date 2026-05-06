@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   AlertTriangle,
+  BellRing,
   Beaker,
   Boxes,
   CalendarRange,
@@ -22,6 +23,10 @@ import {
   fetchDashboardSummary,
   getDashboardErrorMessage,
 } from '../../services/dashboardService';
+import {
+  fetchInventoryAlerts,
+  getInventoryAlertsErrorMessage,
+} from '../../services/alertsService';
 
 const activityToneClasses = {
   teal: 'bg-brand-teal-soft text-brand-teal',
@@ -282,8 +287,90 @@ function DashboardErrorState({ message, onRetry }) {
   );
 }
 
+function DashboardAlertsCard({ alerts, loading, error, onRetry }) {
+  return (
+    <Card className="p-6 sm:p-7">
+      <SectionHeader
+        title="Alertas activas"
+        action={
+          <Badge variant="warning">
+            {loading ? 'Cargando...' : `${formatInteger(alerts.length)} visibles`}
+          </Badge>
+        }
+      />
+
+      <div className="mt-6 space-y-4">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="animate-pulse rounded-[22px] border border-brand-ink/[0.06] p-4">
+              <div className="h-4 w-28 rounded-full bg-surface-2" />
+              <div className="mt-3 h-4 w-44 rounded-full bg-surface-2" />
+              <div className="mt-3 h-3 w-52 rounded-full bg-surface-2" />
+            </div>
+          ))
+        ) : error ? (
+          <div className="rounded-[24px] border border-[#fdebec] bg-[#fff4f5] px-4 py-4 text-sm font-semibold text-[#b73945]">
+            <p>{error}</p>
+            <button
+              type="button"
+              onClick={onRetry}
+              className="mt-3 inline-flex rounded-full bg-brand-ink px-4 py-2 text-xs font-extrabold text-white transition hover:bg-brand-ink-strong"
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : alerts.length ? (
+          alerts.map((alert) => (
+            <article
+              key={alert.id}
+              className="rounded-[22px] border border-brand-ink/[0.06] bg-white/80 px-4 py-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-copy-soft">
+                    {alert.laboratoryCode ? `${alert.laboratoryCode} · ` : ''}
+                    {alert.laboratoryName}
+                  </p>
+                  <h3 className="mt-2 text-sm font-extrabold text-brand-ink">
+                    {alert.productName}
+                    {alert.batchCode ? ` · ${alert.batchCode}` : ''}
+                  </h3>
+                </div>
+
+                <Badge variant={alert.severityVariant}>{alert.severityLabel}</Badge>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-copy">{alert.message}</p>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge variant={alert.alertTypeVariant}>{alert.alertTypeLabel}</Badge>
+                <Badge variant={alert.statusVariant}>{alert.statusLabel}</Badge>
+              </div>
+            </article>
+          ))
+        ) : (
+          <div className="rounded-[24px] border border-dashed border-brand-ink/[0.08] bg-surface-2/50 px-5 py-8 text-center text-sm font-semibold text-copy-soft">
+            No hay alertas activas para resumir.
+          </div>
+        )}
+      </div>
+
+      <Link
+        to="/alerts"
+        className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-brand-teal transition hover:text-brand-ink"
+      >
+        <BellRing className="h-4 w-4" strokeWidth={2.1} />
+        Ver todas las alertas
+      </Link>
+    </Card>
+  );
+}
+
 function DashboardPage() {
   const [summary, setSummary] = useState(null);
+  const [alertItems, setAlertItems] = useState([]);
+  const [alertsLoading, setAlertsLoading] = useState(true);
+  const [alertsError, setAlertsError] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -302,8 +389,24 @@ function DashboardPage() {
     }
   };
 
+  const loadAlertsPreview = async () => {
+    setAlertsLoading(true);
+    setAlertsError('');
+
+    try {
+      const response = await fetchInventoryAlerts({ pendingOnly: true });
+      setAlertItems(response.slice(0, 4));
+    } catch (requestError) {
+      setAlertItems([]);
+      setAlertsError(getInventoryAlertsErrorMessage(requestError));
+    } finally {
+      setAlertsLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadSummary();
+    loadAlertsPreview();
   }, []);
 
   const dashboardSummary = useMemo(() => normalizeDashboardSummary(summary), [summary]);
@@ -465,48 +568,57 @@ function DashboardPage() {
           <DashboardChart movementSeries={dashboardSummary.movementSeries} />
         </Card>
 
-        <Card className="p-6 sm:p-7">
-          <SectionHeader
-            title="Actividad reciente"
-            action={
-              <Badge variant="teal">
-                {formatInteger(dashboardSummary.recentMovements.length)} eventos
-              </Badge>
-            }
+        <div className="space-y-5">
+          <Card className="p-6 sm:p-7">
+            <SectionHeader
+              title="Actividad reciente"
+              action={
+                <Badge variant="teal">
+                  {formatInteger(dashboardSummary.recentMovements.length)} eventos
+                </Badge>
+              }
+            />
+
+            <div className="mt-6 space-y-5">
+              {dashboardSummary.recentMovements.length ? (
+                dashboardSummary.recentMovements.map((item) => (
+                  <article key={item.id} className="flex items-start gap-4">
+                    <div
+                      className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                        activityToneClasses[getActivityTone(item.movementType)]
+                      }`}
+                    >
+                      <Activity className="h-4 w-4" strokeWidth={2.3} />
+                    </div>
+
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-extrabold leading-6 text-brand-ink">
+                        {getActivityTitle(item)}
+                      </h3>
+                      <p className="text-sm leading-6 text-copy">
+                        {getActivityDetail(item)}{' '}
+                        <span className="font-semibold text-copy-soft">
+                          | {formatRelativeTime(item.performedAt)}
+                        </span>
+                      </p>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <div className="rounded-[24px] border border-dashed border-brand-ink/[0.08] bg-surface-2/50 px-5 py-8 text-center text-sm font-semibold text-copy-soft">
+                  Aun no hay movimientos recientes para mostrar.
+                </div>
+              )}
+            </div>
+          </Card>
+
+          <DashboardAlertsCard
+            alerts={alertItems}
+            loading={alertsLoading}
+            error={alertsError}
+            onRetry={loadAlertsPreview}
           />
-
-          <div className="mt-6 space-y-5">
-            {dashboardSummary.recentMovements.length ? (
-              dashboardSummary.recentMovements.map((item) => (
-                <article key={item.id} className="flex items-start gap-4">
-                  <div
-                    className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-                      activityToneClasses[getActivityTone(item.movementType)]
-                    }`}
-                  >
-                    <Activity className="h-4 w-4" strokeWidth={2.3} />
-                  </div>
-
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-extrabold leading-6 text-brand-ink">
-                      {getActivityTitle(item)}
-                    </h3>
-                    <p className="text-sm leading-6 text-copy">
-                      {getActivityDetail(item)}{' '}
-                      <span className="font-semibold text-copy-soft">
-                        | {formatRelativeTime(item.performedAt)}
-                      </span>
-                    </p>
-                  </div>
-                </article>
-              ))
-            ) : (
-              <div className="rounded-[24px] border border-dashed border-brand-ink/[0.08] bg-surface-2/50 px-5 py-8 text-center text-sm font-semibold text-copy-soft">
-                Aun no hay movimientos recientes para mostrar.
-              </div>
-            )}
-          </div>
-        </Card>
+        </div>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(320px,0.78fr)_minmax(0,1.22fr)]">

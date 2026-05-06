@@ -66,6 +66,26 @@ class InventoryStockServiceImplTest {
     }
 
     @Test
+    void getStock_byProductFlagsLowStockWhenQuantityEqualsMinimum() {
+        Product product = Product.builder()
+                .id(10L)
+                .code("PRD-10")
+                .name("Reactivo minimo")
+                .currentStock(new BigDecimal("20"))
+                .minimumStock(new BigDecimal("20"))
+                .active(Boolean.TRUE)
+                .build();
+
+        when(productRepository.findByIdAndActiveTrue(10L)).thenReturn(Optional.of(product));
+
+        List<InventoryStockResponseDto> stock = inventoryStockService.getStock(10L, null, null);
+
+        assertThat(stock).hasSize(1);
+        assertThat(stock.get(0).getProductId()).isEqualTo(10L);
+        assertThat(stock.get(0).getLowStock()).isTrue();
+    }
+
+    @Test
     void getStock_byLaboratoryAggregatesEntriesAndExits() {
         Product product = Product.builder()
                 .id(9L)

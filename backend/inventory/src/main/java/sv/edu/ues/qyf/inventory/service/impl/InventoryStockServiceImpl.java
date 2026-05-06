@@ -128,10 +128,10 @@ public class InventoryStockServiceImpl implements InventoryStockService {
         return List.of(accumulator.toResponse());
     }
 
-    private boolean isLowStock(BigDecimal available, BigDecimal minimumStock) {
+    private static boolean isLowStock(BigDecimal available, BigDecimal minimumStock) {
         return available != null
                 && minimumStock != null
-                && available.compareTo(minimumStock) < 0;
+                && available.compareTo(minimumStock) <= 0;
     }
 
     private record InventoryStockAccumulator(
@@ -212,7 +212,7 @@ public class InventoryStockServiceImpl implements InventoryStockService {
                     .expirationDate(expirationDate)
                     .quantityAvailable(quantityAvailable)
                     .minimumStock(minimumStock)
-                    .lowStock(minimumStock != null && quantityAvailable.compareTo(minimumStock) < 0)
+                    .lowStock(isLowStock(quantityAvailable, minimumStock))
                     .build();
         }
     }

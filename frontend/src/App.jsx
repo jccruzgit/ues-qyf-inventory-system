@@ -4,6 +4,7 @@ import PublicOnlyRoute from './components/common/PublicOnlyRoute';
 import AppLayout from './components/layout/AppLayout';
 import LoginPage from './pages/auth/LoginPage';
 import AuthSupportPage from './pages/auth/AuthSupportPage';
+import AlertsPage from './pages/alerts/AlertsPage';
 import BatchesPage from './pages/batches/BatchesPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import InventoryEntryCreatePage from './pages/inventory/InventoryEntryCreatePage';
@@ -39,7 +40,7 @@ function App() {
           <Route path="/inventory/exits/new" element={<InventoryExitCreatePage />} />
           <Route path="/movements" element={<MovementsPage />} />
           <Route path="/batches" element={<BatchesPage />} />
-          <Route path="/alerts" element={<ModulePlaceholderPage />} />
+          <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/support" element={<ModulePlaceholderPage />} />
           <Route path="/archive" element={<ModulePlaceholderPage />} />
         </Route>

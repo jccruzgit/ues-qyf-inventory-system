@@ -15,12 +15,22 @@ public class InventoryAlertMapper {
         return InventoryAlertResponseDto.builder()
                 .id(inventoryAlert.getId())
                 .laboratoryId(inventoryAlert.getLaboratory() != null ? inventoryAlert.getLaboratory().getId() : null)
+                .laboratoryCode(inventoryAlert.getLaboratory() != null ? inventoryAlert.getLaboratory().getCode() : null)
+                .laboratoryName(inventoryAlert.getLaboratory() != null ? inventoryAlert.getLaboratory().getName() : null)
                 .alertType(inventoryAlert.getAlertType())
                 .productId(inventoryAlert.getProduct() != null ? inventoryAlert.getProduct().getId() : null)
                 .productCode(inventoryAlert.getProduct() != null ? inventoryAlert.getProduct().getCode() : null)
+                .productName(inventoryAlert.getProduct() != null ? inventoryAlert.getProduct().getName() : null)
                 .productBatchId(inventoryAlert.getProductBatch() != null ? inventoryAlert.getProductBatch().getId() : null)
                 .batchCode(inventoryAlert.getProductBatch() != null
                         ? inventoryAlert.getProductBatch().getBatchCode()
+                        : null)
+                .locationName(inventoryAlert.getProduct() != null && inventoryAlert.getProduct().getLocation() != null
+                        ? inventoryAlert.getProduct().getLocation().getName()
+                        : null)
+                .minimumStock(inventoryAlert.getProduct() != null ? inventoryAlert.getProduct().getMinimumStock() : null)
+                .expirationDate(inventoryAlert.getProductBatch() != null
+                        ? inventoryAlert.getProductBatch().getExpirationDate()
                         : null)
                 .message(inventoryAlert.getMessage())
                 .triggeredAt(inventoryAlert.getTriggeredAt())
