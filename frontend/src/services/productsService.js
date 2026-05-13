@@ -86,7 +86,7 @@ export function adaptProductFromApi(productDto) {
 
   return {
     id: productDto?.id,
-    name: productDto?.name?.trim() || 'Producto sin nombre',
+    name: productDto?.name?.trim() || 'Insumo sin nombre',
     code: productDto?.code?.trim() || 'SIN-CODIGO',
     type: deriveType(productDto?.categoryName),
     category: productDto?.categoryName?.trim() || 'Sin categoria',
@@ -188,8 +188,8 @@ function translateValidationMessage(message) {
   const normalizedMessage = String(message ?? '').trim();
 
   const exactMessages = {
-    'Product code is required': 'El codigo del producto es obligatorio.',
-    'Product name is required': 'El nombre del producto es obligatorio.',
+    'Product code is required': 'El codigo del insumo es obligatorio.',
+    'Product name is required': 'El nombre del insumo es obligatorio.',
     'Category id is required': 'La categoria es obligatoria.',
     'Base unit id is required': 'La unidad base es obligatoria.',
     'Minimum stock is required': 'El stock minimo es obligatorio.',
@@ -207,7 +207,7 @@ function translateValidationMessage(message) {
   }
 
   if (normalizedMessage.startsWith('Product code already exists')) {
-    return 'Ya existe un producto con ese codigo.';
+    return 'Ya existe un insumo con ese codigo.';
   }
 
   if (normalizedMessage.startsWith('Category not found')) {
@@ -227,11 +227,11 @@ function translateValidationMessage(message) {
   }
 
   if (normalizedMessage === 'Access denied') {
-    return 'No tiene permisos para registrar productos.';
+    return 'No tiene permisos para registrar insumos.';
   }
 
   if (normalizedMessage === 'An unexpected error occurred') {
-    return 'Ocurrio un error inesperado al guardar el producto.';
+    return 'Ocurrio un error inesperado al guardar el insumo.';
   }
 
   return normalizedMessage;
@@ -242,7 +242,7 @@ export async function fetchProducts() {
   const body = response.data;
 
   if (body?.success === false) {
-    throw new Error(body?.message ?? 'No se pudieron recuperar los productos.');
+    throw new Error(body?.message ?? 'No se pudieron recuperar los insumos.');
   }
 
   const collection = extractCollectionPayload(body);
@@ -301,7 +301,7 @@ export async function createProduct(values) {
   const body = response.data;
 
   if (body?.success === false) {
-    throw new Error(translateValidationMessage(body?.message ?? 'No se pudo crear el producto.'));
+    throw new Error(translateValidationMessage(body?.message ?? 'No se pudo crear el insumo.'));
   }
 
   return adaptProductFromApi(extractItemPayload(body));
@@ -320,7 +320,7 @@ export function getProductsErrorMessage(error) {
     return error.message;
   }
 
-  return 'No fue posible cargar los productos.';
+  return 'No fue posible cargar los insumos.';
 }
 
 export function getProductCatalogsErrorMessage(error) {
@@ -354,13 +354,13 @@ export function getCreateProductErrorDetails(error) {
 
   if (error?.response?.status === 403) {
     return {
-      message: 'No tiene permisos para registrar productos.',
+      message: 'No tiene permisos para registrar insumos.',
       fieldErrors,
     };
   }
 
   return {
-    message: translateValidationMessage(body?.message ?? error?.message ?? 'No se pudo crear el producto.'),
+    message: translateValidationMessage(body?.message ?? error?.message ?? 'No se pudo crear el insumo.'),
     fieldErrors,
   };
 }

@@ -22,12 +22,12 @@ export const productFormSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, 'El nombre del producto es obligatorio.')
+    .min(1, 'El nombre del insumo es obligatorio.')
     .max(150, 'El nombre no debe exceder 150 caracteres.'),
   code: z
     .string()
     .trim()
-    .min(1, 'El codigo del producto es obligatorio.')
+    .min(1, 'El codigo del insumo es obligatorio.')
     .max(50, 'El codigo no debe exceder 50 caracteres.'),
   description: z
     .string()

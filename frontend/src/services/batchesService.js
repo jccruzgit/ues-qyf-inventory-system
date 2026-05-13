@@ -141,7 +141,7 @@ export async function fetchProductBatches(filters = {}) {
       id: item.id,
       productId: item.productId,
       productCode: normalizeText(item.productCode, 'SIN-CODIGO'),
-      productName: normalizeText(item.productName, 'Producto sin nombre'),
+      productName: normalizeText(item.productName, 'Insumo sin nombre'),
       laboratoryId: item.laboratoryId ?? null,
       laboratoryCode: normalizeText(item.laboratoryCode),
       laboratoryName: normalizeText(item.laboratoryName, 'Laboratorio no definido'),

@@ -74,7 +74,7 @@ function ProductForm({
           id="description"
           rows={4}
           className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-          placeholder="Describe el uso o caracteristicas del producto."
+          placeholder="Describe el uso o caracteristicas del insumo."
           aria-invalid={Boolean(errors.description)}
           {...register('description')}
         />
@@ -252,7 +252,7 @@ function ProductForm({
           <span>
             <span className="block text-sm font-extrabold text-brand-ink">Activo</span>
             <span className="mt-1 block text-xs leading-5 text-copy-soft">
-              Deja disponible el producto en el catalogo al guardarlo.
+              Deja disponible el insumo en el catalogo al guardarlo.
             </span>
           </span>
         </label>

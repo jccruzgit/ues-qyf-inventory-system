@@ -1,9 +1,11 @@
 import {
   Archive,
   ArrowDownCircle,
+  BookOpenCheck,
   BellRing,
   Boxes,
   ChevronRight,
+  FlaskConical,
   LayoutDashboard,
   PackageSearch,
   Plus,
@@ -15,8 +17,11 @@ import { Link, NavLink } from 'react-router-dom';
 
 const primaryItems = [
   { label: 'Panel', icon: LayoutDashboard, to: '/dashboard' },
-  { label: 'Productos', icon: PackageSearch, to: '/products' },
+  { label: 'Insumos', icon: PackageSearch, to: '/products' },
   { label: 'Inventario', icon: Boxes, to: '/inventory' },
+  { label: 'Elaboracion', icon: FlaskConical, to: '/production' },
+  { label: 'Recetas', icon: BookOpenCheck, to: '/recipes' },
+  { label: 'Productos elaborados', icon: ChevronRight, to: '/manufactured-products' },
   { label: 'Movimientos', icon: ChevronRight, to: '/movements' },
   { label: 'Lotes', icon: BellRing, to: '/batches' },
   { label: 'Alertas', icon: TriangleAlert, to: '/alerts' },

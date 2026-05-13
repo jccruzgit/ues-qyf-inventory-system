@@ -13,7 +13,7 @@ export const inventoryExitSchema = z
   .object({
     productId: z.preprocess(
       parseRequiredNumber,
-      z.number({ required_error: 'Seleccione un producto.' }).positive('Seleccione un producto.'),
+      z.number({ required_error: 'Seleccione un insumo.' }).positive('Seleccione un insumo.'),
     ),
     laboratoryId: z.preprocess(
       parseRequiredNumber,

@@ -10,10 +10,13 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import InventoryEntryCreatePage from './pages/inventory/InventoryEntryCreatePage';
 import InventoryExitCreatePage from './pages/inventory/InventoryExitCreatePage';
 import InventoryStockPage from './pages/inventory/InventoryStockPage';
+import ManufacturedProductsPage from './pages/manufactured-products/ManufacturedProductsPage';
 import ModulePlaceholderPage from './pages/modules/ModulePlaceholderPage';
 import MovementsPage from './pages/movements/MovementsPage';
+import ProductionRunCreatePage from './pages/production/ProductionRunCreatePage';
 import ProductCreatePage from './pages/products/ProductCreatePage';
 import ProductsPage from './pages/products/ProductsPage';
+import RecipesPage from './pages/recipes/RecipesPage';
 
 function App() {
   return (
@@ -38,6 +41,9 @@ function App() {
           <Route path="/inventory" element={<InventoryStockPage />} />
           <Route path="/inventory/entries/new" element={<InventoryEntryCreatePage />} />
           <Route path="/inventory/exits/new" element={<InventoryExitCreatePage />} />
+          <Route path="/production" element={<ProductionRunCreatePage />} />
+          <Route path="/recipes" element={<RecipesPage />} />
+          <Route path="/manufactured-products" element={<ManufacturedProductsPage />} />
           <Route path="/movements" element={<MovementsPage />} />
           <Route path="/batches" element={<BatchesPage />} />
           <Route path="/alerts" element={<AlertsPage />} />

@@ -216,14 +216,14 @@ function BatchCard({ batch }) {
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
-            {batch.laboratoryCode ? `${batch.laboratoryCode} · ` : ''}
+            {batch.laboratoryCode ? `${batch.laboratoryCode} / ` : ''}
             {batch.laboratoryName}
           </p>
           <h3 className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-brand-ink">
             {batch.productName}
           </h3>
           <p className="mt-2 text-sm font-semibold text-copy">
-            Codigo producto: <span className="text-brand-ink">{batch.productCode}</span>
+            Codigo insumo: <span className="text-brand-ink">{batch.productCode}</span>
           </p>
         </div>
 
@@ -328,7 +328,7 @@ function BatchesPage() {
     <div className="space-y-6">
       <SectionHeader
         title="Lotes"
-        subtitle="Consulta lotes reales por producto y laboratorio con stock disponible, vencimiento, precio unitario y observaciones."
+        subtitle="Consulta lotes reales por insumo y laboratorio con stock disponible, vencimiento, precio unitario y observaciones."
         action={
           <div className="flex flex-wrap items-center justify-end gap-3">
             <Link
@@ -409,7 +409,7 @@ function BatchesPage() {
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(220px,0.7fr)_minmax(220px,0.7fr)_auto]">
           <label className="space-y-2">
             <span className="text-xs font-extrabold uppercase tracking-[0.22em] text-copy-soft">
-              Buscar producto o lote
+              Buscar insumo o lote
             </span>
             <div className="relative">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-copy-soft" />

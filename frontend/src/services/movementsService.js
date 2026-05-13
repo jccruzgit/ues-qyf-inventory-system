@@ -25,11 +25,11 @@ function normalizeMovementMessage(message) {
   const exactMessages = {
     'Access denied': 'No tiene permisos para consultar movimientos de inventario.',
     'An unexpected error occurred': 'Ocurrio un error inesperado al consultar movimientos.',
-    'Reason is required': 'El motivo de la reversión es obligatorio.',
+    'Reason is required': 'El motivo de la reversion es obligatorio.',
     'This movement has already been reversed':
-      'Este movimiento ya tiene una reversión registrada.',
+      'Este movimiento ya tiene una reversion registrada.',
     'Reversal movements cannot be reversed again':
-      'No se puede reversar un movimiento que ya es una reversión.',
+      'No se puede reversar un movimiento que ya es una reversion.',
   };
 
   if (exactMessages[normalizedMessage]) {

@@ -21,6 +21,11 @@ export function adaptInventoryMovementFromApi(movementDto) {
     performedAt: normalizeText(movementDto?.performedAt),
     observation: normalizeText(movementDto?.observation),
     attachmentDocumentId: movementDto?.attachmentDocumentId ?? null,
+    productionRunId: movementDto?.productionRunId ?? null,
+    recipeId: movementDto?.recipeId ?? null,
+    recipeName: normalizeText(movementDto?.recipeName),
+    manufacturedProductId: movementDto?.manufacturedProductId ?? null,
+    manufacturedProductName: normalizeText(movementDto?.manufacturedProductName),
     lines: Array.isArray(movementDto?.lines) ? movementDto.lines : [],
     raw: movementDto,
   };
@@ -58,7 +63,7 @@ export function buildMovementRows(movements, products, laboratories) {
           movement.correctionType === 'REVERSAL' ? 'Sin motivo registrado' : 'Sin observaciones',
         ),
         productId: line?.productId ?? null,
-        productName: normalizeText(line?.productName, product?.name ?? 'Producto no disponible'),
+        productName: normalizeText(line?.productName, product?.name ?? 'Insumo no disponible'),
         productCode: normalizeText(line?.productCode, product?.code ?? 'SIN-CODIGO'),
         batchCode: normalizeText(line?.batchCode, 'Sin lote'),
         quantity: toNumber(line?.quantity),
@@ -76,6 +81,11 @@ export function buildMovementRows(movements, products, laboratories) {
         username: movement.performedByUsername,
         movementObservation: normalizeText(movement.observation, 'Sin observaciones'),
         lineObservation: normalizeText(line?.lineNotes, 'Sin observaciones'),
+        productionRunId: movement.productionRunId,
+        recipeId: movement.recipeId,
+        recipeName: movement.recipeName,
+        manufacturedProductId: movement.manufacturedProductId,
+        manufacturedProductName: movement.manufacturedProductName,
         isFirstLine: index === 0,
       };
     });
@@ -103,7 +113,7 @@ export function sortMovementRowsByDate(rows, direction = 'desc') {
 
 export function buildMovementProductOptions(products) {
   return [
-    { value: 'all', label: 'Todos los productos' },
+    { value: 'all', label: 'Todos los insumos' },
     ...products.map((product) => ({
       value: String(product.id),
       label: `${product.name} (${product.code})`,

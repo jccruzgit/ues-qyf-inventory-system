@@ -108,7 +108,7 @@ function InventoryStockPage() {
     <div className="space-y-6">
       <SectionHeader
         title="Niveles de stock"
-        subtitle="Consulta inventario real por producto, laboratorio y lote para anticipar faltantes y vencimientos."
+        subtitle="Consulta inventario real por insumo, laboratorio y lote para anticipar faltantes y vencimientos."
         action={
           <div className="flex flex-wrap items-center justify-end gap-3">
             <Link
@@ -137,7 +137,7 @@ function InventoryStockPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Productos visibles"
+          title="Insumos visibles"
           value={filteredItems.length}
           icon={Boxes}
           meta="Vista actual"
@@ -177,7 +177,7 @@ function InventoryStockPage() {
               Filtros operativos
             </p>
             <h3 className="mt-2 text-xl font-extrabold tracking-[-0.04em] text-brand-ink">
-              Vista consolidada por producto y laboratorio
+              Vista consolidada por insumo y laboratorio
             </h3>
           </div>
 

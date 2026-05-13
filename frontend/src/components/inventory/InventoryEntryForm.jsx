@@ -53,7 +53,7 @@ function InventoryEntryForm({
     <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
       <div className="grid gap-5 lg:grid-cols-2">
         <Field
-          label="Producto"
+          label="Insumo"
           htmlFor="productId"
           required
           error={errors.productId?.message}
@@ -66,7 +66,7 @@ function InventoryEntryForm({
             {...register('productId')}
           >
             <option value="" disabled>
-              Seleccione un producto
+              Seleccione un insumo
             </option>
             {products.map((product) => (
               <option key={product.id} value={product.id}>
@@ -80,7 +80,7 @@ function InventoryEntryForm({
           label="Laboratorio/Ubicacion"
           htmlFor="laboratoryId"
           required
-          hint="Seleccione el laboratorio destino. La ubicacion de referencia del producto se mostrara al seleccionar el producto."
+          hint="Seleccione el laboratorio destino. La ubicacion de referencia del insumo se mostrara al seleccionar el insumo."
           error={errors.laboratoryId?.message}
         >
           <select
@@ -107,7 +107,7 @@ function InventoryEntryForm({
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
-                Producto seleccionado
+                Insumo seleccionado
               </p>
               <h3 className="mt-3 text-xl font-extrabold tracking-[-0.04em] text-brand-ink">
                 {selectedProduct.name}
@@ -150,7 +150,7 @@ function InventoryEntryForm({
               }
               description={
                 selectedProduct.requiresExpiration
-                  ? 'Este producto exige fecha de vencimiento para activar alertas y seguimiento.'
+                  ? 'Este insumo exige fecha de vencimiento para activar alertas y seguimiento.'
                   : 'Puede registrar fecha de vencimiento si aplica para este lote.'
               }
               tone="bg-[#fff3dd] text-[#d28a19]"
@@ -207,7 +207,7 @@ function InventoryEntryForm({
           label="Precio por unidad de medida"
           htmlFor="unitPrice"
           required
-          hint="Registre manualmente el precio usando la unidad base del producto."
+          hint="Registre manualmente el precio usando la unidad base del insumo."
           error={errors.unitPrice?.message}
         >
           <input
@@ -227,7 +227,7 @@ function InventoryEntryForm({
         <Field
           label="Unidad"
           htmlFor="unitLabel"
-          hint="La unidad se toma automaticamente de la configuracion del producto."
+          hint="La unidad se toma automaticamente de la configuracion del insumo."
         >
           <input
             id="unitLabel"
@@ -242,7 +242,7 @@ function InventoryEntryForm({
           label="Unidad del precio"
           htmlFor="priceUnitLabel"
           required
-          hint="En esta primera version, el precio se registra en la misma unidad base del producto."
+          hint="En esta primera version, el precio se registra en la misma unidad base del insumo."
           error={errors.priceUnitId?.message}
         >
           <input
@@ -273,7 +273,7 @@ function InventoryEntryForm({
 
       {productRequiresTracking ? (
         <div className="rounded-[24px] border border-[#fff1d2] bg-[#fff8e8] px-4 py-3.5 text-sm font-semibold text-[#9a6a0a]">
-          Este producto requiere seguimiento detallado por lote o vencimiento. Verifique que la
+          Este insumo requiere seguimiento detallado por lote o vencimiento. Verifique que la
           informacion capturada coincida con la documentacion fisica del ingreso.
         </div>
       ) : null}

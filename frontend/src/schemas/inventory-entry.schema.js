@@ -33,7 +33,7 @@ export const inventoryEntrySchema = z
   .object({
     productId: z.preprocess(
       parseRequiredNumber,
-      z.number({ required_error: 'Seleccione un producto.' }).positive('Seleccione un producto.'),
+      z.number({ required_error: 'Seleccione un insumo.' }).positive('Seleccione un insumo.'),
     ),
     laboratoryId: z.preprocess(
       parseRequiredNumber,
@@ -88,7 +88,7 @@ export const inventoryEntrySchema = z
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['batchCode'],
-        message: 'El numero de lote es obligatorio para el producto seleccionado.',
+        message: 'El numero de lote es obligatorio para el insumo seleccionado.',
       });
     }
 
@@ -96,7 +96,7 @@ export const inventoryEntrySchema = z
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['expirationDate'],
-        message: 'La fecha de vencimiento es obligatoria para el producto seleccionado.',
+        message: 'La fecha de vencimiento es obligatoria para el insumo seleccionado.',
       });
     }
 

@@ -156,7 +156,7 @@ function InventoryEntryCreatePage() {
             </p>
 
             <div className="mt-8 space-y-3 text-sm text-white/78">
-              <p>1. Seleccione un producto y el laboratorio destino.</p>
+              <p>1. Seleccione un insumo y el laboratorio destino.</p>
               <p>2. Registre lote, vencimiento, cantidad y precio por unidad.</p>
               <p>3. Guarde para revisar el inventario consolidado por lote.</p>
             </div>
@@ -204,7 +204,7 @@ function InventoryEntryCreatePage() {
                   No hay catalogos suficientes para registrar entradas
                 </h3>
                 <p className="mt-2 text-sm leading-7 text-copy">
-                  Verifique que existan productos activos y laboratorios disponibles antes de
+                  Verifique que existan insumos activos y laboratorios disponibles antes de
                   registrar una nueva entrada de inventario.
                 </p>
               </div>

@@ -89,7 +89,7 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
                   {item.productName}
                 </h3>
                 <p className="mt-1 text-sm font-semibold text-copy-soft">
-                  REF: {item.productCode} • {item.laboratoryName}
+                  REF: {item.productCode} / {item.laboratoryName}
                 </p>
               </div>
 
@@ -174,7 +174,7 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
             <div className="mt-4">
               <p className="text-base font-extrabold text-brand-ink">Sin vencimientos proximos</p>
               <p className="mt-2 text-sm font-semibold text-copy">
-                Este producto no tiene lotes con fecha proxima o no requiere control de caducidad.
+                Este insumo no tiene lotes con fecha proxima o no requiere control de caducidad.
               </p>
             </div>
           )}
@@ -215,7 +215,7 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
               },
               context: {
                 title: item.productName,
-                description: `${item.productCode} • ${item.laboratoryName}`,
+                description: `${item.productCode} / ${item.laboratoryName}`,
               },
             }}
             icon={Rows3}
@@ -240,7 +240,7 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
           <div className="space-y-4">
             <div className="rounded-[24px] border border-brand-ink/[0.06] bg-surface-2/60 p-4">
               <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
-                Resumen del producto
+                Resumen del insumo
               </p>
               <div className="mt-4 space-y-3 text-sm font-semibold text-copy">
                 <p>
@@ -265,7 +265,7 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
                 Notas
               </p>
               <p className="mt-4 text-sm leading-7 text-copy">
-                {item.description || item.observations || 'Sin notas registradas para este producto.'}
+                {item.description || item.observations || 'Sin notas registradas para este insumo.'}
               </p>
             </div>
           </div>
@@ -310,7 +310,7 @@ function InventoryOverviewItem({ item, isExpanded, onToggle }) {
               </div>
             ) : (
               <div className="mt-4 rounded-[22px] border border-dashed border-brand-ink/[0.12] bg-surface-2/60 px-4 py-5 text-sm font-semibold text-copy">
-                No hay lotes activos para este producto. La base queda preparada para alertas y
+                No hay lotes activos para este insumo. La base queda preparada para alertas y
                 trazabilidad cuando se registren nuevas entradas.
               </div>
             )}
