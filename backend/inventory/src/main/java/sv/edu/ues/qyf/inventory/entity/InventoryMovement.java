@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -78,6 +79,9 @@ public class InventoryMovement {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attachment_document_id")
     private ProductDocument attachmentDocument;
+
+    @OneToOne(mappedBy = "inventoryMovement", fetch = FetchType.LAZY)
+    private ProductionRun productionRun;
 
     @Builder.Default
     @OneToMany(mappedBy = "movement", cascade = CascadeType.ALL, orphanRemoval = true)

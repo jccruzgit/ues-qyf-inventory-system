@@ -129,7 +129,7 @@ class PostgreSqlPersistenceIntegrationTest {
     @Test
     void shouldApplyFlywayMigrationsAndCreateExpectedTables() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("12");
 
         Integer tableCount = jdbcTemplate.queryForObject(
                 """
@@ -141,12 +141,16 @@ class PostgreSqlPersistenceIntegrationTest {
                       'product_batches',
                       'inventory_movements',
                       'inventory_movement_lines',
-                      'inventory_alerts'
+                      'inventory_alerts',
+                      'manufactured_products',
+                      'recipes',
+                      'recipe_items',
+                      'production_runs'
                   )
                 """,
                 Integer.class);
 
-        assertThat(tableCount).isEqualTo(5);
+        assertThat(tableCount).isEqualTo(9);
     }
 
     @Test
