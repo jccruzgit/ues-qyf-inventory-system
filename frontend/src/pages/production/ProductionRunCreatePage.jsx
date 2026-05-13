@@ -36,7 +36,7 @@ const defaultValues = {
 
 function Field({ label, required, error, children, hint }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-2 block text-sm font-extrabold tracking-tight text-brand-ink">
         {label}
         {required ? <span className="ml-1 text-[#d53a43]">*</span> : null}
@@ -267,9 +267,9 @@ function ProductionRunCreatePage() {
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(680px,0.54fr)_minmax(0,0.46fr)]">
         <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-0">
-          <div className="grid gap-0 lg:grid-cols-[minmax(240px,0.34fr)_minmax(0,0.66fr)]">
+          <div className="grid gap-0 xl:grid-cols-[minmax(220px,240px)_minmax(0,1fr)]">
             <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
                 <BookOpenCheck className="h-5 w-5" strokeWidth={2.1} />
@@ -287,14 +287,13 @@ function ProductionRunCreatePage() {
               </div>
             </aside>
 
-            <div className="p-6 sm:p-8">
+            <div className="min-w-0 p-6 sm:p-8">
               {loading ? (
-                <div className="space-y-4 animate-pulse">
+                <div className="max-w-[440px] space-y-4 animate-pulse">
                   <div className="h-5 w-44 rounded-full bg-surface-2" />
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <div className="h-14 rounded-[22px] bg-surface-2" />
-                    <div className="h-14 rounded-[22px] bg-surface-2" />
-                  </div>
+                  <div className="h-14 rounded-[22px] bg-surface-2" />
+                  <div className="h-14 rounded-[22px] bg-surface-2" />
+                  <div className="h-14 rounded-[22px] bg-surface-2" />
                   <div className="h-14 rounded-[22px] bg-surface-2" />
                   <div className="h-24 rounded-[22px] bg-surface-2" />
                 </div>
@@ -303,84 +302,80 @@ function ProductionRunCreatePage() {
                   {error}
                 </div>
               ) : (
-                <form className="space-y-6" onSubmit={handleSubmit(handlePrepare)}>
-                  <div className="grid gap-5 lg:grid-cols-2">
-                    <Field
-                      label="Producto elaborado"
-                      required
-                      error={errors.manufacturedProductId?.message}
+                <form className="max-w-[440px] space-y-6" onSubmit={handleSubmit(handlePrepare)}>
+                  <Field
+                    label="Producto elaborado"
+                    required
+                    error={errors.manufacturedProductId?.message}
+                  >
+                    <select
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      defaultValue=""
+                      {...register('manufacturedProductId')}
                     >
-                      <select
-                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                        defaultValue=""
-                        {...register('manufacturedProductId')}
-                      >
-                        <option value="" disabled>
-                          Seleccione un producto elaborado
-                        </option>
-                        {manufacturedProducts
-                          .filter((item) => item.active)
-                          .sort((left, right) => left.name.localeCompare(right.name))
-                          .map((item) => (
-                            <option key={item.id} value={item.id}>
-                              {item.name} ({item.code})
-                            </option>
-                          ))}
-                      </select>
-                    </Field>
-
-                    <Field label="Receta" required error={errors.recipeId?.message}>
-                      <select
-                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                        defaultValue=""
-                        {...register('recipeId')}
-                        disabled={!selectedManufacturedProductId}
-                      >
-                        <option value="" disabled>
-                          {selectedManufacturedProductId
-                            ? 'Seleccione una receta'
-                            : 'Seleccione primero un producto elaborado'}
-                        </option>
-                        {recipeOptions.map((item) => (
+                      <option value="" disabled>
+                        Seleccione un producto elaborado
+                      </option>
+                      {manufacturedProducts
+                        .filter((item) => item.active)
+                        .sort((left, right) => left.name.localeCompare(right.name))
+                        .map((item) => (
                           <option key={item.id} value={item.id}>
                             {item.name} ({item.code})
                           </option>
                         ))}
-                      </select>
-                    </Field>
-                  </div>
+                    </select>
+                  </Field>
 
-                  <div className="grid gap-5 lg:grid-cols-2">
-                    <Field label="Laboratorio" required error={errors.laboratoryId?.message}>
-                      <select
-                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                        defaultValue=""
-                        {...register('laboratoryId')}
-                      >
-                        <option value="" disabled>
-                          Seleccione un laboratorio
-                        </option>
-                        {laboratories.map((item) => (
-                          <option key={item.value} value={item.value}>
-                            {item.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-
-                    <Field
-                      label="Grupo o estudiante"
-                      error={errors.groupName?.message}
-                      hint="Opcional para conservar trazabilidad academica."
+                  <Field label="Receta" required error={errors.recipeId?.message}>
+                    <select
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      defaultValue=""
+                      {...register('recipeId')}
+                      disabled={!selectedManufacturedProductId}
                     >
-                      <input
-                        type="text"
-                        placeholder="Ej. Grupo 03 / Seccion B"
-                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                        {...register('groupName')}
-                      />
-                    </Field>
-                  </div>
+                      <option value="" disabled>
+                        {selectedManufacturedProductId
+                          ? 'Seleccione una receta'
+                          : 'Seleccione primero un producto elaborado'}
+                      </option>
+                      {recipeOptions.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name} ({item.code})
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+
+                  <Field label="Laboratorio" required error={errors.laboratoryId?.message}>
+                    <select
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      defaultValue=""
+                      {...register('laboratoryId')}
+                    >
+                      <option value="" disabled>
+                        Seleccione un laboratorio
+                      </option>
+                      {laboratories.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+
+                  <Field
+                    label="Grupo o estudiante"
+                    error={errors.groupName?.message}
+                    hint="Opcional para conservar trazabilidad academica."
+                  >
+                    <input
+                      type="text"
+                      placeholder="Ej. Grupo 03 / Seccion B"
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      {...register('groupName')}
+                    />
+                  </Field>
 
                   <Field
                     label="Observaciones"
@@ -407,21 +402,22 @@ function ProductionRunCreatePage() {
                     </div>
                   ) : null}
 
-                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="inline-flex items-center justify-center rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
                     >
-                      Limpiar
+                      <RefreshCcw className="h-4 w-4" />
+                      Reiniciar
                     </button>
                     <button
                       type="submit"
                       disabled={preparing}
                       className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                      <RefreshCcw className="h-4 w-4" />
-                      {preparing ? 'Preparando...' : 'Preparar elaboracion'}
+                      <FlaskConical className="h-4 w-4" />
+                      {preparing ? 'Preparando...' : 'Preparar'}
                     </button>
                   </div>
                 </form>
