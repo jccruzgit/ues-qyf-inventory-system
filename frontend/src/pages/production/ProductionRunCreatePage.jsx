@@ -48,6 +48,17 @@ function Field({ label, required, error, children, hint }) {
   );
 }
 
+function PreviewDataCell({ label, value, compact = false }) {
+  return (
+    <div className={`rounded-[18px] bg-surface-2/65 px-4 py-2.5 ${compact ? '' : 'h-full'}`}>
+      <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-copy-soft">
+        {label}
+      </p>
+      <p className="mt-2 text-sm font-semibold leading-6 text-copy">{value}</p>
+    </div>
+  );
+}
+
 function formatQuantity(value) {
   return new Intl.NumberFormat('es-SV', {
     minimumFractionDigits: 0,
@@ -267,7 +278,7 @@ function ProductionRunCreatePage() {
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(680px,0.54fr)_minmax(0,0.46fr)]">
+      <div className="space-y-6">
         <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-0">
           <div className="grid gap-0 xl:grid-cols-[minmax(220px,240px)_minmax(0,1fr)]">
             <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
@@ -426,244 +437,285 @@ function ProductionRunCreatePage() {
           </div>
         </Card>
 
-        <div className="space-y-6">
-          <Card className="space-y-5 bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)]">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
-                  Previsualizacion
-                </p>
-                <h3 className="mt-2 text-xl font-extrabold tracking-[-0.04em] text-brand-ink">
-                  Insumos, lotes sugeridos y advertencias
-                </h3>
-              </div>
-
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-extrabold ${
-                  previewRun?.status === 'CONFIRMED'
-                    ? 'bg-[#e7f4eb] text-[#2d7a49]'
-                    : 'bg-brand-teal-soft text-brand-teal'
-                }`}
-              >
-                {previewRun?.status === 'CONFIRMED' ? 'Confirmada' : 'Borrador'}
-              </span>
+        <Card className="space-y-5 bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)]">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
+                Previsualizacion
+              </p>
+              <h3 className="mt-2 text-xl font-extrabold tracking-[-0.04em] text-brand-ink">
+                Insumos, lotes sugeridos y advertencias
+              </h3>
             </div>
 
-            {previewRun ? (
-              <>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-extrabold ${
+                previewRun?.status === 'CONFIRMED'
+                  ? 'bg-[#e7f4eb] text-[#2d7a49]'
+                  : 'bg-brand-teal-soft text-brand-teal'
+              }`}
+            >
+              {previewRun?.status === 'CONFIRMED' ? 'Confirmada' : 'Borrador'}
+            </span>
+          </div>
+
+          {previewRun ? (
+            <>
+              <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="min-w-0">
                     <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-copy-soft">
                       Producto elaborado
                     </p>
                     <h4 className="mt-2 text-lg font-extrabold text-brand-ink">
                       {previewRun.manufacturedProductName}
                     </h4>
-                    <p className="mt-2 text-sm leading-6 text-copy">
+                    <p className="mt-1 text-sm leading-6 text-copy">
                       Receta {previewRun.recipeCode} / {previewRun.recipeName}
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-copy">
-                      Laboratorio: {previewRun.laboratoryName}
-                    </p>
                   </div>
 
-                  <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
-                    <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-copy-soft">
-                      Trazabilidad
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-copy">
-                      Creado por {previewRun.createdByUsername} el {formatDateTime(previewRun.createdAt)}.
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-copy">
-                      {previewRun.groupName
-                        ? `Grupo: ${previewRun.groupName}`
-                        : 'Sin grupo asociado.'}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-copy">
-                      {previewRun.notes || 'Sin observaciones adicionales.'}
-                    </p>
-                  </div>
-                </div>
-
-                {shortageItems.length ? (
-                  <div className="rounded-[24px] border border-[#fdebec] bg-[#fff4f5] px-4 py-4 text-sm font-semibold text-[#b73945]">
-                    <div className="flex items-start gap-2">
-                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                      <div>
-                        No hay stock suficiente para confirmar la elaboracion. Revise:
-                        <ul className="mt-2 list-disc pl-5">
-                          {shortageItems.map((item) => (
-                            <li key={item.recipeItemId}>
-                              {item.productName} ({item.productCode}): requiere {formatQuantity(item.requiredQuantity)} y solo hay {formatQuantity(item.totalAvailableQuantity)}.
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-[24px] border border-[#fff1d2] bg-[#fff8e8] px-4 py-4 text-sm font-semibold text-[#9a6a0a]">
-                    Al confirmar se descargaran todos los insumos listados. No se realizaran descargas parciales si algun insumo falla.
-                  </div>
-                )}
-
-                <div className="space-y-3">
-                  {previewRun.items.map((item) => (
-                    <div
-                      key={item.recipeItemId}
-                      className="rounded-[24px] border border-white/80 bg-white px-5 py-4"
-                    >
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="min-w-0">
-                          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-copy-soft">
-                            Insumo requerido
-                          </p>
-                          <h4 className="mt-2 text-lg font-extrabold text-brand-ink">
-                            {item.productName}
-                          </h4>
-                          <p className="mt-1 text-sm font-semibold text-copy">
-                            {item.productCode} / {formatQuantity(item.requiredQuantity)} {item.unitOfMeasureSymbol || item.unitOfMeasureName}
-                          </p>
-                          <p className="mt-2 text-sm leading-6 text-copy">
-                            Ubicacion: {item.locationName}
-                          </p>
-                          <p className="mt-1 text-sm leading-6 text-copy">
-                            Disponible total: {formatQuantity(item.totalAvailableQuantity)} {item.unitOfMeasureSymbol || item.unitOfMeasureName}
-                          </p>
-                          <p className="mt-1 text-sm leading-6 text-copy">
-                            {item.observations || 'Sin observaciones en la receta.'}
-                          </p>
-                        </div>
-
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-extrabold ${
-                            item.stockSufficient
-                              ? 'bg-[#e7f4eb] text-[#2d7a49]'
-                              : 'bg-[#fdebec] text-[#d53a43]'
-                          }`}
-                        >
-                          {item.stockSufficient ? 'Stock suficiente' : 'Stock insuficiente'}
-                        </span>
-                      </div>
-
-                      <div className="mt-4 grid gap-3">
-                        {item.suggestedAllocations.length ? (
-                          item.suggestedAllocations.map((allocation) => (
-                            <div
-                              key={`${item.recipeItemId}-${allocation.productBatchId ?? allocation.batchCode}`}
-                              className="flex flex-col gap-3 rounded-[20px] bg-surface-2/65 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                            >
-                              <div>
-                                <p className="text-sm font-extrabold text-brand-ink">
-                                  Lote sugerido: {allocation.batchCode}
-                                </p>
-                                <p className="mt-1 text-sm font-semibold text-copy">
-                                  Vence: {formatDate(allocation.expirationDate)} / Disponible: {formatQuantity(allocation.availableQuantity)}
-                                </p>
-                              </div>
-                              <p className="text-sm font-extrabold text-brand-ink">
-                                Descargar {formatQuantity(allocation.suggestedQuantity)}
-                              </p>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="rounded-[20px] bg-surface-2/65 px-4 py-3 text-sm font-semibold text-copy">
-                            No se encontro un lote sugerido con disponibilidad para este insumo.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <PackageCheck className="h-5 w-5 text-brand-teal" />
-                      <p className="text-sm font-extrabold text-brand-ink">
-                        Movimiento asociado
-                      </p>
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-copy">
-                      {previewRun.inventoryMovementId
-                        ? `Se genero el movimiento #${previewRun.inventoryMovementId}.`
-                        : 'Se generara un movimiento de salida al confirmar.'}
-                    </p>
-                    {previewRun.inventoryMovementId ? (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          navigate('/movements', {
-                            state: {
-                              prefill: { laboratoryId: previewRun.laboratoryId },
-                              context: {
-                                title: `el movimiento #${previewRun.inventoryMovementId}`,
-                                description: 'Revise el historial y use la fila principal para reversar si es necesario.',
-                              },
-                            },
-                          })
-                        }
-                        className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
-                      >
-                        <Link2 className="h-4 w-4" />
-                        Ver movimientos
-                      </button>
-                    ) : null}
-                  </div>
-
-                  <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <CircleAlert className="h-5 w-5 text-[#d28a19]" />
-                      <p className="text-sm font-extrabold text-brand-ink">
-                        Reversiones
-                      </p>
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-copy">
-                      El movimiento generado no se edita ni se elimina. Si hay un error, debe reversarse desde el historial y el stock volvera a su valor anterior.
-                    </p>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:justify-items-stretch">
+                    <PreviewDataCell
+                      label="Laboratorio"
+                      value={previewRun.laboratoryName}
+                      compact
+                    />
+                    <PreviewDataCell
+                      label="Creado por"
+                      value={previewRun.createdByUsername}
+                      compact
+                    />
+                    <PreviewDataCell
+                      label="Fecha"
+                      value={formatDateTime(previewRun.createdAt)}
+                      compact
+                    />
+                    <PreviewDataCell
+                      label="Grupo"
+                      value={previewRun.groupName || 'Sin grupo asociado.'}
+                      compact
+                    />
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="inline-flex items-center justify-center rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
-                  >
-                    Preparar otra elaboracion
-                  </button>
-                  <button
-                    type="button"
-                    disabled={
-                      confirming ||
-                      previewRun.status === 'CONFIRMED' ||
-                      !previewRun.readyToConfirm
-                    }
-                    onClick={handleConfirm}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    <Boxes className="h-4 w-4" />
-                    {confirming
-                      ? 'Confirmando...'
-                      : previewRun.status === 'CONFIRMED'
-                        ? 'Elaboracion confirmada'
-                        : 'Confirmar elaboracion'}
-                  </button>
+                <div className="mt-3 rounded-[18px] bg-surface-2/65 px-4 py-3">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-copy-soft">
+                    Observaciones
+                  </p>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-copy">
+                    {previewRun.notes || 'Sin observaciones adicionales.'}
+                  </p>
                 </div>
-              </>
-            ) : (
-              <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-10 text-center">
-                <FlaskConical className="mx-auto h-8 w-8 text-copy-soft" strokeWidth={1.9} />
-                <h3 className="mt-4 text-lg font-extrabold text-brand-ink">
-                  Aun no hay una elaboracion preparada
-                </h3>
-                <p className="mt-2 text-sm leading-7 text-copy">
-                  Selecciona una receta y prepara la elaboracion para revisar insumos, cantidades requeridas, lote sugerido y advertencias antes de confirmar.
-                </p>
               </div>
-            )}
-          </Card>
-        </div>
+
+              {shortageItems.length ? (
+                <div className="rounded-[24px] border border-[#fdebec] bg-[#fff4f5] px-4 py-4 text-sm font-semibold text-[#b73945]">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div>
+                      No hay stock suficiente para confirmar la elaboracion. Revise:
+                      <ul className="mt-2 list-disc pl-5">
+                        {shortageItems.map((item) => (
+                          <li key={item.recipeItemId}>
+                            {item.productName} ({item.productCode}): requiere {formatQuantity(item.requiredQuantity)} y solo hay {formatQuantity(item.totalAvailableQuantity)}.
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-[24px] border border-[#fff1d2] bg-[#fff8e8] px-4 py-4 text-sm font-semibold text-[#9a6a0a]">
+                  Al confirmar se descargaran todos los insumos listados. No se realizaran descargas parciales si algun insumo falla.
+                </div>
+              )}
+
+              <div className="space-y-3">
+                {previewRun.items.map((item) => (
+                  <div
+                    key={item.recipeItemId}
+                    className="rounded-[24px] border border-white/80 bg-white px-5 py-3"
+                  >
+                    <div className="flex flex-col gap-2.5 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-copy-soft">
+                          Insumo requerido
+                        </p>
+                        <h4 className="mt-2 text-lg font-extrabold text-brand-ink">
+                          {item.productName}
+                        </h4>
+                        <p className="mt-1 text-sm font-semibold text-copy">
+                          {item.productCode}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-extrabold ${
+                          item.stockSufficient
+                            ? 'bg-[#e7f4eb] text-[#2d7a49]'
+                            : 'bg-[#fdebec] text-[#d53a43]'
+                        }`}
+                      >
+                        {item.stockSufficient ? 'Stock suficiente' : 'Stock insuficiente'}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid gap-2.5 md:grid-cols-2 xl:grid-cols-4">
+                      <PreviewDataCell
+                        label="Cantidad requerida"
+                        value={`${formatQuantity(item.requiredQuantity)} ${item.unitOfMeasureSymbol || item.unitOfMeasureName}`}
+                      />
+                      <PreviewDataCell
+                        label="Disponible total"
+                        value={`${formatQuantity(item.totalAvailableQuantity)} ${item.unitOfMeasureSymbol || item.unitOfMeasureName}`}
+                      />
+                      <PreviewDataCell
+                        label="Ubicacion"
+                        value={item.locationName}
+                      />
+                      <PreviewDataCell
+                        label="Observaciones"
+                        value={item.observations || 'Sin observaciones en la receta.'}
+                      />
+                    </div>
+
+                    <div className="mt-3 grid gap-2.5">
+                      {item.suggestedAllocations.length ? (
+                        <div className="overflow-hidden rounded-[20px] border border-brand-ink/[0.06] bg-surface-2/45">
+                          <div className="hidden grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] gap-3 border-b border-brand-ink/[0.06] px-4 py-2.5 text-[11px] font-extrabold uppercase tracking-[0.18em] text-copy-soft md:grid">
+                            <span>Lote sugerido</span>
+                            <span>Vencimiento</span>
+                            <span>Disponible</span>
+                            <span>Descargar</span>
+                          </div>
+                          <div className="divide-y divide-brand-ink/[0.06]">
+                            {item.suggestedAllocations.map((allocation) => (
+                              <div
+                                key={`${item.recipeItemId}-${allocation.productBatchId ?? allocation.batchCode}`}
+                                className="grid gap-2.5 px-4 py-2.5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,0.9fr)] md:items-center"
+                              >
+                                <PreviewDataCell
+                                  label="Lote sugerido"
+                                  value={allocation.batchCode}
+                                  compact
+                                />
+                                <PreviewDataCell
+                                  label="Vencimiento"
+                                  value={formatDate(allocation.expirationDate)}
+                                  compact
+                                />
+                                <PreviewDataCell
+                                  label="Disponible"
+                                  value={formatQuantity(allocation.availableQuantity)}
+                                  compact
+                                />
+                                <PreviewDataCell
+                                  label="Descargar"
+                                  value={formatQuantity(allocation.suggestedQuantity)}
+                                  compact
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-[20px] bg-surface-2/65 px-4 py-3 text-sm font-semibold text-copy">
+                          No se encontro un lote sugerido con disponibilidad para este insumo.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-4 xl:grid-cols-2">
+                <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
+                  <div className="flex items-center gap-3">
+                    <PackageCheck className="h-5 w-5 text-brand-teal" />
+                    <p className="text-sm font-extrabold text-brand-ink">
+                      Movimiento asociado
+                    </p>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-copy">
+                    {previewRun.inventoryMovementId
+                      ? `Se genero el movimiento #${previewRun.inventoryMovementId}.`
+                      : 'Se generara un movimiento de salida al confirmar.'}
+                  </p>
+                  {previewRun.inventoryMovementId ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate('/movements', {
+                          state: {
+                            prefill: { laboratoryId: previewRun.laboratoryId },
+                            context: {
+                              title: `el movimiento #${previewRun.inventoryMovementId}`,
+                              description: 'Revise el historial y use la fila principal para reversar si es necesario.',
+                            },
+                          },
+                        })
+                      }
+                      className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
+                    >
+                      <Link2 className="h-4 w-4" />
+                      Ver movimientos
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
+                  <div className="flex items-center gap-3">
+                    <CircleAlert className="h-5 w-5 text-[#d28a19]" />
+                    <p className="text-sm font-extrabold text-brand-ink">
+                      Reversiones
+                    </p>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-copy">
+                    El movimiento generado no se edita ni se elimina. Si hay un error, debe reversarse desde el historial y el stock volvera a su valor anterior.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 lg:max-w-[420px] lg:ml-auto">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="inline-flex items-center justify-center rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
+                >
+                  Preparar otra elaboracion
+                </button>
+                <button
+                  type="button"
+                  disabled={
+                    confirming ||
+                    previewRun.status === 'CONFIRMED' ||
+                    !previewRun.readyToConfirm
+                  }
+                  onClick={handleConfirm}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  <Boxes className="h-4 w-4" />
+                  {confirming
+                    ? 'Confirmando...'
+                    : previewRun.status === 'CONFIRMED'
+                      ? 'Elaboracion confirmada'
+                      : 'Confirmar elaboracion'}
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-10 text-center">
+              <FlaskConical className="mx-auto h-8 w-8 text-copy-soft" strokeWidth={1.9} />
+              <h3 className="mt-4 text-lg font-extrabold text-brand-ink">
+                Aun no hay una elaboracion preparada
+              </h3>
+              <p className="mt-2 text-sm leading-7 text-copy">
+                Selecciona una receta y prepara la elaboracion para revisar insumos, cantidades requeridas, lote sugerido y advertencias antes de confirmar.
+              </p>
+            </div>
+          )}
+        </Card>
       </div>
     </div>
   );

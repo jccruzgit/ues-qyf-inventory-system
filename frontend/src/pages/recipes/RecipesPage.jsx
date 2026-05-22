@@ -470,7 +470,7 @@ function RecipesPage() {
 
         <div className="space-y-6">
           <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-0">
-            <div className="grid gap-0 lg:grid-cols-[minmax(240px,0.32fr)_minmax(0,0.68fr)]">
+            <div className="grid gap-0 lg:grid-cols-[minmax(220px,0.28fr)_minmax(0,0.72fr)]">
               <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
                   <BookOpenCheck className="h-5 w-5" strokeWidth={2.1} />
@@ -488,61 +488,57 @@ function RecipesPage() {
                 </div>
               </aside>
 
-              <div className="p-6 sm:p-8">
+              <div className="p-6 sm:p-8 lg:p-10">
                 <form className="space-y-6" onSubmit={handleSubmit(handleSaveRecipe)}>
-                  <div className="grid gap-5 lg:grid-cols-2">
-                    <Field
-                      label="Producto elaborado"
-                      required
-                      error={errors.manufacturedProductId?.message}
+                  <Field
+                    label="Producto elaborado"
+                    required
+                    error={errors.manufacturedProductId?.message}
+                  >
+                    <select
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      defaultValue=""
+                      {...register('manufacturedProductId')}
                     >
-                      <select
-                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                        defaultValue=""
-                        {...register('manufacturedProductId')}
-                      >
-                        <option value="" disabled>
-                          Seleccione un producto elaborado
+                      <option value="" disabled>
+                        Seleccione un producto elaborado
+                      </option>
+                      {manufacturedProductOptions.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name} ({item.code})
                         </option>
-                        {manufacturedProductOptions.map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.name} ({item.code})
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
+                      ))}
+                    </select>
+                  </Field>
 
-                    <Field label="Codigo de receta" required error={errors.code?.message}>
-                      <input
-                        type="text"
-                        placeholder="Ej. REC-JAB-001"
-                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                        {...register('code')}
-                      />
-                    </Field>
-                  </div>
+                  <Field label="Codigo de receta" required error={errors.code?.message}>
+                    <input
+                      type="text"
+                      placeholder="Ej. REC-JAB-001"
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      {...register('code')}
+                    />
+                  </Field>
 
-                  <div className="grid gap-5 lg:grid-cols-2">
-                    <Field label="Nombre de receta" required error={errors.name?.message}>
-                      <input
-                        type="text"
-                        placeholder="Ej. Formula base de jabon liquido"
-                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                        {...register('name')}
-                      />
-                    </Field>
+                  <Field label="Nombre de receta" required error={errors.name?.message}>
+                    <input
+                      type="text"
+                      placeholder="Ej. Formula base de jabon liquido"
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      {...register('name')}
+                    />
+                  </Field>
 
-                    <label className="flex items-start gap-3 rounded-[22px] border border-brand-ink/[0.06] bg-white px-4 py-3">
-                      <input
-                        type="checkbox"
-                        className="mt-1 h-4 w-4 rounded border-brand-ink/20 text-brand-teal focus:ring-brand-teal/20"
-                        {...register('active')}
-                      />
-                      <span className="text-sm font-semibold leading-6 text-copy">
-                        Mantener la receta activa para nuevas elaboraciones.
-                      </span>
-                    </label>
-                  </div>
+                  <label className="flex items-start gap-3 rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 rounded border-brand-ink/20 text-brand-teal focus:ring-brand-teal/20"
+                      {...register('active')}
+                    />
+                    <span className="text-sm font-semibold leading-6 text-copy">
+                      Mantener la receta activa para nuevas elaboraciones.
+                    </span>
+                  </label>
 
                   <Field label="Descripcion" error={errors.description?.message}>
                     <textarea
@@ -565,11 +561,11 @@ function RecipesPage() {
                     </div>
                   ) : null}
 
-                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <button
                       type="button"
                       onClick={handleStartCreate}
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
                     >
                       <Eraser className="h-4 w-4" />
                       Limpiar
@@ -577,16 +573,10 @@ function RecipesPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       <Save className="h-4 w-4" />
-                      {isSubmitting
-                        ? selectedRecipe
-                          ? 'Guardando cambios...'
-                          : 'Guardando receta...'
-                        : selectedRecipe
-                          ? 'Guardar cambios'
-                          : 'Guardar receta'}
+                      {isSubmitting ? 'Guardando...' : 'Guardar'}
                     </button>
                   </div>
                 </form>
@@ -609,7 +599,10 @@ function RecipesPage() {
               </span>
             </div>
 
-            <form className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.55fr)_minmax(0,1fr)_auto]" onSubmit={handleSubmitItem(handleAddItem)}>
+            <form
+              className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]"
+              onSubmit={handleSubmitItem(handleAddItem)}
+            >
               <Field label="Insumo" required error={itemErrors.productId?.message}>
                 <select
                   className="w-full rounded-[22px] border border-transparent bg-white px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:ring-4 focus:ring-brand-teal/10"
@@ -666,11 +659,11 @@ function RecipesPage() {
                 />
               </Field>
 
-              <div className="flex items-end">
+              <div className="flex items-end lg:col-span-2">
                 <button
                   type="submit"
                   disabled={isSubmittingItem}
-                  className="inline-flex h-[54px] items-center justify-center gap-2 rounded-full bg-brand-ink px-5 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-full bg-brand-ink px-5 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:min-w-[160px]"
                 >
                   <PackagePlus className="h-4 w-4" />
                   Agregar

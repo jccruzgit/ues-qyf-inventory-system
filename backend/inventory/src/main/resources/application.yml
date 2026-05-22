@@ -39,10 +39,10 @@ app:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   demo:
     seed:
-      enabled: ${APP_DEMO_SEED_ENABLED:false}
+      enabled: ${APP_DEMO_SEED_ENABLED:true}
   default-admin:
-    enabled: ${APP_DEFAULT_ADMIN_ENABLED:false}
+    enabled: ${APP_DEFAULT_ADMIN_ENABLED:true}
     username: ${APP_DEFAULT_ADMIN_USERNAME:admin}
     email: ${APP_DEFAULT_ADMIN_EMAIL:admin@qyf.demo}
-    password: ${APP_DEFAULT_ADMIN_PASSWORD:}
+    password: ${APP_DEFAULT_ADMIN_PASSWORD:Admin123*}
     full-name: ${APP_DEFAULT_ADMIN_FULL_NAME:Administrador Demo}
