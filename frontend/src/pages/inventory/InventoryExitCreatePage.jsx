@@ -204,7 +204,7 @@ function InventoryExitCreatePage() {
 
     if (!batchOptions.length) {
       setServerMessage(
-        'No hay stock disponible para el producto seleccionado en el laboratorio indicado.',
+        'No hay stock disponible para el insumo seleccionado en el laboratorio indicado.',
       );
       setError('selectedBatchKey', {
         type: 'manual',
@@ -234,7 +234,7 @@ function InventoryExitCreatePage() {
   const stockMessage = stockError
     ? stockError
     : selectedProduct && selectedLaboratory && !stockLoading && !batchOptions.length
-      ? 'No hay lotes o existencias disponibles para registrar una salida de este producto en el laboratorio seleccionado.'
+      ? 'No hay lotes o existencias disponibles para registrar una salida de este insumo en el laboratorio seleccionado.'
       : '';
 
   return (
@@ -250,7 +250,7 @@ function InventoryExitCreatePage() {
 
         <SectionHeader
           title="Registrar salida"
-          subtitle="Registra descargos normales del inventario por laboratorio, producto y lote disponible sin alterar el flujo de reversion."
+          subtitle="Registra descargos normales del inventario por laboratorio, insumo y lote disponible sin alterar el flujo de reversion."
         />
       </div>
 
@@ -269,7 +269,7 @@ function InventoryExitCreatePage() {
             </p>
 
             <div className="mt-8 space-y-3 text-sm text-white/78">
-              <p>1. Seleccione laboratorio, producto y lote con existencias disponibles.</p>
+              <p>1. Seleccione laboratorio, insumo y lote con existencias disponibles.</p>
               <p>2. Indique la cantidad a descargar y documente las observaciones necesarias.</p>
               <p>3. Guarde para actualizar stock y dejar el movimiento visible en historial.</p>
             </div>
@@ -318,7 +318,7 @@ function InventoryExitCreatePage() {
                   No hay catalogos suficientes para registrar salidas
                 </h3>
                 <p className="mt-2 text-sm leading-7 text-copy">
-                  Verifique que existan productos activos y laboratorios disponibles antes de
+                  Verifique que existan insumos activos y laboratorios disponibles antes de
                   registrar una nueva salida de inventario.
                 </p>
               </div>

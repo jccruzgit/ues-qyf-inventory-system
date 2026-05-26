@@ -81,7 +81,7 @@ function translateInventoryMessage(message) {
     'Movement type is required': 'El tipo de movimiento es obligatorio.',
     'Laboratory id is required': 'El laboratorio es obligatorio.',
     'At least one movement line is required': 'Debe registrar al menos una linea de movimiento.',
-    'Product id is required': 'El producto es obligatorio.',
+    'Product id is required': 'El insumo es obligatorio.',
     'Quantity is required': 'La cantidad ingresada es obligatoria.',
     'Quantity must be greater than 0': 'La cantidad ingresada debe ser mayor que 0.',
     'Unit price must be greater than or equal to 0': 'El precio por unidad de medida debe ser mayor o igual a 0.',
@@ -101,15 +101,15 @@ function translateInventoryMessage(message) {
   }
 
   if (normalizedMessage.startsWith('Product not found with id:')) {
-    return 'El producto seleccionado ya no esta disponible.';
+    return 'El insumo seleccionado ya no esta disponible.';
   }
 
   if (normalizedMessage.startsWith('Batch is required for product')) {
-    return 'El numero de lote es obligatorio para el producto seleccionado.';
+    return 'El numero de lote es obligatorio para el insumo seleccionado.';
   }
 
   if (normalizedMessage.startsWith('Expiration date is required for product')) {
-    return 'La fecha de vencimiento es obligatoria para el producto seleccionado.';
+    return 'La fecha de vencimiento es obligatoria para el insumo seleccionado.';
   }
 
   if (normalizedMessage.startsWith('Unit price is required for entry movements')) {
@@ -121,7 +121,7 @@ function translateInventoryMessage(message) {
   }
 
   if (normalizedMessage.startsWith('Price unit must match the product base unit')) {
-    return 'La unidad del precio debe coincidir con la unidad base del producto.';
+    return 'La unidad del precio debe coincidir con la unidad base del insumo.';
   }
 
   if (normalizedMessage.startsWith('Expiration date does not match the existing batch data')) {
@@ -137,7 +137,7 @@ function translateInventoryMessage(message) {
   }
 
   if (normalizedMessage.startsWith('Product batch not found for product')) {
-    return 'No se encontro un lote disponible para el producto seleccionado.';
+    return 'No se encontro un lote disponible para el insumo seleccionado.';
   }
 
   if (normalizedMessage.startsWith('Product batch does not belong to the selected laboratory')) {
@@ -145,11 +145,11 @@ function translateInventoryMessage(message) {
   }
 
   if (normalizedMessage.startsWith('Product batch does not belong to the selected product')) {
-    return 'El lote indicado no pertenece al producto seleccionado.';
+    return 'El lote indicado no pertenece al insumo seleccionado.';
   }
 
-  if (normalizedMessage.startsWith('A product cannot be repeated in the same movement')) {
-    return 'No se puede repetir el mismo producto dentro del mismo movimiento.';
+  if (normalizedMessage.startsWith('A product batch combination cannot be repeated in the same movement')) {
+    return 'No se puede repetir el mismo insumo con el mismo lote dentro del movimiento.';
   }
 
   if (normalizedMessage.startsWith('Insufficient stock for')) {
@@ -226,7 +226,7 @@ export async function fetchInventoryStock(filters = {}) {
       id: item.productBatchId ?? `${item.productId}-${item.laboratoryId}`,
       productId: item.productId,
       productCode: item.productCode?.trim() || 'SIN-CODIGO',
-      productName: item.productName?.trim() || 'Producto sin nombre',
+      productName: item.productName?.trim() || 'Insumo sin nombre',
       laboratoryId: item.laboratoryId,
       laboratoryCode: item.laboratoryCode?.trim() || '',
       laboratoryName: item.laboratoryName?.trim() || 'Laboratorio no definido',

@@ -77,7 +77,7 @@ function ProductCreatePage() {
       await createProduct(values);
       navigate('/products', {
         replace: true,
-        state: { notice: 'Producto creado correctamente.' },
+        state: { notice: 'Insumo creado correctamente.' },
       });
     } catch (error) {
       const details = getCreateProductErrorDetails(error);
@@ -101,12 +101,12 @@ function ProductCreatePage() {
           className="inline-flex items-center gap-2 text-sm font-extrabold text-copy transition hover:text-brand-ink"
         >
           <ArrowLeft className="h-4 w-4" />
-          Volver a productos
+          Volver a insumos
         </Link>
 
         <SectionHeader
-          title="Nuevo producto"
-          subtitle="Registra un nuevo producto real en el catalogo institucional."
+          title="Nuevo insumo"
+          subtitle="Registra un nuevo insumo real en el catalogo institucional."
         />
       </div>
 
@@ -117,10 +117,10 @@ function ProductCreatePage() {
               <PackagePlus className="h-5 w-5" strokeWidth={2.2} />
             </div>
             <h2 className="mt-8 text-3xl font-extrabold tracking-[-0.05em]">
-              Alta de producto
+              Alta de insumo
             </h2>
             <p className="mt-4 text-sm leading-7 text-white/72">
-              Completa los datos requeridos para crear un producto real y dejarlo disponible
+              Completa los datos requeridos para crear un insumo real y dejarlo disponible
               en el listado principal.
             </p>
 
@@ -170,11 +170,11 @@ function ProductCreatePage() {
             ) : !hasCatalogData ? (
               <div className="rounded-[28px] border border-brand-ink/[0.06] bg-surface-2/70 p-6">
                 <h3 className="text-lg font-extrabold text-brand-ink">
-                  Faltan catalogos para registrar productos
+                  Faltan catalogos para registrar insumos
                 </h3>
                 <p className="mt-2 text-sm leading-7 text-copy">
                   Verifica que existan categorias, unidades base y ubicaciones activas en el
-                  backend antes de crear un nuevo producto.
+                  backend antes de crear un nuevo insumo.
                 </p>
               </div>
             ) : (
@@ -184,7 +184,7 @@ function ProductCreatePage() {
                 categories={catalogs.categories}
                 units={catalogs.units}
                 locations={catalogs.locations}
-                submitLabel={isSubmitting ? 'Guardando producto...' : 'Guardar producto'}
+                submitLabel={isSubmitting ? 'Guardando insumo...' : 'Guardar insumo'}
                 isSubmitting={isSubmitting}
                 onCancel={() => navigate('/products')}
                 serverMessage={serverMessage}

@@ -26,5 +26,10 @@ public class InventoryMovementResponseDto {
     private String correctionReason;
     private String observation;
     private Long attachmentDocumentId;
+    private Long productionRunId;
+    private Long recipeId;
+    private String recipeName;
+    private Long manufacturedProductId;
+    private String manufacturedProductName;
     private List<InventoryMovementLineResponseDto> lines;
 }

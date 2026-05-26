@@ -121,7 +121,7 @@ function MovementTable({
                 'Fecha',
                 'Tipo',
                 'Estado',
-                'Producto',
+                'Insumo',
                 'Lote',
                 'Cantidad',
                 'Unidad',
@@ -129,6 +129,7 @@ function MovementTable({
                 'Unidad precio',
                 'Laboratorio',
                 'Usuario',
+                'Elaboracion',
                 'Observacion general',
                 'Nota por linea',
                 'Acciones',
@@ -194,6 +195,22 @@ function MovementTable({
                 </td>
                 <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top text-sm font-semibold text-copy">
                   {row.username}
+                </td>
+                <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top text-sm font-semibold text-copy">
+                  <div className="min-w-[210px]">
+                    {row.productionRunId ? (
+                      <>
+                        <p className="font-extrabold text-brand-ink">
+                          {row.manufacturedProductName || 'Elaboracion asociada'}
+                        </p>
+                        <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-copy-soft">
+                          Receta {row.recipeName || 'sin nombre'} • Run #{row.productionRunId}
+                        </p>
+                      </>
+                    ) : (
+                      <span>Descargo individual</span>
+                    )}
+                  </div>
                 </td>
                 <td className="border-b border-brand-ink/[0.06] px-5 py-4 align-top text-sm font-semibold text-copy">
                   <p className="max-w-[280px] leading-6">{row.movementObservation}</p>

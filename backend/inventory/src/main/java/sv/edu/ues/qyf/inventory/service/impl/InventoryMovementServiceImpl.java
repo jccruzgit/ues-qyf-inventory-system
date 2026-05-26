@@ -129,7 +129,7 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Laboratory not found with id: " + request.getLaboratoryId()));
         User currentUser = currentUserService.getAuthenticatedUser();
-        validateNoDuplicateProducts(request.getLines());
+        validateNoDuplicateProductBatchCombinations(request.getLines());
 
         InventoryMovement movement = InventoryMovement.builder()
                 .movementType(request.getMovementType())
@@ -430,11 +430,16 @@ public class InventoryMovementServiceImpl implements InventoryMovementService {
         product.setCurrentStock(product.getCurrentStock().subtract(quantity));
     }
 
-    private void validateNoDuplicateProducts(List<InventoryMovementLineRequestDto> lines) {
-        Set<Long> productIds = new HashSet<>();
+    private void validateNoDuplicateProductBatchCombinations(List<InventoryMovementLineRequestDto> lines) {
+        Set<String> lineKeys = new HashSet<>();
         for (InventoryMovementLineRequestDto line : lines) {
-            if (!productIds.add(line.getProductId())) {
-                throw new BadRequestException("A product cannot be repeated in the same movement");
+            String batchKey = line.getProductBatchId() != null
+                    ? "batch-id:" + line.getProductBatchId()
+                    : hasText(line.getBatchCode()) ? "batch-code:" + normalize(line.getBatchCode()) : "no-batch";
+            String lineKey = line.getProductId() + "|" + batchKey;
+            if (!lineKeys.add(lineKey)) {
+                throw new BadRequestException(
+                        "A product batch combination cannot be repeated in the same movement");
             }
         }
     }

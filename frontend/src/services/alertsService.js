@@ -122,7 +122,7 @@ export async function fetchInventoryAlerts(filters = {}) {
       laboratoryName: normalizeText(item.laboratoryName, 'Laboratorio no definido'),
       productId: item.productId ?? null,
       productCode: normalizeText(item.productCode, 'SIN-CODIGO'),
-      productName: normalizeText(item.productName, 'Producto sin nombre'),
+      productName: normalizeText(item.productName, 'Insumo sin nombre'),
       productBatchId: item.productBatchId ?? null,
       batchCode: normalizeText(item.batchCode),
       locationName: normalizeText(item.locationName),

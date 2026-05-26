@@ -199,15 +199,15 @@ function AlertCard({ alert }) {
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
-            {alert.laboratoryCode ? `${alert.laboratoryCode} · ` : ''}
+            {alert.laboratoryCode ? `${alert.laboratoryCode} / ` : ''}
             {alert.laboratoryName}
           </p>
           <h3 className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-brand-ink">
             {alert.productName}
           </h3>
           <p className="mt-2 text-sm font-semibold text-copy">
-            Codigo producto: <span className="text-brand-ink">{alert.productCode}</span>
-            {alert.batchCode ? ` · Lote ${alert.batchCode}` : ''}
+            Codigo insumo: <span className="text-brand-ink">{alert.productCode}</span>
+            {alert.batchCode ? ` / Lote ${alert.batchCode}` : ''}
           </p>
         </div>
 

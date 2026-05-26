@@ -148,7 +148,7 @@ export function buildInventoryOverview(products, stockItems) {
     cards.push({
       id: group.key,
       productId: group.productId,
-      productName: product?.name ?? group.stockRows[0]?.productName ?? 'Producto sin nombre',
+      productName: product?.name ?? group.stockRows[0]?.productName ?? 'Insumo sin nombre',
       productCode: product?.code ?? group.stockRows[0]?.productCode ?? 'SIN-CODIGO',
       category: product?.category ?? 'Sin categoria',
       type: product?.type ?? 'Sin clasificacion',

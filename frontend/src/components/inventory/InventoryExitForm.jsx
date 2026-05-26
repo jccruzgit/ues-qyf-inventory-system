@@ -73,7 +73,7 @@ function InventoryExitForm({
   return (
     <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
       <div className="grid gap-5 lg:grid-cols-2">
-        <Field label="Producto" required error={errors.productId?.message}>
+        <Field label="Insumo" required error={errors.productId?.message}>
           <select
             className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
             defaultValue=""
@@ -81,7 +81,7 @@ function InventoryExitForm({
             {...register('productId')}
           >
             <option value="" disabled>
-              Seleccione un producto
+              Seleccione un insumo
             </option>
             {products.map((product) => (
               <option key={product.id} value={product.id}>
@@ -120,7 +120,7 @@ function InventoryExitForm({
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
-                Producto seleccionado
+                Insumo seleccionado
               </p>
               <h3 className="mt-3 text-xl font-extrabold tracking-[-0.04em] text-brand-ink">
                 {selectedProduct.name}
@@ -164,7 +164,7 @@ function InventoryExitForm({
             !selectedLaboratory
               ? 'Seleccione un laboratorio para consultar lotes disponibles.'
               : !selectedProduct
-                ? 'Seleccione un producto para cargar los lotes con stock.'
+                ? 'Seleccione un insumo para cargar los lotes con stock.'
                 : selectedBatch
                   ? `Disponible: ${selectedBatch.quantityAvailable} ${selectedBatch.unit}. Vence: ${formatDate(selectedBatch.expirationDate)}.`
                   : 'Seleccione el lote o existencia disponible que desea descargar.'
@@ -204,13 +204,13 @@ function InventoryExitForm({
         <Field
           label="Unidad de medida"
           required
-          hint="La salida se registra en la unidad base configurada para el producto."
+          hint="La salida se registra en la unidad base configurada para el insumo."
         >
           <select
             className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
             {...register('unitLabel')}
           >
-            <option value={selectedProduct?.unit ?? ''}>{selectedProduct?.unit ?? 'Seleccione un producto'}</option>
+            <option value={selectedProduct?.unit ?? ''}>{selectedProduct?.unit ?? 'Seleccione un insumo'}</option>
           </select>
         </Field>
 
@@ -236,7 +236,7 @@ function InventoryExitForm({
           </p>
           <div className="mt-4 space-y-3 text-sm font-semibold text-copy">
             <p>
-              <span className="font-extrabold text-brand-ink">Producto:</span> {selectedProductStock}{' '}
+              <span className="font-extrabold text-brand-ink">Insumo:</span> {selectedProductStock}{' '}
               {selectedProduct?.unit ?? 'unidades'}
             </p>
             <p>

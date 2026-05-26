@@ -56,7 +56,7 @@ function MovementFilters({
         onChange={(value) => onFilterChange('movementType', value)}
       />
       <FilterSelect
-        label="Producto"
+        label="Insumo"
         value={filters.productId}
         options={productOptions}
         onChange={(value) => onFilterChange('productId', value)}

@@ -104,7 +104,7 @@ function MovementsEmptyState({ isFiltered, onReset }) {
         </h3>
         <p className="mt-3 max-w-[560px] text-base leading-8 text-copy">
           {isFiltered
-            ? 'No se encontraron movimientos para los filtros seleccionados. Ajuste fechas, tipo, producto o laboratorio.'
+            ? 'No se encontraron movimientos para los filtros seleccionados. Ajuste fechas, tipo, insumo o laboratorio.'
             : 'Cuando se registren entradas o salidas, el historial completo aparecera aqui para auditoria y reportes.'}
         </p>
         {isFiltered ? (
@@ -156,7 +156,7 @@ function ReverseMovementModal({
           para mantener la trazabilidad.
         </p>
         <div className="mt-5 rounded-[24px] border border-[#f7d7b5] bg-[#fff7eb] px-4 py-3 text-sm font-semibold leading-6 text-[#915b10]">
-          Tipo original: {movement.movementTypeLabel}. Producto de referencia: {movement.productName}.
+          Tipo original: {movement.movementTypeLabel}. Insumo de referencia: {movement.productName}.
         </div>
 
         <label className="mt-6 block">
@@ -437,7 +437,7 @@ function MovementsPage() {
     <div className="space-y-6">
       <SectionHeader
         title="Movimientos de inventario"
-        subtitle="Revise entradas, salidas y reversiones por fecha, producto, lote, laboratorio, usuario y observaciones."
+        subtitle="Revise entradas, salidas y reversiones por fecha, insumo, lote, laboratorio, usuario y observaciones."
         action={
           <Link
             to="/inventory/entries/new"

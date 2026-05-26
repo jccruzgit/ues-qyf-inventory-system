@@ -310,6 +310,68 @@ class InventoryMovementServiceImplTest {
     }
 
     @Test
+    void create_exitAllowsSameProductAcrossDifferentBatches() {
+        InventoryMovementRequestDto request = new InventoryMovementRequestDto(
+                MovementType.EXIT,
+                3L,
+                "Salida FEFO",
+                List.of(
+                        new InventoryMovementLineRequestDto(9L, 70L, new BigDecimal("10"), "Primer lote"),
+                        new InventoryMovementLineRequestDto(9L, 71L, new BigDecimal("15"), "Segundo lote")));
+        Laboratory laboratory = Laboratory.builder().id(3L).active(Boolean.TRUE).build();
+        Product product = Product.builder()
+                .id(9L)
+                .code("PRD-9")
+                .name("Reactivo")
+                .currentStock(new BigDecimal("100"))
+                .requiresBatchControl(Boolean.TRUE)
+                .requiresExpiration(Boolean.FALSE)
+                .active(Boolean.TRUE)
+                .build();
+        ProductBatch firstBatch = ProductBatch.builder()
+                .id(70L)
+                .product(product)
+                .laboratory(laboratory)
+                .batchCode("LOT-001")
+                .status(BatchStatus.ACTIVE)
+                .active(Boolean.TRUE)
+                .build();
+        ProductBatch secondBatch = ProductBatch.builder()
+                .id(71L)
+                .product(product)
+                .laboratory(laboratory)
+                .batchCode("LOT-002")
+                .status(BatchStatus.ACTIVE)
+                .active(Boolean.TRUE)
+                .build();
+        User currentUser = buildUser();
+
+        when(laboratoryRepository.findByIdAndActiveTrue(3L)).thenReturn(Optional.of(laboratory));
+        when(productRepository.findByIdAndActiveTrue(9L)).thenReturn(Optional.of(product));
+        when(productBatchRepository.findByIdAndActiveTrue(70L)).thenReturn(Optional.of(firstBatch));
+        when(productBatchRepository.findByIdAndActiveTrue(71L)).thenReturn(Optional.of(secondBatch));
+        when(currentUserService.getAuthenticatedUser()).thenReturn(currentUser);
+        when(inventoryMovementLineRepository.calculateCurrentStockByBatchId(70L, MovementType.ENTRY))
+                .thenReturn(new BigDecimal("10"));
+        when(inventoryMovementLineRepository.calculateCurrentStockByBatchId(71L, MovementType.ENTRY))
+                .thenReturn(new BigDecimal("20"));
+        when(productBatchRepository.save(any(ProductBatch.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(inventoryMovementRepository.save(any(InventoryMovement.class))).thenAnswer(invocation -> {
+            InventoryMovement movement = invocation.getArgument(0);
+            movement.setId(17L);
+            movement.getLines().get(0).setId(40L);
+            movement.getLines().get(1).setId(41L);
+            return movement;
+        });
+
+        InventoryMovementResponseDto response = inventoryMovementService.create(request);
+
+        assertThat(product.getCurrentStock()).isEqualByComparingTo("75");
+        assertThat(response.getLines()).hasSize(2);
+        assertThat(response.getLines()).extracting("productBatchId").containsExactly(70L, 71L);
+    }
+
+    @Test
     void getByLaboratory_validatesAccessBeforeLoadingMovements() {
         InventoryMovement movement = InventoryMovement.builder()
                 .id(4L)

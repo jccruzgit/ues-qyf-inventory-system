@@ -37,6 +37,25 @@ public class InventoryMovementMapper {
                 .attachmentDocumentId(inventoryMovement.getAttachmentDocument() != null
                         ? inventoryMovement.getAttachmentDocument().getId()
                         : null)
+                .productionRunId(inventoryMovement.getProductionRun() != null
+                        ? inventoryMovement.getProductionRun().getId()
+                        : null)
+                .recipeId(inventoryMovement.getProductionRun() != null
+                                && inventoryMovement.getProductionRun().getRecipe() != null
+                        ? inventoryMovement.getProductionRun().getRecipe().getId()
+                        : null)
+                .recipeName(inventoryMovement.getProductionRun() != null
+                                && inventoryMovement.getProductionRun().getRecipe() != null
+                        ? inventoryMovement.getProductionRun().getRecipe().getName()
+                        : null)
+                .manufacturedProductId(inventoryMovement.getProductionRun() != null
+                                && inventoryMovement.getProductionRun().getManufacturedProduct() != null
+                        ? inventoryMovement.getProductionRun().getManufacturedProduct().getId()
+                        : null)
+                .manufacturedProductName(inventoryMovement.getProductionRun() != null
+                                && inventoryMovement.getProductionRun().getManufacturedProduct() != null
+                        ? inventoryMovement.getProductionRun().getManufacturedProduct().getName()
+                        : null)
                 .lines(mapLines(inventoryMovement.getLines()))
                 .build();
     }

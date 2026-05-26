@@ -106,7 +106,7 @@ function ProductsLoadingState() {
   return (
     <div className="space-y-4">
       <div className="hidden grid-cols-[minmax(280px,1.55fr)_minmax(160px,0.72fr)_minmax(170px,0.82fr)_minmax(220px,0.8fr)_44px] gap-4 px-6 text-[0.7rem] font-extrabold uppercase tracking-[0.24em] text-copy-soft lg:grid">
-        <span>Producto y codigo</span>
+        <span>Insumo y codigo</span>
         <span>Clasificacion</span>
         <span>Nivel de riesgo</span>
         <span>En stock</span>
@@ -230,7 +230,7 @@ function ProductsPage() {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Productos"
+        title="Insumos"
         subtitle="Gestiona el catalogo operativo de insumos, equipos y reactivos del laboratorio."
         action={
           <Link
@@ -238,7 +238,7 @@ function ProductsPage() {
             className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(23,61,44,0.2)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong"
           >
             <Plus className="h-4 w-4" strokeWidth={2.4} />
-            Nuevo producto
+            Nuevo insumo
           </Link>
         }
       />
@@ -268,7 +268,7 @@ function ProductsPage() {
         ) : filteredProducts.length ? (
           <>
             <div className="hidden grid-cols-[minmax(280px,1.55fr)_minmax(160px,0.72fr)_minmax(170px,0.82fr)_minmax(220px,0.8fr)_44px] gap-4 px-6 text-[0.7rem] font-extrabold uppercase tracking-[0.24em] text-copy-soft lg:grid">
-              <span>Producto y codigo</span>
+              <span>Insumo y codigo</span>
               <span>Clasificacion</span>
               <span>Nivel de riesgo</span>
               <span>En stock</span>
@@ -302,7 +302,7 @@ function ProductsPage() {
             </div>
 
             <div className="pt-2 text-sm font-semibold text-copy">
-              Mostrando {filteredProducts.length} de {totalProducts} productos
+              Mostrando {filteredProducts.length} de {totalProducts} insumos
             </div>
           </>
         ) : (
@@ -313,13 +313,13 @@ function ProductsPage() {
               </div>
               <h3 className="mt-6 text-2xl font-extrabold tracking-[-0.04em] text-brand-ink">
                 {hasRegisteredProducts
-                  ? 'No se encontraron productos'
-                  : 'Aun no hay productos registrados'}
+                  ? 'No se encontraron insumos'
+                  : 'Aun no hay insumos registrados'}
               </h3>
               <p className="mt-3 max-w-[520px] text-base leading-8 text-copy">
                 {hasRegisteredProducts
                   ? 'Ajusta la categoria, el laboratorio o la condicion de almacenamiento para ver resultados disponibles en el catalogo.'
-                  : 'Crea el primer producto del catalogo para habilitar el flujo de entradas, stock y movimientos de la demo.'}
+                  : 'Crea el primer insumo del catalogo para habilitar el flujo de entradas, stock y movimientos de la demo.'}
               </p>
               {hasRegisteredProducts ? (
                 <button
@@ -340,7 +340,7 @@ function ProductsPage() {
                   className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-ink-strong"
                 >
                   <Plus className="h-4 w-4" />
-                  Crear primer producto
+                  Crear primer insumo
                 </Link>
               )}
             </div>
