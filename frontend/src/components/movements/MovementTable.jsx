@@ -204,7 +204,7 @@ function MovementTable({
                           {row.manufacturedProductName || 'Elaboracion asociada'}
                         </p>
                         <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-copy-soft">
-                          Receta {row.recipeName || 'sin nombre'} • Run #{row.productionRunId}
+                          Formula {row.recipeName || 'sin nombre'} • Run #{row.productionRunId}
                         </p>
                       </>
                     ) : (

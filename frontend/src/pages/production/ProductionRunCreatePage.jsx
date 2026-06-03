@@ -260,7 +260,7 @@ function ProductionRunCreatePage() {
     <div className="space-y-6">
       <SectionHeader
         title="Elaboracion"
-        subtitle="Prepara un descargo por receta, revisa los insumos sugeridos por lote y confirma la salida de inventario sin afectar el descargo individual."
+        subtitle="Prepara un descargo por formula, revisa los insumos sugeridos por lote y confirma la salida de inventario sin afectar el descargo individual."
         action={
           <Link
             to="/inventory/exits/new"
@@ -286,15 +286,15 @@ function ProductionRunCreatePage() {
                 <BookOpenCheck className="h-5 w-5" strokeWidth={2.1} />
               </div>
               <h2 className="mt-8 text-3xl font-extrabold tracking-[-0.05em]">
-                Descargo por receta
+                Descargo por formula
               </h2>
               <p className="mt-4 text-sm leading-7 text-white/72">
-                Este flujo toma una receta, valida stock completo y crea una salida trazable con una linea por cada lote sugerido.
+                Este flujo toma una formula, valida stock completo y crea una salida trazable con una linea por cada lote sugerido.
               </p>
               <div className="mt-8 space-y-3 text-sm text-white/78">
-                <p>1. Selecciona producto elaborado, receta y laboratorio.</p>
+                <p>1. Selecciona producto a elaborar, formula y laboratorio.</p>
                 <p>2. Prepara la elaboracion para revisar insumos, cantidades y lotes FEFO.</p>
-                <p>3. Confirma solo si toda la receta tiene disponibilidad suficiente.</p>
+                <p>3. Confirma solo si toda la formula tiene disponibilidad suficiente.</p>
               </div>
             </aside>
 
@@ -315,7 +315,7 @@ function ProductionRunCreatePage() {
               ) : (
                 <form className="max-w-[440px] space-y-6" onSubmit={handleSubmit(handlePrepare)}>
                   <Field
-                    label="Producto elaborado"
+                    label="Producto a elaborar"
                     required
                     error={errors.manufacturedProductId?.message}
                   >
@@ -325,20 +325,20 @@ function ProductionRunCreatePage() {
                       {...register('manufacturedProductId')}
                     >
                       <option value="" disabled>
-                        Seleccione un producto elaborado
+                        Seleccione un producto a elaborar
                       </option>
                       {manufacturedProducts
                         .filter((item) => item.active)
                         .sort((left, right) => left.name.localeCompare(right.name))
                         .map((item) => (
                           <option key={item.id} value={item.id}>
-                            {item.name} ({item.code})
+                            {item.name} ({item.code}){item.groupCode ? ` • ${item.groupCode}` : ''}
                           </option>
                         ))}
                     </select>
                   </Field>
 
-                  <Field label="Receta" required error={errors.recipeId?.message}>
+                  <Field label="Formula" required error={errors.recipeId?.message}>
                     <select
                       className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
                       defaultValue=""
@@ -347,8 +347,8 @@ function ProductionRunCreatePage() {
                     >
                       <option value="" disabled>
                         {selectedManufacturedProductId
-                          ? 'Seleccione una receta'
-                          : 'Seleccione primero un producto elaborado'}
+                          ? 'Seleccione una formula'
+                          : 'Seleccione primero un producto a elaborar'}
                       </option>
                       {recipeOptions.map((item) => (
                         <option key={item.id} value={item.id}>
@@ -403,7 +403,7 @@ function ProductionRunCreatePage() {
 
                   {selectedRecipe ? (
                     <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-4 py-4 text-sm font-semibold text-copy">
-                      Esta receta contiene <span className="text-brand-ink">{selectedRecipe.items.length}</span> insumo(s) registrados.
+                      Esta formula contiene <span className="text-brand-ink">{selectedRecipe.items.length}</span> insumo(s) registrados.
                     </div>
                   ) : null}
 
@@ -465,13 +465,13 @@ function ProductionRunCreatePage() {
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
                     <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-copy-soft">
-                      Producto elaborado
+                      Producto a elaborar
                     </p>
                     <h4 className="mt-2 text-lg font-extrabold text-brand-ink">
                       {previewRun.manufacturedProductName}
                     </h4>
                     <p className="mt-1 text-sm leading-6 text-copy">
-                      Receta {previewRun.recipeCode} / {previewRun.recipeName}
+                      Formula {previewRun.recipeCode} / {previewRun.recipeName}
                     </p>
                   </div>
 
@@ -576,7 +576,7 @@ function ProductionRunCreatePage() {
                       />
                       <PreviewDataCell
                         label="Observaciones"
-                        value={item.observations || 'Sin observaciones en la receta.'}
+                        value={item.observations || 'Sin observaciones en la formula.'}
                       />
                     </div>
 
@@ -711,7 +711,7 @@ function ProductionRunCreatePage() {
                 Aun no hay una elaboracion preparada
               </h3>
               <p className="mt-2 text-sm leading-7 text-copy">
-                Selecciona una receta y prepara la elaboracion para revisar insumos, cantidades requeridas, lote sugerido y advertencias antes de confirmar.
+                Selecciona una formula y prepara la elaboracion para revisar insumos, cantidades requeridas, lote sugerido y advertencias antes de confirmar.
               </p>
             </div>
           )}

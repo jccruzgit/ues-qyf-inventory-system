@@ -42,9 +42,9 @@ function translateRecipeMessage(message) {
 
   const exactMessages = {
     'Manufactured product id is required':
-      'Debe seleccionar un producto elaborado para la receta.',
-    'Recipe code is required': 'El codigo de la receta es obligatorio.',
-    'Recipe name is required': 'El nombre de la receta es obligatorio.',
+      'Debe seleccionar un producto a elaborar para la formula.',
+    'Recipe code is required': 'El codigo de la formula es obligatorio.',
+    'Recipe name is required': 'El nombre de la formula es obligatorio.',
     'Recipe code must not exceed 50 characters': 'El codigo no debe exceder 50 caracteres.',
     'Recipe name must not exceed 150 characters': 'El nombre no debe exceder 150 caracteres.',
     'Recipe description must not exceed 500 characters':
@@ -53,9 +53,9 @@ function translateRecipeMessage(message) {
     'Unit of measure id is required': 'La unidad de medida es obligatoria.',
     'Quantity is required': 'La cantidad es obligatoria.',
     'Quantity must be greater than 0': 'La cantidad debe ser mayor que cero.',
-    'Validation failed': 'Los datos de la receta no son validos.',
-    'Access denied': 'No tiene permisos para gestionar recetas.',
-    'An unexpected error occurred': 'Ocurrio un error inesperado al procesar la receta.',
+    'Validation failed': 'Los datos de la formula no son validos.',
+    'Access denied': 'No tiene permisos para gestionar formulas.',
+    'An unexpected error occurred': 'Ocurrio un error inesperado al procesar la formula.',
   };
 
   if (exactMessages[normalizedMessage]) {
@@ -63,23 +63,23 @@ function translateRecipeMessage(message) {
   }
 
   if (normalizedMessage.startsWith('Recipe code already exists')) {
-    return 'Ya existe una receta con ese codigo.';
+    return 'Ya existe una formula con ese codigo.';
   }
 
   if (normalizedMessage.startsWith('Manufactured product not found with id:')) {
-    return 'El producto elaborado seleccionado ya no esta disponible.';
+    return 'El producto a elaborar seleccionado ya no esta disponible.';
   }
 
   if (normalizedMessage.startsWith('Recipe not found with id:')) {
-    return 'La receta seleccionada ya no esta disponible.';
+    return 'La formula seleccionada ya no esta disponible.';
   }
 
   if (normalizedMessage.startsWith('Recipe item not found with id:')) {
-    return 'El insumo seleccionado ya no forma parte de la receta.';
+    return 'El insumo seleccionado ya no forma parte de la formula.';
   }
 
   if (normalizedMessage.startsWith('Recipe already contains product id:')) {
-    return 'Ese insumo ya forma parte de la receta.';
+    return 'Ese insumo ya forma parte de la formula.';
   }
 
   if (normalizedMessage.startsWith('Product not found with id:')) {
@@ -123,10 +123,13 @@ function adaptRecipeFromApi(item) {
     manufacturedProductCode: normalizeText(item?.manufacturedProductCode, 'SIN-CODIGO'),
     manufacturedProductName: normalizeText(
       item?.manufacturedProductName,
-      'Producto elaborado sin nombre',
+      'Producto a elaborar sin nombre',
     ),
+    manufacturedProductGroupCode: normalizeText(item?.manufacturedProductGroupCode ?? item?.groupCode, ''),
+    manufacturedProductCycle: normalizeText(item?.manufacturedProductCycle ?? item?.cycle, ''),
+    manufacturedProductLotNumber: normalizeText(item?.manufacturedProductLotNumber ?? item?.lotNumber, ''),
     code: normalizeText(item?.code, 'SIN-CODIGO'),
-    name: normalizeText(item?.name, 'Receta sin nombre'),
+    name: normalizeText(item?.name, 'Formula sin nombre'),
     description: normalizeText(item?.description),
     active: item?.active !== false,
     createdAt: normalizeText(item?.createdAt),
@@ -194,7 +197,7 @@ export function getRecipesErrorMessage(error) {
   }
 
   if (error?.response?.status === 403) {
-    return 'No tiene permisos para consultar recetas.';
+    return 'No tiene permisos para consultar formulas.';
   }
 
   if (error?.response?.data?.message) {
@@ -209,7 +212,7 @@ export function getRecipesErrorMessage(error) {
     return translateRecipeMessage(error.message);
   }
 
-  return 'No fue posible cargar las recetas.';
+  return 'No fue posible cargar las formulas.';
 }
 
 export function getRecipeMutationErrorDetails(error) {

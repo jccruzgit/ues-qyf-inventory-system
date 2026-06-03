@@ -16,6 +16,9 @@ import {
 const defaultValues = {
   code: '',
   name: '',
+  groupCode: '',
+  cycle: '',
+  lotNumber: '',
   description: '',
   active: true,
 };
@@ -110,6 +113,9 @@ function ManufacturedProductsPage() {
     reset({
       code: item.code,
       name: item.name,
+      groupCode: item.groupCode,
+      cycle: item.cycle,
+      lotNumber: item.lotNumber,
       description: item.description,
       active: item.active,
     });
@@ -136,13 +142,16 @@ function ManufacturedProductsPage() {
       reset({
         code: savedProduct.code,
         name: savedProduct.name,
+        groupCode: savedProduct.groupCode,
+        cycle: savedProduct.cycle,
+        lotNumber: savedProduct.lotNumber,
         description: savedProduct.description,
         active: savedProduct.active,
       });
       setFeedback(
         editingId
-          ? 'Producto elaborado actualizado correctamente.'
-          : 'Producto elaborado creado correctamente.',
+          ? 'Producto a elaborar actualizado correctamente.'
+          : 'Producto a elaborar creado correctamente.',
       );
     } catch (requestError) {
       const details = getManufacturedProductMutationErrorDetails(requestError);
@@ -160,8 +169,8 @@ function ManufacturedProductsPage() {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Productos elaborados"
-        subtitle="Administra los productos que se fabrican en el laboratorio y que luego se vinculan a recetas."
+        title="Productos a elaborar"
+        subtitle="Administra los productos que entraran a formulacion en el laboratorio y que luego se vinculan a formulas."
         action={
           <button
             type="button"
@@ -169,7 +178,7 @@ function ManufacturedProductsPage() {
             className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(23,61,44,0.2)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong"
           >
             <PackagePlus className="h-4 w-4" strokeWidth={2.3} />
-            Nuevo producto elaborado
+            Nuevo producto a elaborar
           </button>
         }
       />
@@ -188,7 +197,7 @@ function ManufacturedProductsPage() {
                 Catalogo actual
               </p>
               <h3 className="mt-2 text-xl font-extrabold tracking-[-0.04em] text-brand-ink">
-                Productos elaborados registrados
+                Productos a elaborar registrados
               </h3>
             </div>
 
@@ -243,6 +252,9 @@ function ManufacturedProductsPage() {
                           <h4 className="mt-2 text-lg font-extrabold tracking-[-0.03em] text-brand-ink">
                             {item.name}
                           </h4>
+                          <p className="mt-2 text-xs font-bold uppercase tracking-[0.16em] text-copy-soft">
+                            Grupo {item.groupCode || 'Sin grupo'} • Ciclo {item.cycle || 'Sin ciclo'} • Lote {item.lotNumber || 'Sin lote'}
+                          </p>
                         </div>
 
                         <span
@@ -270,10 +282,10 @@ function ManufacturedProductsPage() {
             <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-8 text-center">
               <SearchX className="mx-auto h-8 w-8 text-copy-soft" strokeWidth={1.9} />
               <h3 className="mt-4 text-lg font-extrabold text-brand-ink">
-                Aun no hay productos elaborados
+                Aun no hay productos a elaborar
               </h3>
               <p className="mt-2 text-sm leading-7 text-copy">
-                Registra el primer producto elaborado para comenzar a definir recetas y descargos por elaboracion.
+                Registra el primer producto a elaborar para comenzar a definir formulas y descargos por elaboracion.
               </p>
             </div>
           )}
@@ -290,15 +302,15 @@ function ManufacturedProductsPage() {
                 )}
               </div>
               <h2 className="mt-8 text-3xl font-extrabold tracking-[-0.05em]">
-                {editingProduct ? 'Editar producto elaborado' : 'Nuevo producto elaborado'}
+                {editingProduct ? 'Editar producto a elaborar' : 'Nuevo producto a elaborar'}
               </h2>
               <p className="mt-4 text-sm leading-7 text-white/72">
-                Define el producto final que se fabrica con una receta. Este catalogo no reemplaza a los insumos del inventario actual.
+                Define el producto que entrara a fase de formulacion. Este catalogo no reemplaza a los insumos del inventario actual.
               </p>
               <div className="mt-8 space-y-3 text-sm text-white/78">
-                <p>1. Registra codigo, nombre y descripcion operativa.</p>
-                <p>2. Mantiene el estado activo para recetas vigentes.</p>
-                <p>3. Luego crea una receta y sus insumos asociados.</p>
+                <p>1. Registra codigo, nombre y trazabilidad academica.</p>
+                <p>2. Mantiene el estado activo para formulas vigentes.</p>
+                <p>3. Luego crea una formula teorica y sus insumos asociados.</p>
               </div>
             </aside>
 
@@ -316,20 +328,64 @@ function ManufacturedProductsPage() {
                 <Field label="Nombre" required error={errors.name?.message}>
                   <input
                     type="text"
-                    placeholder="Ej. Jabon liquido"
+                    placeholder="Ej. Acetaminofen tabletas"
                     className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
                     {...register('name')}
                   />
                 </Field>
 
+                <div className="grid gap-6 md:grid-cols-3">
+                  <Field
+                    label="Grupo"
+                    required
+                    error={errors.groupCode?.message}
+                    hint="Ej. G01M o G01J."
+                  >
+                    <input
+                      type="text"
+                      placeholder="Ej. G01M"
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      {...register('groupCode')}
+                    />
+                  </Field>
+
+                  <Field
+                    label="Ciclo"
+                    required
+                    error={errors.cycle?.message}
+                    hint="Identificador del ciclo academico."
+                  >
+                    <input
+                      type="text"
+                      placeholder="Ej. 2026-01"
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      {...register('cycle')}
+                    />
+                  </Field>
+
+                  <Field
+                    label="Numero de lote"
+                    required
+                    error={errors.lotNumber?.message}
+                    hint="Ej. L20260602."
+                  >
+                    <input
+                      type="text"
+                      placeholder="Ej. L20260602"
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      {...register('lotNumber')}
+                    />
+                  </Field>
+                </div>
+
                 <Field
                   label="Descripcion"
                   error={errors.description?.message}
-                  hint="Describe el producto final o su uso academico."
+                  hint="Describe el producto o su referencia academica."
                 >
                   <textarea
                     rows={5}
-                    placeholder="Describe el producto elaborado y su referencia dentro del laboratorio."
+                    placeholder="Describe el producto a elaborar y su referencia dentro del laboratorio."
                     className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
                     {...register('description')}
                   />
@@ -342,7 +398,7 @@ function ManufacturedProductsPage() {
                     {...register('active')}
                   />
                   <span className="text-sm font-semibold leading-6 text-copy">
-                    Mantener este producto elaborado activo para nuevas recetas y elaboraciones.
+                    Mantener este producto a elaborar activo para nuevas formulas y elaboraciones.
                   </span>
                 </label>
 

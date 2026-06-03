@@ -23,12 +23,12 @@ function translateProductionRunMessage(message) {
   const normalizedMessage = String(message ?? '').trim();
 
   const exactMessages = {
-    'Recipe id is required': 'Debe seleccionar una receta.',
+    'Recipe id is required': 'Debe seleccionar una formula.',
     'Laboratory id is required': 'Debe seleccionar un laboratorio.',
     'Group name must not exceed 150 characters':
       'El nombre del grupo no debe exceder 150 caracteres.',
     'Recipe must contain at least one item before creating a production run':
-      'La receta debe tener al menos un insumo antes de crear una elaboracion.',
+      'La formula debe tener al menos un insumo antes de crear una elaboracion.',
     'Production run has already been confirmed':
       'Esta elaboracion ya fue confirmada.',
     'Access denied': 'No tiene permisos para registrar elaboraciones.',
@@ -44,7 +44,7 @@ function translateProductionRunMessage(message) {
   }
 
   if (normalizedMessage.startsWith('Recipe not found with id:')) {
-    return 'La receta seleccionada ya no esta disponible.';
+    return 'La formula seleccionada ya no esta disponible.';
   }
 
   if (normalizedMessage.startsWith('Laboratory not found with id:')) {
@@ -106,12 +106,12 @@ function adaptProductionRunFromApi(item) {
     status: normalizeText(item?.status, 'DRAFT'),
     recipeId: item?.recipeId ?? null,
     recipeCode: normalizeText(item?.recipeCode, 'SIN-CODIGO'),
-    recipeName: normalizeText(item?.recipeName, 'Receta sin nombre'),
+    recipeName: normalizeText(item?.recipeName, 'Formula sin nombre'),
     manufacturedProductId: item?.manufacturedProductId ?? null,
     manufacturedProductCode: normalizeText(item?.manufacturedProductCode, 'SIN-CODIGO'),
     manufacturedProductName: normalizeText(
       item?.manufacturedProductName,
-      'Producto elaborado sin nombre',
+      'Producto a elaborar sin nombre',
     ),
     laboratoryId: item?.laboratoryId ?? null,
     laboratoryCode: normalizeText(item?.laboratoryCode),

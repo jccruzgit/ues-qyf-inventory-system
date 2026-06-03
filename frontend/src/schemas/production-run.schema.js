@@ -13,12 +13,12 @@ export const productionRunFormSchema = z.object({
   manufacturedProductId: z.preprocess(
     parseRequiredNumber,
     z
-      .number({ required_error: 'Seleccione un producto elaborado.' })
-      .positive('Seleccione un producto elaborado.'),
+      .number({ required_error: 'Seleccione un producto a elaborar.' })
+      .positive('Seleccione un producto a elaborar.'),
   ),
   recipeId: z.preprocess(
     parseRequiredNumber,
-    z.number({ required_error: 'Seleccione una receta.' }).positive('Seleccione una receta.'),
+    z.number({ required_error: 'Seleccione una formula.' }).positive('Seleccione una formula.'),
   ),
   laboratoryId: z.preprocess(
     parseRequiredNumber,

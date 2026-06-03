@@ -13,18 +13,18 @@ export const recipeFormSchema = z.object({
   manufacturedProductId: z.preprocess(
     parseRequiredNumber,
     z
-      .number({ required_error: 'Seleccione un producto elaborado.' })
-      .positive('Seleccione un producto elaborado.'),
+      .number({ required_error: 'Seleccione un producto a elaborar.' })
+      .positive('Seleccione un producto a elaborar.'),
   ),
   name: z
     .string()
     .trim()
-    .min(1, 'El nombre de la receta es obligatorio.')
+    .min(1, 'El nombre de la formula es obligatorio.')
     .max(150, 'El nombre no debe exceder 150 caracteres.'),
   code: z
     .string()
     .trim()
-    .min(1, 'El codigo de la receta es obligatorio.')
+    .min(1, 'El codigo de la formula es obligatorio.')
     .max(50, 'El codigo no debe exceder 50 caracteres.'),
   description: z
     .string()

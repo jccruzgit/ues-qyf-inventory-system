@@ -88,7 +88,6 @@ function RecipesPage() {
     handleSubmit,
     reset,
     setError: setRecipeFieldError,
-    watch,
     formState: { errors, isSubmitting },
   } = recipeForm;
   const {
@@ -107,7 +106,6 @@ function RecipesPage() {
     [recipes, selectedRecipeId],
   );
   const currentItems = selectedRecipeId ? selectedRecipe?.items ?? [] : draftItems;
-  const selectedManufacturedProductId = Number(watch('manufacturedProductId'));
   const selectedItemProductId = Number(watchItem('productId'));
   const selectedItemProduct = products.find((item) => item.id === selectedItemProductId) ?? null;
 
@@ -193,7 +191,7 @@ function RecipesPage() {
     if (currentItems.some((item) => item.productId === values.productId)) {
       setItemFieldError('productId', {
         type: 'manual',
-        message: 'Ese insumo ya forma parte de la receta.',
+        message: 'Ese insumo ya forma parte de la formula.',
       });
       return;
     }
@@ -219,7 +217,7 @@ function RecipesPage() {
         setRecipes((currentRecipes) =>
           currentRecipes.map((item) => (item.id === updatedRecipe.id ? updatedRecipe : item)),
         );
-        setFeedback('Insumo agregado a la receta.');
+        setFeedback('Insumo agregado a la formula.');
         resetItem(itemDefaultValues);
       } catch (requestError) {
         const details = getRecipeMutationErrorDetails(requestError);
@@ -250,7 +248,7 @@ function RecipesPage() {
         locationName: selectedItemProduct.locationName || 'Ubicacion no definida',
       },
     ]);
-    setFeedback('Insumo agregado al borrador de receta.');
+    setFeedback('Insumo agregado al borrador de formula.');
     resetItem(itemDefaultValues);
   };
 
@@ -274,7 +272,7 @@ function RecipesPage() {
           currentRecipe.id === updatedRecipe.id ? updatedRecipe : currentRecipe,
         ),
       );
-      setFeedback('Insumo eliminado de la receta.');
+      setFeedback('Insumo eliminado de la formula.');
     } catch (requestError) {
       setItemServerMessage(getRecipeMutationErrorDetails(requestError).message);
     }
@@ -285,7 +283,7 @@ function RecipesPage() {
     setFeedback('');
 
     if (!currentItems.length) {
-      setServerMessage('La receta debe tener al menos un insumo antes de guardarse.');
+      setServerMessage('La formula debe tener al menos un insumo antes de guardarse.');
       return;
     }
 
@@ -295,7 +293,7 @@ function RecipesPage() {
         setRecipes((currentRecipes) =>
           currentRecipes.map((item) => (item.id === updatedRecipe.id ? updatedRecipe : item)),
         );
-        setFeedback('Receta actualizada correctamente.');
+        setFeedback('Formula actualizada correctamente.');
       } catch (requestError) {
         const details = getRecipeMutationErrorDetails(requestError);
 
@@ -336,7 +334,7 @@ function RecipesPage() {
         description: latestRecipe.description,
         active: latestRecipe.active,
       });
-      setFeedback('Receta creada correctamente.');
+      setFeedback('Formula creada correctamente.');
     } catch (requestError) {
       const details = getRecipeMutationErrorDetails(requestError);
 
@@ -346,22 +344,18 @@ function RecipesPage() {
 
       setServerMessage(
         createdRecipe
-          ? 'La receta base fue creada, pero no se pudieron registrar todos los insumos. Revisa la receta y completa los faltantes.'
+          ? 'La formula base fue creada, pero no se pudieron registrar todos los insumos. Revisa la formula y completa los faltantes.'
           : details.message,
       );
       await loadPageData();
     }
   };
 
-  const recipesByManufacturedProduct = recipes.filter(
-    (item) => item.manufacturedProductId === selectedManufacturedProductId,
-  );
-
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Recetas"
-        subtitle="Define la composicion de cada producto elaborado usando los insumos ya existentes en inventario."
+        title="Formulas"
+        subtitle="Define la composicion de cada producto a elaborar usando los insumos ya existentes en inventario."
         action={
           <button
             type="button"
@@ -369,7 +363,7 @@ function RecipesPage() {
             className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-sm font-extrabold text-white shadow-[0_16px_32px_rgba(23,61,44,0.2)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong"
           >
             <PackagePlus className="h-4 w-4" strokeWidth={2.3} />
-            Nueva receta
+            Nueva formula
           </button>
         }
       />
@@ -385,7 +379,7 @@ function RecipesPage() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-copy-soft">
-                Recetas registradas
+                Formulas registradas
               </p>
               <h3 className="mt-2 text-xl font-extrabold tracking-[-0.04em] text-brand-ink">
                 Catalogo de formulas
@@ -445,6 +439,11 @@ function RecipesPage() {
                           <p className="mt-1 text-sm font-semibold text-copy">
                             {recipe.manufacturedProductName}
                           </p>
+                          {recipe.manufacturedProductGroupCode || recipe.manufacturedProductCycle || recipe.manufacturedProductLotNumber ? (
+                            <p className="mt-2 text-xs font-bold uppercase tracking-[0.16em] text-copy-soft">
+                              Grupo {recipe.manufacturedProductGroupCode || 'Sin grupo'} • Ciclo {recipe.manufacturedProductCycle || 'Sin ciclo'} • Lote {recipe.manufacturedProductLotNumber || 'Sin lote'}
+                            </p>
+                          ) : null}
                         </div>
                         <span className="rounded-full bg-[#e7f4eb] px-3 py-1 text-xs font-extrabold text-[#2d7a49]">
                           {recipe.items.length} insumo(s)
@@ -460,9 +459,9 @@ function RecipesPage() {
           ) : (
             <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-8 text-center">
               <SearchX className="mx-auto h-8 w-8 text-copy-soft" strokeWidth={1.9} />
-              <h3 className="mt-4 text-lg font-extrabold text-brand-ink">Aun no hay recetas</h3>
+              <h3 className="mt-4 text-lg font-extrabold text-brand-ink">Aun no hay formulas</h3>
               <p className="mt-2 text-sm leading-7 text-copy">
-                Crea la primera receta para vincular un producto elaborado con sus insumos y cantidades requeridas.
+                Crea la primera formula para vincular un producto a elaborar con sus insumos y cantidades requeridas.
               </p>
             </div>
           )}
@@ -476,22 +475,22 @@ function RecipesPage() {
                   <BookOpenCheck className="h-5 w-5" strokeWidth={2.1} />
                 </div>
                 <h2 className="mt-8 text-3xl font-extrabold tracking-[-0.05em]">
-                  {selectedRecipe ? 'Editar receta' : 'Nueva receta'}
+                  {selectedRecipe ? 'Editar formula' : 'Nueva formula'}
                 </h2>
                 <p className="mt-4 text-sm leading-7 text-white/72">
-                  Cada receta describe los insumos y cantidades necesarias para elaborar un producto final.
+                  Cada formula describe los insumos y cantidades teoricas necesarias para elaborar un producto.
                 </p>
                 <div className="mt-8 space-y-3 text-sm text-white/78">
-                  <p>1. Selecciona el producto elaborado objetivo.</p>
+                  <p>1. Selecciona el producto a elaborar objetivo.</p>
                   <p>2. Agrega al menos un insumo con cantidad mayor que cero.</p>
-                  <p>3. Guarda la receta para usarla en el modulo de elaboracion.</p>
+                  <p>3. Guarda la formula para usarla en el modulo de elaboracion.</p>
                 </div>
               </aside>
 
               <div className="p-6 sm:p-8 lg:p-10">
                 <form className="space-y-6" onSubmit={handleSubmit(handleSaveRecipe)}>
                   <Field
-                    label="Producto elaborado"
+                    label="Producto a elaborar"
                     required
                     error={errors.manufacturedProductId?.message}
                   >
@@ -501,29 +500,29 @@ function RecipesPage() {
                       {...register('manufacturedProductId')}
                     >
                       <option value="" disabled>
-                        Seleccione un producto elaborado
+                        Seleccione un producto a elaborar
                       </option>
                       {manufacturedProductOptions.map((item) => (
                         <option key={item.id} value={item.id}>
-                          {item.name} ({item.code})
+                          {item.name} ({item.code}) • {item.groupCode || 'Sin grupo'} • {item.cycle || 'Sin ciclo'}
                         </option>
                       ))}
                     </select>
                   </Field>
 
-                  <Field label="Codigo de receta" required error={errors.code?.message}>
+                  <Field label="Codigo de formula" required error={errors.code?.message}>
                     <input
                       type="text"
-                      placeholder="Ej. REC-JAB-001"
+                      placeholder="Ej. FOR-ACE-001"
                       className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
                       {...register('code')}
                     />
                   </Field>
 
-                  <Field label="Nombre de receta" required error={errors.name?.message}>
+                  <Field label="Nombre de formula" required error={errors.name?.message}>
                     <input
                       type="text"
-                      placeholder="Ej. Formula base de jabon liquido"
+                      placeholder="Ej. Formula teorica grupo G01M"
                       className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
                       {...register('name')}
                     />
@@ -536,24 +535,18 @@ function RecipesPage() {
                       {...register('active')}
                     />
                     <span className="text-sm font-semibold leading-6 text-copy">
-                      Mantener la receta activa para nuevas elaboraciones.
+                      Mantener la formula activa para nuevas elaboraciones.
                     </span>
                   </label>
 
                   <Field label="Descripcion" error={errors.description?.message}>
                     <textarea
                       rows={4}
-                      placeholder="Describe el contexto de la receta o sus observaciones generales."
+                      placeholder="Describe el contexto de la formula o sus observaciones generales."
                       className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
                       {...register('description')}
                     />
                   </Field>
-
-                  {recipesByManufacturedProduct.length > 1 ? (
-                    <div className="rounded-[20px] border border-[#fff1d2] bg-[#fff8e8] px-4 py-3 text-sm font-semibold text-[#9a6a0a]">
-                      Este producto elaborado ya tiene {recipesByManufacturedProduct.length} recetas registradas. Para esta primera version se recomienda mantener solo una receta activa.
-                    </div>
-                  ) : null}
 
                   {serverMessage ? (
                     <div className="rounded-[24px] border border-[#fdebec] bg-[#fff4f5] px-4 py-3 text-sm font-semibold text-[#d53a43]">
@@ -591,7 +584,7 @@ function RecipesPage() {
                   Detalle de insumos
                 </p>
                 <h3 className="mt-2 text-xl font-extrabold tracking-[-0.04em] text-brand-ink">
-                  Composicion de la receta
+                  Composicion de la formula
                 </h3>
               </div>
               <span className="rounded-full bg-brand-teal-soft px-3 py-1 text-xs font-extrabold text-brand-teal">
@@ -717,10 +710,10 @@ function RecipesPage() {
               <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-8 text-center">
                 <FlaskConical className="mx-auto h-8 w-8 text-copy-soft" strokeWidth={1.9} />
                 <h3 className="mt-4 text-lg font-extrabold text-brand-ink">
-                  La receta aun no tiene insumos
+                  La formula aun no tiene insumos
                 </h3>
                 <p className="mt-2 text-sm leading-7 text-copy">
-                  Agrega al menos un insumo con cantidad mayor a cero antes de guardar la receta.
+                  Agrega al menos un insumo con cantidad mayor a cero antes de guardar la formula.
                 </p>
               </div>
             )}

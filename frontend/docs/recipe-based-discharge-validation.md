@@ -209,6 +209,67 @@ Se ejecutaron scripts PowerShell con `Invoke-RestMethod` contra:
 
 ## Conclusión
 
+## Backlog accionable antes de otra feature
+
+### Prioridad alta
+
+- [ ] Cerrar definicion funcional antes de implementar cambios.
+  - Observaciones origen: el documento de demo mezcla ajustes de etiquetas con cambios de dominio y de roles.
+  - Entregable: decision escrita sobre si el modulo seguira modelando `Producto elaborado` + `Receta` o si cambiara a `Producto a elaborar` + `Formula`.
+  - Criterio de cierre: el equipo aprueba terminologia, responsables del flujo y alcance de esta ronda.
+- [ ] Agregar trazabilidad del producto a elaborar con `grupo`, `ciclo` y `numero de lote`.
+  - Alcance esperado: alta, edicion, detalle y persistencia del producto.
+  - Datos sugeridos por demo: grupos como `G01M` y `G01J`, ciclo academico y lote tipo `L20260526`.
+  - Criterio de cierre: el producto queda identificado por grupo/ciclo/lote y esa informacion se puede consultar luego.
+- [ ] Renombrar la terminologia visible segun la decision funcional.
+  - Cambios pedidos en demo: `Productos Elaborados` a `Productos a Elaborar` y `Receta` a `Formula`.
+  - Criterio de cierre: la UI no mezcla ambos terminos dentro del mismo flujo.
+- [ ] Redisenar el flujo de formula teorica para que el alumno proponga materias primas y cantidades.
+  - Alcance esperado: seleccion de producto, carga de materias primas, cantidades teoricas y vista consolidada de la formula.
+  - Criterio de cierre: el alumno puede crear la formula teorica completa del producto que le corresponde.
+- [ ] Restringir cambios estructurales de formula al profesor.
+  - Regla pedida en demo: el alumno propone la formula, pero modificar materias primas o corregir errores estructurales debe quedar solo para el profesor.
+  - Criterio de cierre: permisos y acciones visibles coinciden con esa regla.
+- [ ] Separar formula teorica de descargo real de materias primas.
+  - Regla pedida en demo: durante el laboratorio pueden variar cantidades reales; agregar o quitar una materia prima requiere autorizacion del profesor.
+  - Criterio de cierre: el sistema permite registrar consumo real sin perder la referencia de la formula teorica.
+- [ ] Mostrar y restringir el producto por grupo al momento de formular y descargar.
+  - Regla pedida en demo: al seleccionar el producto debe verse el grupo asociado para evitar que un alumno tome otro producto.
+  - Criterio de cierre: el flujo impide ambiguedad entre productos de grupos distintos.
+- [ ] Habilitar impresion de formula y de descargo final.
+  - Salida 1: impresion de la formula teorica antes del laboratorio.
+  - Salida 2: impresion del descargo real para entrega al profesor despues del laboratorio.
+  - Criterio de cierre: ambos documentos se pueden generar desde el sistema con el detalle de materias primas y cantidades.
+
+### Prioridad media
+
+- [ ] Ejecutar validacion UI del flujo `/production` usando el checklist de [pruebas-descargo-por-receta.md](C:/Users/jcriv/Documents/ues-qyf-inventory-system/frontend/docs/pruebas-descargo-por-receta.md).
+  - Entregable: evidencia minima de apertura, validaciones, previsualizacion con stock suficiente, previsualizacion con stock insuficiente, confirmacion y trazabilidad en movimientos.
+  - Criterio de cierre: todos los casos criticos del checklist marcados como aprobados o convertidos en bug.
+- [ ] Ejecutar validacion visual y funcional de las pantallas `Insumos`, `Inventario`, `Lotes` y `Movimientos`.
+  - Entregable: resultado por pantalla con estado `OK` o hallazgo documentado.
+  - Criterio de cierre: se confirma que no hubo regresion visible ni de navegacion en pantallas impactadas por el descargo por receta.
+- [ ] Repetir la validacion funcional completa despues de corregir observaciones altas.
+  - Entregable: rerun de backend tests, frontend build y flujo de confirmacion/reversion.
+  - Criterio de cierre: se mantiene el resultado validado actual sin regresiones.
+- [ ] Definir si el proyecto necesita `mvnw` como requisito de equipo o CI.
+  - Entregable: decision explicita; si aplica, agregar Maven Wrapper al repo.
+  - Criterio de cierre: el comando oficial de validacion queda estandarizado.
+- [ ] Revisar el warning de bundle grande de Vite.
+  - Entregable: diagnostico corto con origen del peso y decision de si se difiere o se optimiza ya.
+  - Criterio de cierre: el warning queda aceptado conscientemente o convertido en tarea tecnica separada.
+
+### Prioridad baja
+
+- [ ] Convertir la validacion manual del flujo en regresion repetible.
+  - Entregable: script, suite automatizada o checklist operativo reutilizable para futuras releases.
+  - Criterio de cierre: el equipo puede revalidar la feature sin reconstruir el procedimiento desde cero.
+- [ ] Convertir las observaciones de demo en historias separadas por epic.
+  - Sugerencia de epics: `Terminologia`, `Trazabilidad academica`, `Formula teorica`, `Descargo real`, `Permisos`, `Impresion`.
+  - Criterio de cierre: el backlog deja de depender del documento narrativo de observaciones.
+
+## Conclusiones
+
 La feature de descargo por receta quedo validada funcionalmente:
 
 - pasa backend tests;
