@@ -6,10 +6,13 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Comparator;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sv.edu.ues.qyf.inventory.dto.RecipeItemRequestDto;
+import sv.edu.ues.qyf.inventory.dto.RecipePrintItemResponseDto;
+import sv.edu.ues.qyf.inventory.dto.RecipePrintResponseDto;
 import sv.edu.ues.qyf.inventory.dto.RecipeRequestDto;
 import sv.edu.ues.qyf.inventory.dto.RecipeResponseDto;
 import sv.edu.ues.qyf.inventory.entity.ManufacturedProduct;
@@ -23,6 +26,7 @@ import sv.edu.ues.qyf.inventory.exception.ResourceNotFoundException;
 import sv.edu.ues.qyf.inventory.mapper.RecipeMapper;
 import sv.edu.ues.qyf.inventory.repository.ManufacturedProductRepository;
 import sv.edu.ues.qyf.inventory.repository.ProductRepository;
+import sv.edu.ues.qyf.inventory.repository.ProductionRunRepository;
 import sv.edu.ues.qyf.inventory.repository.RecipeItemRepository;
 import sv.edu.ues.qyf.inventory.repository.RecipeRepository;
 import sv.edu.ues.qyf.inventory.repository.UnitOfMeasureRepository;
@@ -43,6 +47,7 @@ public class RecipeServiceImpl implements RecipeService {
     private final ManufacturedProductRepository manufacturedProductRepository;
     private final ProductRepository productRepository;
     private final UnitOfMeasureRepository unitOfMeasureRepository;
+    private final ProductionRunRepository productionRunRepository;
     private final RecipeMapper recipeMapper;
     private final CurrentUserService currentUserService;
     private final AuditLogService auditLogService;
@@ -54,6 +59,7 @@ public class RecipeServiceImpl implements RecipeService {
             ManufacturedProductRepository manufacturedProductRepository,
             ProductRepository productRepository,
             UnitOfMeasureRepository unitOfMeasureRepository,
+            ProductionRunRepository productionRunRepository,
             RecipeMapper recipeMapper,
             CurrentUserService currentUserService,
             AuditLogService auditLogService,
@@ -63,6 +69,7 @@ public class RecipeServiceImpl implements RecipeService {
         this.manufacturedProductRepository = manufacturedProductRepository;
         this.productRepository = productRepository;
         this.unitOfMeasureRepository = unitOfMeasureRepository;
+        this.productionRunRepository = productionRunRepository;
         this.recipeMapper = recipeMapper;
         this.currentUserService = currentUserService;
         this.auditLogService = auditLogService;
@@ -115,6 +122,37 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public RecipePrintResponseDto getPrintableById(Long id) {
+        Recipe recipe = getActiveRecipe(id);
+        return RecipePrintResponseDto.builder()
+                .recipeId(recipe.getId())
+                .recipeCode(recipe.getCode())
+                .recipeName(recipe.getName())
+                .manufacturedProductId(recipe.getManufacturedProduct() != null
+                        ? recipe.getManufacturedProduct().getId()
+                        : null)
+                .manufacturedProductCode(recipe.getManufacturedProduct() != null
+                        ? recipe.getManufacturedProduct().getCode()
+                        : null)
+                .manufacturedProductName(recipe.getManufacturedProduct() != null
+                        ? recipe.getManufacturedProduct().getName()
+                        : null)
+                .groupCode(recipe.getManufacturedProduct() != null
+                        ? recipe.getManufacturedProduct().getGroupCode()
+                        : null)
+                .cycle(recipe.getManufacturedProduct() != null
+                        ? recipe.getManufacturedProduct().getCycle()
+                        : null)
+                .lotNumber(recipe.getManufacturedProduct() != null
+                        ? recipe.getManufacturedProduct().getLotNumber()
+                        : null)
+                .generatedAt(LocalDateTime.now())
+                .items(mapPrintableItems(recipe))
+                .build();
+    }
+
+    @Override
     public RecipeResponseDto update(Long id, RecipeRequestDto request) {
         Recipe recipe = getActiveRecipe(id);
         String oldValues = serializeState(recipe);
@@ -125,6 +163,8 @@ public class RecipeServiceImpl implements RecipeService {
                 manufacturedProductRepository.findByIdAndActiveTrue(request.getManufacturedProductId())
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 "Manufactured product not found with id: " + request.getManufacturedProductId()));
+
+        validateUsedRecipeStructureChange(recipe, manufacturedProduct.getId());
 
         recipe.setManufacturedProduct(manufacturedProduct);
         recipe.setCode(code);
@@ -156,6 +196,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public RecipeResponseDto addItem(Long recipeId, RecipeItemRequestDto request) {
         Recipe recipe = getActiveRecipe(recipeId);
+        validateRecipeStructureUnlocked(recipeId);
         String oldValues = serializeState(recipe);
 
         if (recipeItemRepository.existsByRecipeIdAndProductId(recipeId, request.getProductId())) {
@@ -196,6 +237,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public RecipeResponseDto deleteItem(Long recipeId, Long itemId) {
         Recipe recipe = getActiveRecipe(recipeId);
+        validateRecipeStructureUnlocked(recipeId);
         String oldValues = serializeState(recipe);
 
         RecipeItem item = recipeItemRepository.findByIdAndRecipeId(itemId, recipeId)
@@ -233,6 +275,51 @@ public class RecipeServiceImpl implements RecipeService {
         if (product.getBaseUnit() == null || !product.getBaseUnit().getId().equals(unitOfMeasure.getId())) {
             throw new BadRequestException("Recipe item unit must match the product base unit");
         }
+    }
+
+    private List<RecipePrintItemResponseDto> mapPrintableItems(Recipe recipe) {
+        if (recipe.getItems() == null) {
+            return List.of();
+        }
+
+        return recipe.getItems().stream()
+                .sorted(Comparator.comparing(RecipeItem::getItemOrder).thenComparing(RecipeItem::getId))
+                .map(item -> RecipePrintItemResponseDto.builder()
+                        .itemOrder(item.getItemOrder())
+                        .productId(item.getProduct() != null ? item.getProduct().getId() : null)
+                        .productCode(item.getProduct() != null ? item.getProduct().getCode() : null)
+                        .productName(item.getProduct() != null ? item.getProduct().getName() : null)
+                        .unitOfMeasureName(item.getUnitOfMeasure() != null ? item.getUnitOfMeasure().getName() : null)
+                        .unitOfMeasureSymbol(
+                                item.getUnitOfMeasure() != null ? item.getUnitOfMeasure().getSymbol() : null)
+                        .theoreticalQuantity(item.getQuantity())
+                        .observations(item.getObservations())
+                        .build())
+                .toList();
+    }
+
+    private void validateUsedRecipeStructureChange(Recipe recipe, Long requestedManufacturedProductId) {
+        if (!hasProductionRuns(recipe.getId())) {
+            return;
+        }
+
+        Long currentManufacturedProductId = recipe.getManufacturedProduct() != null
+                ? recipe.getManufacturedProduct().getId()
+                : null;
+        if (currentManufacturedProductId != null && !currentManufacturedProductId.equals(requestedManufacturedProductId)) {
+            throw new BadRequestException(
+                    "Cannot change manufactured product for a recipe that has production runs");
+        }
+    }
+
+    private void validateRecipeStructureUnlocked(Long recipeId) {
+        if (hasProductionRuns(recipeId)) {
+            throw new BadRequestException("Cannot modify recipe structure after it has been used in a production run");
+        }
+    }
+
+    private boolean hasProductionRuns(Long recipeId) {
+        return recipeId != null && productionRunRepository.existsByRecipeId(recipeId);
     }
 
     private void reorderItems(List<RecipeItem> items) {

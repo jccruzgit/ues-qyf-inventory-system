@@ -31,6 +31,10 @@ function translateProductionRunMessage(message) {
       'La formula debe tener al menos un insumo antes de crear una elaboracion.',
     'Production run has already been confirmed':
       'Esta elaboracion ya fue confirmada.',
+    'At least one production run item is required':
+      'Debe registrar al menos un insumo con cantidad real para confirmar la elaboracion.',
+    'All recipe items must be informed when confirming actual quantities':
+      'Debe registrar la cantidad real de cada insumo antes de confirmar la elaboracion.',
     'Access denied': 'No tiene permisos para registrar elaboraciones.',
     'An unexpected error occurred': 'Ocurrio un error inesperado al procesar la elaboracion.',
   };
@@ -65,6 +69,23 @@ function translateProductionRunMessage(message) {
       : 'No hay stock suficiente para confirmar la elaboracion.';
   }
 
+  if (normalizedMessage.startsWith('Actual quantity for product ')) {
+    return normalizedMessage
+      .replace('Actual quantity for product ', 'La cantidad real del insumo ')
+      .replace(' exceeds the maximum allowed variation of 10%', ' supera la variacion maxima permitida del 10%');
+  }
+
+  if (normalizedMessage.startsWith('Allocation quantities do not match the actual quantity for product ')) {
+    return normalizedMessage.replace(
+      'Allocation quantities do not match the actual quantity for product ',
+      'Las asignaciones por lote no coinciden con la cantidad real del insumo ',
+    );
+  }
+
+  if (normalizedMessage.startsWith('Recipe item cannot be repeated in the same production run confirmation')) {
+    return 'No se puede repetir el mismo insumo dentro de la confirmacion de elaboracion.';
+  }
+
   return normalizedMessage;
 }
 
@@ -90,6 +111,18 @@ function adaptProductionRunItem(item) {
     unitOfMeasureName: normalizeText(item?.unitOfMeasureName, 'Unidad no definida'),
     unitOfMeasureSymbol: normalizeText(item?.unitOfMeasureSymbol),
     requiredQuantity: toNumber(item?.requiredQuantity),
+    actualQuantity: item?.actualQuantity == null ? null : toNumber(item?.actualQuantity),
+    minimumAllowedQuantity:
+      item?.minimumAllowedQuantity == null ? null : toNumber(item?.minimumAllowedQuantity),
+    maximumAllowedQuantity:
+      item?.maximumAllowedQuantity == null ? null : toNumber(item?.maximumAllowedQuantity),
+    variationPercentage: item?.variationPercentage == null ? null : toNumber(item?.variationPercentage),
+    maximumVariationPercentage:
+      item?.maximumVariationPercentage == null
+        ? null
+        : toNumber(item?.maximumVariationPercentage),
+    withinAllowedVariation:
+      item?.withinAllowedVariation == null ? null : Boolean(item?.withinAllowedVariation),
     totalAvailableQuantity: toNumber(item?.totalAvailableQuantity),
     stockSufficient: Boolean(item?.stockSufficient),
     observations: normalizeText(item?.observations),
@@ -131,6 +164,66 @@ function adaptProductionRunFromApi(item) {
   };
 }
 
+function adaptPrintableProductionRunAllocation(item) {
+  return {
+    movementLineId: item?.movementLineId ?? null,
+    productBatchId: item?.productBatchId ?? null,
+    batchCode: normalizeText(item?.batchCode, 'Sin lote'),
+    expirationDate: normalizeText(item?.expirationDate),
+    actualQuantity: toNumber(item?.actualQuantity),
+    raw: item,
+  };
+}
+
+function adaptPrintableProductionRunItem(item) {
+  return {
+    recipeItemId: item?.recipeItemId ?? null,
+    itemOrder: item?.itemOrder ?? null,
+    productId: item?.productId ?? null,
+    productCode: normalizeText(item?.productCode, 'SIN-CODIGO'),
+    productName: normalizeText(item?.productName, 'Insumo sin nombre'),
+    unitOfMeasureName: normalizeText(item?.unitOfMeasureName, 'Unidad no definida'),
+    unitOfMeasureSymbol: normalizeText(item?.unitOfMeasureSymbol),
+    theoreticalQuantity: toNumber(item?.theoreticalQuantity),
+    actualQuantity: item?.actualQuantity == null ? null : toNumber(item?.actualQuantity),
+    observations: normalizeText(item?.observations),
+    allocations: Array.isArray(item?.allocations)
+      ? item.allocations.map(adaptPrintableProductionRunAllocation)
+      : [],
+    raw: item,
+  };
+}
+
+function adaptProductionRunPrintableFromApi(item) {
+  return {
+    productionRunId: item?.productionRunId ?? null,
+    status: normalizeText(item?.status, 'DRAFT'),
+    controlMark: normalizeText(item?.controlMark),
+    recipeId: item?.recipeId ?? null,
+    recipeCode: normalizeText(item?.recipeCode, 'SIN-CODIGO'),
+    recipeName: normalizeText(item?.recipeName, 'Formula sin nombre'),
+    manufacturedProductId: item?.manufacturedProductId ?? null,
+    manufacturedProductCode: normalizeText(item?.manufacturedProductCode, 'SIN-CODIGO'),
+    manufacturedProductName: normalizeText(
+      item?.manufacturedProductName,
+      'Producto a elaborar sin nombre',
+    ),
+    groupName: normalizeText(item?.groupName),
+    cycle: normalizeText(item?.cycle),
+    lotNumber: normalizeText(item?.lotNumber),
+    laboratoryId: item?.laboratoryId ?? null,
+    laboratoryCode: normalizeText(item?.laboratoryCode),
+    laboratoryName: normalizeText(item?.laboratoryName, 'Laboratorio no definido'),
+    laboratoryDate: normalizeText(item?.laboratoryDate),
+    generatedAt: normalizeText(item?.generatedAt),
+    preparedByUsername: normalizeText(item?.preparedByUsername, 'Sistema'),
+    confirmedByUsername: normalizeText(item?.confirmedByUsername),
+    notes: normalizeText(item?.notes),
+    items: Array.isArray(item?.items) ? item.items.map(adaptPrintableProductionRunItem) : [],
+    raw: item,
+  };
+}
+
 export async function createProductionRun(values) {
   const response = await api.post('/production-runs', {
     recipeId: values.recipeId,
@@ -142,14 +235,28 @@ export async function createProductionRun(values) {
   return adaptProductionRunFromApi(extractItemPayload(response.data));
 }
 
-export async function confirmProductionRun(id) {
-  const response = await api.post(`/production-runs/${id}/confirm`);
+export async function confirmProductionRun(id, items) {
+  const payload = Array.isArray(items) && items.length
+    ? {
+        items: items.map((item) => ({
+          recipeItemId: item.recipeItemId,
+          actualQuantity: item.actualQuantity,
+        })),
+      }
+    : undefined;
+
+  const response = await api.post(`/production-runs/${id}/confirm`, payload);
   return adaptProductionRunFromApi(extractItemPayload(response.data));
 }
 
 export async function fetchProductionRunById(id) {
   const response = await api.get(`/production-runs/${id}`);
   return adaptProductionRunFromApi(extractItemPayload(response.data));
+}
+
+export async function fetchProductionRunPrintableById(id) {
+  const response = await api.get(`/production-runs/${id}/printable`);
+  return adaptProductionRunPrintableFromApi(extractItemPayload(response.data));
 }
 
 export function getProductionRunErrorMessage(error) {

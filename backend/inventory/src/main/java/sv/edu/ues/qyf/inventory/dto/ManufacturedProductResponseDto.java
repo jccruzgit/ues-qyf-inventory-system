@@ -15,6 +15,9 @@ public class ManufacturedProductResponseDto {
     private Long id;
     private String code;
     private String name;
+    private String groupCode;
+    private String cycle;
+    private String lotNumber;
     private String description;
     private Boolean active;
     private LocalDateTime createdAt;

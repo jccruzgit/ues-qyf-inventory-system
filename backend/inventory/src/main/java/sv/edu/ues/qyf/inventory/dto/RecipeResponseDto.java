@@ -17,6 +17,9 @@ public class RecipeResponseDto {
     private Long manufacturedProductId;
     private String manufacturedProductCode;
     private String manufacturedProductName;
+    private String manufacturedProductGroupCode;
+    private String manufacturedProductCycle;
+    private String manufacturedProductLotNumber;
     private String code;
     private String name;
     private String description;

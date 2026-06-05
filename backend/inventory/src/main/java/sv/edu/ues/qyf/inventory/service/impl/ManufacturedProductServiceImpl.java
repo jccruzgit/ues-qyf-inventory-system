@@ -56,6 +56,9 @@ public class ManufacturedProductServiceImpl implements ManufacturedProductServic
         manufacturedProduct.setCode(code);
         manufacturedProduct.setName(normalize(request.getName()));
         manufacturedProduct.setDescription(normalizeNullable(request.getDescription()));
+        manufacturedProduct.setGroupCode(normalize(request.getGroupCode()));
+        manufacturedProduct.setCycle(normalize(request.getCycle()));
+        manufacturedProduct.setLotNumber(normalize(request.getLotNumber()));
         manufacturedProduct.setActive(resolveActive(request.getActive(), Boolean.TRUE));
 
         ManufacturedProduct savedManufacturedProduct = manufacturedProductRepository.save(manufacturedProduct);
@@ -96,6 +99,9 @@ public class ManufacturedProductServiceImpl implements ManufacturedProductServic
         manufacturedProduct.setCode(code);
         manufacturedProduct.setName(normalize(request.getName()));
         manufacturedProduct.setDescription(normalizeNullable(request.getDescription()));
+        manufacturedProduct.setGroupCode(normalize(request.getGroupCode()));
+        manufacturedProduct.setCycle(normalize(request.getCycle()));
+        manufacturedProduct.setLotNumber(normalize(request.getLotNumber()));
         manufacturedProduct.setActive(resolveActive(request.getActive(), manufacturedProduct.getActive()));
 
         if (Boolean.TRUE.equals(manufacturedProduct.getActive())) {
@@ -153,6 +159,9 @@ public class ManufacturedProductServiceImpl implements ManufacturedProductServic
         state.put("id", manufacturedProduct.getId());
         state.put("code", manufacturedProduct.getCode());
         state.put("name", manufacturedProduct.getName());
+        state.put("groupCode", manufacturedProduct.getGroupCode());
+        state.put("cycle", manufacturedProduct.getCycle());
+        state.put("lotNumber", manufacturedProduct.getLotNumber());
         state.put("description", manufacturedProduct.getDescription());
         state.put("active", manufacturedProduct.getActive());
         state.put("deletedAt", manufacturedProduct.getDeletedAt());

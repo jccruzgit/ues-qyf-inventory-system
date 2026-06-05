@@ -2,6 +2,7 @@ package sv.edu.ues.qyf.inventory.service;
 
 import java.util.List;
 import sv.edu.ues.qyf.inventory.dto.RecipeItemRequestDto;
+import sv.edu.ues.qyf.inventory.dto.RecipePrintResponseDto;
 import sv.edu.ues.qyf.inventory.dto.RecipeResponseDto;
 import sv.edu.ues.qyf.inventory.dto.RecipeRequestDto;
 
@@ -12,6 +13,8 @@ public interface RecipeService {
     List<RecipeResponseDto> getAll();
 
     RecipeResponseDto getById(Long id);
+
+    RecipePrintResponseDto getPrintableById(Long id);
 
     RecipeResponseDto update(Long id, RecipeRequestDto request);
 

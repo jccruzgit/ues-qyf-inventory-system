@@ -17,6 +17,9 @@ public class ManufacturedProductMapper {
                 .code(request.getCode())
                 .name(request.getName())
                 .description(request.getDescription())
+                .groupCode(request.getGroupCode())
+                .cycle(request.getCycle())
+                .lotNumber(request.getLotNumber())
                 .active(request.getActive())
                 .build();
     }
@@ -25,6 +28,9 @@ public class ManufacturedProductMapper {
         manufacturedProduct.setCode(request.getCode());
         manufacturedProduct.setName(request.getName());
         manufacturedProduct.setDescription(request.getDescription());
+        manufacturedProduct.setGroupCode(request.getGroupCode());
+        manufacturedProduct.setCycle(request.getCycle());
+        manufacturedProduct.setLotNumber(request.getLotNumber());
         manufacturedProduct.setActive(request.getActive());
     }
 
@@ -37,6 +43,9 @@ public class ManufacturedProductMapper {
                 .id(manufacturedProduct.getId())
                 .code(manufacturedProduct.getCode())
                 .name(manufacturedProduct.getName())
+                .groupCode(manufacturedProduct.getGroupCode())
+                .cycle(manufacturedProduct.getCycle())
+                .lotNumber(manufacturedProduct.getLotNumber())
                 .description(manufacturedProduct.getDescription())
                 .active(manufacturedProduct.getActive())
                 .createdAt(manufacturedProduct.getCreatedAt())

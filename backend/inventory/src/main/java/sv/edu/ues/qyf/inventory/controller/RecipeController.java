@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sv.edu.ues.qyf.inventory.dto.ApiResponse;
 import sv.edu.ues.qyf.inventory.dto.RecipeItemRequestDto;
+import sv.edu.ues.qyf.inventory.dto.RecipePrintResponseDto;
 import sv.edu.ues.qyf.inventory.dto.RecipeRequestDto;
 import sv.edu.ues.qyf.inventory.dto.RecipeResponseDto;
 import sv.edu.ues.qyf.inventory.service.RecipeService;
@@ -43,6 +44,14 @@ public class RecipeController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<RecipeResponseDto>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success("Recipe retrieved successfully", recipeService.getById(id)));
+    }
+
+    @GetMapping("/{id}/printable")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<RecipePrintResponseDto>> getPrintableById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Recipe printable payload retrieved successfully",
+                recipeService.getPrintableById(id)));
     }
 
     @PostMapping

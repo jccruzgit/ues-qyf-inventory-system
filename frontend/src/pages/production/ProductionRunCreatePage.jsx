@@ -9,6 +9,7 @@ import {
   FlaskConical,
   Link2,
   PackageCheck,
+  Printer,
   RefreshCcw,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -18,13 +19,19 @@ import SectionHeader from '../../components/ui/SectionHeader';
 import { FilterSelect } from '../../components/products/ProductFilters';
 import { fetchInventoryCatalogs, getInventoryCatalogsErrorMessage } from '../../services/inventoryService';
 import { fetchManufacturedProducts, getManufacturedProductsErrorMessage } from '../../services/manufacturedProductsService';
-import { fetchRecipes, getRecipesErrorMessage } from '../../services/recipesService';
+import {
+  fetchRecipePrintableById,
+  fetchRecipes,
+  getRecipesErrorMessage,
+} from '../../services/recipesService';
 import {
   confirmProductionRun,
   createProductionRun,
+  fetchProductionRunPrintableById,
   getProductionRunErrorMessage,
 } from '../../services/productionRunsService';
 import { productionRunFormSchema } from '../../schemas/production-run.schema';
+import { printProductionRunDocument, printRecipeDocument } from '../../utils/printDocuments';
 
 const defaultValues = {
   manufacturedProductId: '',
@@ -64,6 +71,25 @@ function formatQuantity(value) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 4,
   }).format(Number(value) || 0);
+}
+
+function formatEditableQuantity(value) {
+  if (value == null || value === '') {
+    return '';
+  }
+
+  return String(value);
+}
+
+function parseQuantityInput(value) {
+  const normalizedValue = String(value ?? '').trim();
+
+  if (!normalizedValue) {
+    return null;
+  }
+
+  const parsedValue = Number(normalizedValue);
+  return Number.isFinite(parsedValue) ? parsedValue : null;
 }
 
 function formatDate(value) {
@@ -109,8 +135,11 @@ function ProductionRunCreatePage() {
   const [feedback, setFeedback] = useState('');
   const [serverMessage, setServerMessage] = useState('');
   const [previewRun, setPreviewRun] = useState(null);
+  const [actualQuantities, setActualQuantities] = useState({});
   const [preparing, setPreparing] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [printingRecipe, setPrintingRecipe] = useState(false);
+  const [printingProductionRun, setPrintingProductionRun] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(productionRunFormSchema),
@@ -199,9 +228,84 @@ function ProductionRunCreatePage() {
 
   useEffect(() => {
     setPreviewRun(null);
+    setActualQuantities({});
     setServerMessage('');
     setFeedback('');
   }, [groupName, notes, selectedLaboratoryId, selectedManufacturedProductId, selectedRecipeId]);
+
+  useEffect(() => {
+    if (!previewRun) {
+      setActualQuantities({});
+      return;
+    }
+
+    setActualQuantities(
+      Object.fromEntries(
+        previewRun.items.map((item) => [
+          item.recipeItemId,
+          formatEditableQuantity(item.actualQuantity ?? item.requiredQuantity),
+        ]),
+      ),
+    );
+  }, [previewRun]);
+
+  const previewItems = useMemo(() => {
+    if (!previewRun) {
+      return [];
+    }
+
+    return previewRun.items.map((item) => {
+      const actualQuantityInput =
+        actualQuantities[item.recipeItemId] ??
+        formatEditableQuantity(item.actualQuantity ?? item.requiredQuantity);
+      const parsedActualQuantity = parseQuantityInput(actualQuantityInput);
+      const hasValidActualQuantity = parsedActualQuantity !== null && parsedActualQuantity >= 0;
+      const minimumAllowedQuantity =
+        item.minimumAllowedQuantity ?? item.requiredQuantity * 0.9;
+      const maximumAllowedQuantity =
+        item.maximumAllowedQuantity ?? item.requiredQuantity * 1.1;
+      const exceedsAvailableStock =
+        parsedActualQuantity !== null && parsedActualQuantity > item.totalAvailableQuantity;
+      const withinAllowedVariation =
+        parsedActualQuantity !== null &&
+        parsedActualQuantity >= minimumAllowedQuantity &&
+        parsedActualQuantity <= maximumAllowedQuantity;
+      const variationPercentage =
+        parsedActualQuantity === null || !item.requiredQuantity
+          ? null
+          : Math.abs(((parsedActualQuantity - item.requiredQuantity) / item.requiredQuantity) * 100);
+
+      return {
+        ...item,
+        actualQuantityInput,
+        parsedActualQuantity,
+        hasValidActualQuantity,
+        minimumAllowedQuantity,
+        maximumAllowedQuantity,
+        exceedsAvailableStock,
+        withinAllowedVariation,
+        variationPercentage,
+      };
+    });
+  }, [actualQuantities, previewRun]);
+
+  const quantityIssues = useMemo(
+    () =>
+      previewItems.filter(
+        (item) =>
+          !item.hasValidActualQuantity ||
+          item.exceedsAvailableStock ||
+          !item.withinAllowedVariation,
+      ),
+    [previewItems],
+  );
+
+  const canConfirmPreview =
+    Boolean(previewRun) &&
+    previewRun?.status !== 'CONFIRMED' &&
+    previewItems.length > 0 &&
+    quantityIssues.length === 0 &&
+    previewItems.some((item) => (item.parsedActualQuantity ?? 0) > 0);
 
   const handlePrepare = async (values) => {
     setPreparing(true);
@@ -225,8 +329,42 @@ function ProductionRunCreatePage() {
     }
   };
 
+  const handleActualQuantityChange = (recipeItemId, value) => {
+    setActualQuantities((currentState) => ({
+      ...currentState,
+      [recipeItemId]: value,
+    }));
+  };
+
   const handleConfirm = async () => {
     if (!previewRun) {
+      return;
+    }
+
+    if (!previewItems.length) {
+      setServerMessage('No hay insumos disponibles para confirmar esta elaboracion.');
+      return;
+    }
+
+    if (previewItems.some((item) => !item.hasValidActualQuantity)) {
+      setServerMessage('Ingrese una cantidad real valida para cada insumo antes de confirmar.');
+      return;
+    }
+
+    if (previewItems.some((item) => item.exceedsAvailableStock)) {
+      setServerMessage('La cantidad real no puede exceder el stock disponible de ningun insumo.');
+      return;
+    }
+
+    if (previewItems.some((item) => !item.withinAllowedVariation)) {
+      setServerMessage(
+        'La cantidad real debe mantenerse dentro del rango permitido de variacion para todos los insumos.',
+      );
+      return;
+    }
+
+    if (!previewItems.some((item) => (item.parsedActualQuantity ?? 0) > 0)) {
+      setServerMessage('Debe registrar al menos una cantidad real mayor que cero para confirmar.');
       return;
     }
 
@@ -235,7 +373,13 @@ function ProductionRunCreatePage() {
     setFeedback('');
 
     try {
-      const response = await confirmProductionRun(previewRun.id);
+      const response = await confirmProductionRun(
+        previewRun.id,
+        previewItems.map((item) => ({
+          recipeItemId: item.recipeItemId,
+          actualQuantity: item.parsedActualQuantity,
+        })),
+      );
       setPreviewRun(response);
       setFeedback(
         `Elaboracion confirmada correctamente. Se genero el movimiento de salida #${response.inventoryMovementId}.`,
@@ -247,14 +391,54 @@ function ProductionRunCreatePage() {
     }
   };
 
+  const handlePrintRecipe = async () => {
+    if (!previewRun?.recipeId) {
+      return;
+    }
+
+    setPrintingRecipe(true);
+    setServerMessage('');
+
+    try {
+      const printableRecipe = await fetchRecipePrintableById(previewRun.recipeId);
+      printRecipeDocument(printableRecipe);
+    } catch (requestError) {
+      setServerMessage(getRecipesErrorMessage(requestError));
+    } finally {
+      setPrintingRecipe(false);
+    }
+  };
+
+  const handlePrintProductionRun = async () => {
+    if (!previewRun?.id || previewRun.status !== 'CONFIRMED') {
+      return;
+    }
+
+    setPrintingProductionRun(true);
+    setServerMessage('');
+
+    try {
+      const printableProductionRun = await fetchProductionRunPrintableById(previewRun.id);
+      printProductionRunDocument(printableProductionRun);
+    } catch (requestError) {
+      setServerMessage(getProductionRunErrorMessage(requestError));
+    } finally {
+      setPrintingProductionRun(false);
+    }
+  };
+
   const handleReset = () => {
     reset(defaultValues);
     setPreviewRun(null);
+    setActualQuantities({});
     setServerMessage('');
     setFeedback('');
   };
 
-  const shortageItems = previewRun?.items.filter((item) => !item.stockSufficient) ?? [];
+  const shortageItems = previewItems.filter(
+    (item) =>
+      item.parsedActualQuantity !== null && item.parsedActualQuantity > item.totalAvailableQuantity,
+  );
 
   return (
     <div className="space-y-6">
@@ -289,12 +473,13 @@ function ProductionRunCreatePage() {
                 Descargo por formula
               </h2>
               <p className="mt-4 text-sm leading-7 text-white/72">
-                Este flujo toma una formula, valida stock completo y crea una salida trazable con una linea por cada lote sugerido.
+                Este flujo toma una formula, valida stock completo, permite registrar cantidades reales y crea una salida trazable con una linea por cada lote sugerido.
               </p>
               <div className="mt-8 space-y-3 text-sm text-white/78">
                 <p>1. Selecciona producto a elaborar, formula y laboratorio.</p>
                 <p>2. Prepara la elaboracion para revisar insumos, cantidades y lotes FEFO.</p>
-                <p>3. Confirma solo si toda la formula tiene disponibilidad suficiente.</p>
+                <p>3. Ajusta la cantidad real de cada insumo dentro del rango permitido.</p>
+                <p>4. Confirma solo si toda la formula tiene disponibilidad suficiente.</p>
               </div>
             </aside>
 
@@ -518,7 +703,7 @@ function ProductionRunCreatePage() {
                       <ul className="mt-2 list-disc pl-5">
                         {shortageItems.map((item) => (
                           <li key={item.recipeItemId}>
-                            {item.productName} ({item.productCode}): requiere {formatQuantity(item.requiredQuantity)} y solo hay {formatQuantity(item.totalAvailableQuantity)}.
+                            {item.productName} ({item.productCode}): disponible {formatQuantity(item.totalAvailableQuantity)} y cantidad real actual {formatQuantity(item.parsedActualQuantity ?? item.requiredQuantity)}.
                           </li>
                         ))}
                       </ul>
@@ -527,12 +712,12 @@ function ProductionRunCreatePage() {
                 </div>
               ) : (
                 <div className="rounded-[24px] border border-[#fff1d2] bg-[#fff8e8] px-4 py-4 text-sm font-semibold text-[#9a6a0a]">
-                  Al confirmar se descargaran todos los insumos listados. No se realizaran descargas parciales si algun insumo falla.
+                  Cada insumo debe mantenerse dentro de la variacion maxima del 10% respecto a la formula teorica. Si la cantidad real supera ese rango, el backend bloqueara la confirmacion.
                 </div>
               )}
 
               <div className="space-y-3">
-                {previewRun.items.map((item) => (
+                {previewItems.map((item) => (
                   <div
                     key={item.recipeItemId}
                     className="rounded-[24px] border border-white/80 bg-white px-5 py-3"
@@ -566,6 +751,29 @@ function ProductionRunCreatePage() {
                         label="Cantidad requerida"
                         value={`${formatQuantity(item.requiredQuantity)} ${item.unitOfMeasureSymbol || item.unitOfMeasureName}`}
                       />
+                      <div className="rounded-[18px] bg-surface-2/65 px-4 py-2.5">
+                        <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-copy-soft">
+                          Cantidad real
+                        </p>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.0001"
+                          value={item.actualQuantityInput}
+                          disabled={previewRun.status === 'CONFIRMED'}
+                          onChange={(event) =>
+                            handleActualQuantityChange(item.recipeItemId, event.target.value)
+                          }
+                          className={`mt-2 w-full rounded-[16px] border px-3 py-2 text-sm font-semibold outline-none transition ${
+                            !item.hasValidActualQuantity || item.exceedsAvailableStock || !item.withinAllowedVariation
+                              ? 'border-[#d53a43] bg-[#fff4f5] text-[#8a2530] focus:ring-4 focus:ring-[#f7cfd4]'
+                              : 'border-transparent bg-white text-brand-ink focus:border-brand-teal/25 focus:ring-4 focus:ring-brand-teal/10'
+                          }`}
+                        />
+                        <p className="mt-2 text-xs font-semibold text-copy-soft">
+                          Rango permitido: {formatQuantity(item.minimumAllowedQuantity)} - {formatQuantity(item.maximumAllowedQuantity)} {item.unitOfMeasureSymbol || item.unitOfMeasureName}
+                        </p>
+                      </div>
                       <PreviewDataCell
                         label="Disponible total"
                         value={`${formatQuantity(item.totalAvailableQuantity)} ${item.unitOfMeasureSymbol || item.unitOfMeasureName}`}
@@ -578,6 +786,41 @@ function ProductionRunCreatePage() {
                         label="Observaciones"
                         value={item.observations || 'Sin observaciones en la formula.'}
                       />
+                    </div>
+
+                    <div className="mt-3 grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+                      <PreviewDataCell
+                        label="Variacion actual"
+                        value={
+                          item.variationPercentage == null
+                            ? 'Pendiente'
+                            : `${formatQuantity(item.variationPercentage)}%`
+                        }
+                      />
+                      <PreviewDataCell
+                        label="Maximo permitido"
+                        value={`${formatQuantity(item.maximumVariationPercentage ?? 10)}%`}
+                      />
+                      <div
+                        className={`rounded-[18px] px-4 py-2.5 ${
+                          !item.hasValidActualQuantity || item.exceedsAvailableStock || !item.withinAllowedVariation
+                            ? 'bg-[#fff4f5] text-[#b73945]'
+                            : 'bg-[#eef6f0] text-[#2d7a49]'
+                        }`}
+                      >
+                        <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] opacity-70">
+                          Estado de control
+                        </p>
+                        <p className="mt-2 text-sm font-extrabold">
+                          {!item.hasValidActualQuantity
+                            ? 'Cantidad invalida'
+                            : item.exceedsAvailableStock
+                              ? 'Supera stock disponible'
+                              : item.withinAllowedVariation
+                                ? 'Dentro de tolerancia'
+                                : 'Fuera de tolerancia'}
+                        </p>
+                      </div>
                     </div>
 
                     <div className="mt-3 grid gap-2.5">
@@ -677,6 +920,54 @@ function ProductionRunCreatePage() {
                 </div>
               </div>
 
+              <div className="grid gap-3 xl:grid-cols-2">
+                <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
+                  <div className="flex items-center gap-3">
+                    <Printer className="h-5 w-5 text-brand-teal" />
+                    <p className="text-sm font-extrabold text-brand-ink">
+                      Impresion de formula
+                    </p>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-copy">
+                    Genera una vista imprimible de la formula teorica con producto, grupo, ciclo, lote y materias primas.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handlePrintRecipe}
+                    disabled={printingRecipe}
+                    className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <Printer className="h-4 w-4" />
+                    {printingRecipe ? 'Preparando...' : 'Imprimir formula'}
+                  </button>
+                </div>
+
+                <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
+                  <div className="flex items-center gap-3">
+                    <Printer className="h-5 w-5 text-[#d28a19]" />
+                    <p className="text-sm font-extrabold text-brand-ink">
+                      Impresion de descargo
+                    </p>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-copy">
+                    Genera la salida imprimible del descargo real con cantidades teoricas, cantidades reales y detalle por lote.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handlePrintProductionRun}
+                    disabled={printingProductionRun || previewRun.status !== 'CONFIRMED'}
+                    className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <Printer className="h-4 w-4" />
+                    {printingProductionRun
+                      ? 'Preparando...'
+                      : previewRun.status === 'CONFIRMED'
+                        ? 'Imprimir descargo'
+                        : 'Confirma para imprimir'}
+                  </button>
+                </div>
+              </div>
+
               <div className="grid gap-3 sm:grid-cols-2 lg:max-w-[420px] lg:ml-auto">
                 <button
                   type="button"
@@ -690,7 +981,7 @@ function ProductionRunCreatePage() {
                   disabled={
                     confirming ||
                     previewRun.status === 'CONFIRMED' ||
-                    !previewRun.readyToConfirm
+                    !canConfirmPreview
                   }
                   onClick={handleConfirm}
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"

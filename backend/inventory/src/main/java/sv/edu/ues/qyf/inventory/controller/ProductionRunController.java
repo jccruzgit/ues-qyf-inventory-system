@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sv.edu.ues.qyf.inventory.dto.ApiResponse;
+import sv.edu.ues.qyf.inventory.dto.ProductionRunConfirmRequestDto;
+import sv.edu.ues.qyf.inventory.dto.ProductionRunPrintResponseDto;
 import sv.edu.ues.qyf.inventory.dto.ProductionRunRequestDto;
 import sv.edu.ues.qyf.inventory.dto.ProductionRunResponseDto;
 import sv.edu.ues.qyf.inventory.service.ProductionRunService;
@@ -47,11 +49,21 @@ public class ProductionRunController {
                 productionRunService.getById(id)));
     }
 
+    @GetMapping("/{id}/printable")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<ProductionRunPrintResponseDto>> getPrintableById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Production run printable payload retrieved successfully",
+                productionRunService.getPrintableById(id)));
+    }
+
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTORY_MANAGER', 'LAB_TECHNICIAN')")
-    public ResponseEntity<ApiResponse<ProductionRunResponseDto>> confirm(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ProductionRunResponseDto>> confirm(
+            @PathVariable Long id,
+            @Valid @RequestBody(required = false) ProductionRunConfirmRequestDto request) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Production run confirmed successfully",
-                productionRunService.confirm(id)));
+                productionRunService.confirm(id, request)));
     }
 }

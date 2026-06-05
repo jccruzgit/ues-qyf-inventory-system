@@ -141,6 +141,40 @@ function adaptRecipeFromApi(item) {
   };
 }
 
+function adaptPrintableRecipeItem(item) {
+  return {
+    itemOrder: item?.itemOrder ?? null,
+    productId: item?.productId ?? null,
+    productCode: normalizeText(item?.productCode, 'SIN-CODIGO'),
+    productName: normalizeText(item?.productName, 'Insumo sin nombre'),
+    unitOfMeasureName: normalizeText(item?.unitOfMeasureName, 'Unidad no definida'),
+    unitOfMeasureSymbol: normalizeText(item?.unitOfMeasureSymbol),
+    theoreticalQuantity: toNumber(item?.theoreticalQuantity),
+    observations: normalizeText(item?.observations),
+    raw: item,
+  };
+}
+
+function adaptRecipePrintableFromApi(item) {
+  return {
+    recipeId: item?.recipeId ?? null,
+    recipeCode: normalizeText(item?.recipeCode, 'SIN-CODIGO'),
+    recipeName: normalizeText(item?.recipeName, 'Formula sin nombre'),
+    manufacturedProductId: item?.manufacturedProductId ?? null,
+    manufacturedProductCode: normalizeText(item?.manufacturedProductCode, 'SIN-CODIGO'),
+    manufacturedProductName: normalizeText(
+      item?.manufacturedProductName,
+      'Producto a elaborar sin nombre',
+    ),
+    groupCode: normalizeText(item?.groupCode),
+    cycle: normalizeText(item?.cycle),
+    lotNumber: normalizeText(item?.lotNumber),
+    generatedAt: normalizeText(item?.generatedAt),
+    items: Array.isArray(item?.items) ? item.items.map(adaptPrintableRecipeItem) : [],
+    raw: item,
+  };
+}
+
 export async function fetchRecipes() {
   const response = await api.get('/recipes');
   return extractCollectionPayload(response.data).map(adaptRecipeFromApi);
@@ -149,6 +183,11 @@ export async function fetchRecipes() {
 export async function fetchRecipeById(id) {
   const response = await api.get(`/recipes/${id}`);
   return adaptRecipeFromApi(extractItemPayload(response.data));
+}
+
+export async function fetchRecipePrintableById(id) {
+  const response = await api.get(`/recipes/${id}/printable`);
+  return adaptRecipePrintableFromApi(extractItemPayload(response.data));
 }
 
 export async function createRecipe(values) {

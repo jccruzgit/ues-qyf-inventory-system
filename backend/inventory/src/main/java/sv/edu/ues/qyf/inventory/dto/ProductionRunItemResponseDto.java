@@ -22,6 +22,12 @@ public class ProductionRunItemResponseDto {
     private String unitOfMeasureName;
     private String unitOfMeasureSymbol;
     private BigDecimal requiredQuantity;
+    private BigDecimal actualQuantity;
+    private BigDecimal minimumAllowedQuantity;
+    private BigDecimal maximumAllowedQuantity;
+    private BigDecimal variationPercentage;
+    private BigDecimal maximumVariationPercentage;
+    private Boolean withinAllowedVariation;
     private BigDecimal totalAvailableQuantity;
     private Boolean stockSufficient;
     private String observations;

@@ -182,6 +182,9 @@ public class DemoDataInitializer {
                     .orElseGet(() -> manufacturedProductRepository.save(ManufacturedProduct.builder()
                             .code("ELAB-JAB-001")
                             .name("Jabon liquido citrico")
+                            .groupCode("G01M")
+                            .cycle("2026-I")
+                            .lotNumber("LT-JAB-2026-01")
                             .description("Manufactured product seeded for recipe-based discharge demo")
                             .active(Boolean.TRUE)
                             .build()));
