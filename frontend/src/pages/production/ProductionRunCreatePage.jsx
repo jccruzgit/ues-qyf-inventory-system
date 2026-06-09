@@ -31,7 +31,12 @@ import {
   getProductionRunErrorMessage,
 } from '../../services/productionRunsService';
 import { productionRunFormSchema } from '../../schemas/production-run.schema';
-import { printProductionRunDocument, printRecipeDocument } from '../../utils/printDocuments';
+import {
+  openPrintPreviewWindow,
+  printProductionRunDocument,
+  printRecipeDocument,
+  renderPrintWindowError,
+} from '../../utils/printDocuments';
 
 const defaultValues = {
   manufacturedProductId: '',
@@ -396,14 +401,22 @@ function ProductionRunCreatePage() {
       return;
     }
 
+    let printWindow;
     setPrintingRecipe(true);
     setServerMessage('');
 
     try {
+      printWindow = openPrintPreviewWindow(`Formula ${previewRun.recipeCode || previewRun.recipeId}`);
       const printableRecipe = await fetchRecipePrintableById(previewRun.recipeId);
-      printRecipeDocument(printableRecipe);
+      printRecipeDocument(printableRecipe, printWindow);
     } catch (requestError) {
-      setServerMessage(getRecipesErrorMessage(requestError));
+      const message = getRecipesErrorMessage(requestError);
+      renderPrintWindowError(
+        printWindow,
+        `Formula ${previewRun.recipeCode || previewRun.recipeId}`,
+        message,
+      );
+      setServerMessage(message);
     } finally {
       setPrintingRecipe(false);
     }
@@ -414,14 +427,22 @@ function ProductionRunCreatePage() {
       return;
     }
 
+    let printWindow;
     setPrintingProductionRun(true);
     setServerMessage('');
 
     try {
+      printWindow = openPrintPreviewWindow(`Descargo ${previewRun.recipeCode || previewRun.id}`);
       const printableProductionRun = await fetchProductionRunPrintableById(previewRun.id);
-      printProductionRunDocument(printableProductionRun);
+      printProductionRunDocument(printableProductionRun, printWindow);
     } catch (requestError) {
-      setServerMessage(getProductionRunErrorMessage(requestError));
+      const message = getProductionRunErrorMessage(requestError);
+      renderPrintWindowError(
+        printWindow,
+        `Descargo ${previewRun.recipeCode || previewRun.id}`,
+        message,
+      );
+      setServerMessage(message);
     } finally {
       setPrintingProductionRun(false);
     }

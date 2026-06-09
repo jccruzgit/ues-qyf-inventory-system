@@ -54,12 +54,12 @@ function renderMetaCard(label, value) {
   `;
 }
 
-function openPrintWindow(title, bodyHtml) {
-  const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=1120,height=900');
-
-  if (!printWindow) {
-    throw new Error('No fue posible abrir la ventana de impresion. Verifique el bloqueador de ventanas emergentes.');
+function writePrintWindow(printWindow, title, bodyHtml) {
+  if (!printWindow || printWindow.closed) {
+    throw new Error('La ventana de impresion ya no esta disponible.');
   }
+
+  printWindow.document.open();
 
   printWindow.document.write(`
     <!doctype html>
@@ -256,13 +256,67 @@ function openPrintWindow(title, bodyHtml) {
     </html>
   `);
   printWindow.document.close();
+}
+
+export function openPrintPreviewWindow(title) {
+  const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=1120,height=900');
+
+  if (!printWindow) {
+    throw new Error('No fue posible abrir la ventana de impresion. Verifique el bloqueador de ventanas emergentes.');
+  }
+
+  writePrintWindow(
+    printWindow,
+    title,
+    `
+      <main class="sheet">
+        <header class="header">
+          <div>
+            <div class="eyebrow">Preparando impresion</div>
+            <h1 class="title">${escapeHtml(title)}</h1>
+            <p class="subtitle">Generando el documento imprimible desde el backend...</p>
+          </div>
+        </header>
+      </main>
+    `,
+  );
+  printWindow.focus();
+  return printWindow;
+}
+
+export function renderPrintWindowError(printWindow, title, message) {
+  if (!printWindow || printWindow.closed) {
+    return;
+  }
+
+  writePrintWindow(
+    printWindow,
+    title,
+    `
+      <main class="sheet">
+        <header class="header">
+          <div>
+            <div class="eyebrow">Error de impresion</div>
+            <h1 class="title">${escapeHtml(title)}</h1>
+            <p class="subtitle">${escapeHtml(message)}</p>
+          </div>
+        </header>
+      </main>
+    `,
+  );
+  printWindow.focus();
+}
+
+function openPrintWindow(title, bodyHtml, existingWindow) {
+  const printWindow = existingWindow ?? openPrintPreviewWindow(title);
+  writePrintWindow(printWindow, title, bodyHtml);
   printWindow.focus();
   window.setTimeout(() => {
     printWindow.print();
   }, 250);
 }
 
-export function printRecipeDocument(document) {
+export function printRecipeDocument(document, existingWindow) {
   const rows = document.items
     .map(
       (item) => `
@@ -328,10 +382,11 @@ export function printRecipeDocument(document) {
         </section>
       </main>
     `,
+    existingWindow,
   );
 }
 
-export function printProductionRunDocument(document) {
+export function printProductionRunDocument(document, existingWindow) {
   const rows = document.items
     .map(
       (item) => `
@@ -426,5 +481,6 @@ export function printProductionRunDocument(document) {
         </section>
       </main>
     `,
+    existingWindow,
   );
 }
