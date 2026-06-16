@@ -23,9 +23,9 @@ const defaultValues = {
   active: true,
 };
 
-function Field({ label, required, error, children, hint }) {
+function Field({ label, required, error, children, hint, className = '' }) {
   return (
-    <label className="block">
+    <label className={`block ${className}`.trim()}>
       <span className="mb-2 block text-sm font-extrabold tracking-tight text-brand-ink">
         {label}
         {required ? <span className="ml-1 text-[#d53a43]">*</span> : null}
@@ -292,7 +292,7 @@ function ManufacturedProductsPage() {
         </Card>
 
         <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-0">
-          <div className="grid gap-0 lg:grid-cols-[minmax(220px,0.28fr)_minmax(0,0.72fr)]">
+          <div className="grid gap-0 lg:grid-cols-[minmax(220px,260px)_minmax(0,1fr)] xl:grid-cols-[minmax(240px,280px)_minmax(0,1fr)]">
             <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
                 {editingProduct ? (
@@ -334,7 +334,7 @@ function ManufacturedProductsPage() {
                   />
                 </Field>
 
-                <div className="grid gap-6 md:grid-cols-3">
+                <div className="grid gap-6 md:grid-cols-2">
                   <Field
                     label="Grupo"
                     required
@@ -368,6 +368,7 @@ function ManufacturedProductsPage() {
                     required
                     error={errors.lotNumber?.message}
                     hint="Ej. L20260602."
+                    className="md:col-span-2"
                   >
                     <input
                       type="text"

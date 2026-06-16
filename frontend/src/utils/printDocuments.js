@@ -54,14 +54,8 @@ function renderMetaCard(label, value) {
   `;
 }
 
-function writePrintWindow(printWindow, title, bodyHtml) {
-  if (!printWindow || printWindow.closed) {
-    throw new Error('La ventana de impresion ya no esta disponible.');
-  }
-
-  printWindow.document.open();
-
-  printWindow.document.write(`
+function buildPrintDocumentHtml(title, bodyHtml) {
+  return `
     <!doctype html>
     <html lang="es">
       <head>
@@ -228,7 +222,7 @@ function writePrintWindow(printWindow, title, bodyHtml) {
           }
 
           .footer {
-            margin-top: 28px;
+            margin-top: 56px;
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 18px;
@@ -236,8 +230,8 @@ function writePrintWindow(printWindow, title, bodyHtml) {
 
           .signature {
             border-top: 1px solid var(--ink);
-            padding-top: 10px;
-            min-height: 48px;
+            padding-top: 12px;
+            min-height: 72px;
           }
 
           @page {
@@ -254,19 +248,108 @@ function writePrintWindow(printWindow, title, bodyHtml) {
       </head>
       <body>${bodyHtml}</body>
     </html>
-  `);
-  printWindow.document.close();
+  `;
+}
+
+function createPrintSession(title) {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    throw new Error('La impresion solo esta disponible en el navegador.');
+  }
+
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('title', title);
+  iframe.setAttribute('aria-hidden', 'true');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '1px';
+  iframe.style.height = '1px';
+  iframe.style.opacity = '0';
+  iframe.style.pointerEvents = 'none';
+  iframe.style.border = '0';
+
+  document.body.appendChild(iframe);
+
+  return {
+    iframe,
+    cleanupTimeoutId: null,
+    loadHandler: null,
+    disposed: false,
+  };
+}
+
+function disposePrintSession(session) {
+  if (!session || session.disposed) {
+    return;
+  }
+
+  session.disposed = true;
+
+  if (session.cleanupTimeoutId) {
+    window.clearTimeout(session.cleanupTimeoutId);
+    session.cleanupTimeoutId = null;
+  }
+
+  if (session.iframe && session.loadHandler) {
+    session.iframe.removeEventListener('load', session.loadHandler);
+    session.loadHandler = null;
+  }
+
+  if (session.iframe?.parentNode) {
+    session.iframe.parentNode.removeChild(session.iframe);
+  }
+}
+
+function writePrintSession(session, title, bodyHtml, shouldPrint = false) {
+  if (!session || session.disposed || !session.iframe?.isConnected) {
+    throw new Error('La sesion de impresion ya no esta disponible.');
+  }
+
+  if (session.loadHandler) {
+    session.iframe.removeEventListener('load', session.loadHandler);
+    session.loadHandler = null;
+  }
+
+  if (shouldPrint) {
+    session.loadHandler = () => {
+      session.iframe.removeEventListener('load', session.loadHandler);
+      session.loadHandler = null;
+
+      const frameWindow = session.iframe.contentWindow;
+
+      if (!frameWindow) {
+        disposePrintSession(session);
+        return;
+      }
+
+      const cleanup = () => disposePrintSession(session);
+
+      frameWindow.addEventListener('afterprint', cleanup, { once: true });
+
+      window.setTimeout(() => {
+        try {
+          frameWindow.focus();
+          frameWindow.print();
+        } catch (error) {
+          cleanup();
+          throw error;
+        }
+      }, 50);
+
+      session.cleanupTimeoutId = window.setTimeout(cleanup, 60000);
+    };
+
+    session.iframe.addEventListener('load', session.loadHandler);
+  }
+
+  session.iframe.srcdoc = buildPrintDocumentHtml(title, bodyHtml);
 }
 
 export function openPrintPreviewWindow(title) {
-  const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=1120,height=900');
+  const printSession = createPrintSession(title);
 
-  if (!printWindow) {
-    throw new Error('No fue posible abrir la ventana de impresion. Verifique el bloqueador de ventanas emergentes.');
-  }
-
-  writePrintWindow(
-    printWindow,
+  writePrintSession(
+    printSession,
     title,
     `
       <main class="sheet">
@@ -280,40 +363,21 @@ export function openPrintPreviewWindow(title) {
       </main>
     `,
   );
-  printWindow.focus();
-  return printWindow;
+
+  return printSession;
 }
 
-export function renderPrintWindowError(printWindow, title, message) {
-  if (!printWindow || printWindow.closed) {
+export function renderPrintWindowError(printSession) {
+  if (!printSession) {
     return;
   }
 
-  writePrintWindow(
-    printWindow,
-    title,
-    `
-      <main class="sheet">
-        <header class="header">
-          <div>
-            <div class="eyebrow">Error de impresion</div>
-            <h1 class="title">${escapeHtml(title)}</h1>
-            <p class="subtitle">${escapeHtml(message)}</p>
-          </div>
-        </header>
-      </main>
-    `,
-  );
-  printWindow.focus();
+  disposePrintSession(printSession);
 }
 
-function openPrintWindow(title, bodyHtml, existingWindow) {
-  const printWindow = existingWindow ?? openPrintPreviewWindow(title);
-  writePrintWindow(printWindow, title, bodyHtml);
-  printWindow.focus();
-  window.setTimeout(() => {
-    printWindow.print();
-  }, 250);
+function openPrintWindow(title, bodyHtml, existingSession) {
+  const printSession = existingSession ?? openPrintPreviewWindow(title);
+  writePrintSession(printSession, title, bodyHtml, true);
 }
 
 export function printRecipeDocument(document, existingWindow) {

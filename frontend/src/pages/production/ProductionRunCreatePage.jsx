@@ -401,18 +401,18 @@ function ProductionRunCreatePage() {
       return;
     }
 
-    let printWindow;
+    let printSession;
     setPrintingRecipe(true);
     setServerMessage('');
 
     try {
-      printWindow = openPrintPreviewWindow(`Formula ${previewRun.recipeCode || previewRun.recipeId}`);
+      printSession = openPrintPreviewWindow(`Formula ${previewRun.recipeCode || previewRun.recipeId}`);
       const printableRecipe = await fetchRecipePrintableById(previewRun.recipeId);
-      printRecipeDocument(printableRecipe, printWindow);
+      printRecipeDocument(printableRecipe, printSession);
     } catch (requestError) {
       const message = getRecipesErrorMessage(requestError);
       renderPrintWindowError(
-        printWindow,
+        printSession,
         `Formula ${previewRun.recipeCode || previewRun.recipeId}`,
         message,
       );
@@ -427,18 +427,18 @@ function ProductionRunCreatePage() {
       return;
     }
 
-    let printWindow;
+    let printSession;
     setPrintingProductionRun(true);
     setServerMessage('');
 
     try {
-      printWindow = openPrintPreviewWindow(`Descargo ${previewRun.recipeCode || previewRun.id}`);
+      printSession = openPrintPreviewWindow(`Descargo ${previewRun.recipeCode || previewRun.id}`);
       const printableProductionRun = await fetchProductionRunPrintableById(previewRun.id);
-      printProductionRunDocument(printableProductionRun, printWindow);
+      printProductionRunDocument(printableProductionRun, printSession);
     } catch (requestError) {
       const message = getProductionRunErrorMessage(requestError);
       renderPrintWindowError(
-        printWindow,
+        printSession,
         `Descargo ${previewRun.recipeCode || previewRun.id}`,
         message,
       );
