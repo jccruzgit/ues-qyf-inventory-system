@@ -42,7 +42,7 @@ const defaultValues = {
   manufacturedProductId: '',
   recipeId: '',
   laboratoryId: '',
-  groupName: '',
+  lotNumber: '',
   notes: '',
 };
 
@@ -164,7 +164,7 @@ function ProductionRunCreatePage() {
   const selectedManufacturedProductId = Number(watch('manufacturedProductId'));
   const selectedRecipeId = Number(watch('recipeId'));
   const selectedLaboratoryId = String(watch('laboratoryId') ?? '');
-  const groupName = watch('groupName');
+  const lotNumber = watch('lotNumber');
   const notes = watch('notes');
 
   const recipeOptions = useMemo(
@@ -232,11 +232,17 @@ function ProductionRunCreatePage() {
   }, []);
 
   useEffect(() => {
+    if (laboratories.length === 1 && !selectedLaboratoryId) {
+      setValue('laboratoryId', String(laboratories[0].value));
+    }
+  }, [laboratories, selectedLaboratoryId, setValue]);
+
+  useEffect(() => {
     setPreviewRun(null);
     setActualQuantities({});
     setServerMessage('');
     setFeedback('');
-  }, [groupName, notes, selectedLaboratoryId, selectedManufacturedProductId, selectedRecipeId]);
+  }, [lotNumber, notes, selectedLaboratoryId, selectedManufacturedProductId, selectedRecipeId]);
 
   useEffect(() => {
     if (!previewRun) {
@@ -323,7 +329,7 @@ function ProductionRunCreatePage() {
       setFeedback(
         response.readyToConfirm
           ? 'Previsualizacion generada. Revise los lotes sugeridos antes de confirmar.'
-          : 'La elaboracion fue preparada, pero hay insumos con stock insuficiente.',
+          : 'El descargo fue preparado, pero hay insumos con stock insuficiente.',
       );
     } catch (requestError) {
       const message = getProductionRunErrorMessage(requestError);
@@ -347,7 +353,7 @@ function ProductionRunCreatePage() {
     }
 
     if (!previewItems.length) {
-      setServerMessage('No hay insumos disponibles para confirmar esta elaboracion.');
+      setServerMessage('No hay insumos disponibles para confirmar este descargo.');
       return;
     }
 
@@ -387,7 +393,7 @@ function ProductionRunCreatePage() {
       );
       setPreviewRun(response);
       setFeedback(
-        `Elaboracion confirmada correctamente. Se genero el movimiento de salida #${response.inventoryMovementId}.`,
+        `Descargo confirmado correctamente. Se genero el movimiento de salida #${response.inventoryMovementId}.`,
       );
     } catch (requestError) {
       setServerMessage(getProductionRunErrorMessage(requestError));
@@ -464,8 +470,8 @@ function ProductionRunCreatePage() {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Elaboracion"
-        subtitle="Prepara un descargo por formula, revisa los insumos sugeridos por lote y confirma la salida de inventario sin afectar el descargo individual."
+        title="Descargo por formula"
+        subtitle="Registra el consumo real de un producto elaborado, revisa los lotes sugeridos y confirma la salida de inventario."
         action={
           <Link
             to="/inventory/exits/new"
@@ -497,8 +503,8 @@ function ProductionRunCreatePage() {
                 Este flujo toma una formula, valida stock completo, permite registrar cantidades reales y crea una salida trazable con una linea por cada lote sugerido.
               </p>
               <div className="mt-8 space-y-3 text-sm text-white/78">
-                <p>1. Selecciona producto a elaborar, formula y laboratorio.</p>
-                <p>2. Prepara la elaboracion para revisar insumos, cantidades y lotes FEFO.</p>
+                <p>1. Selecciona producto elaborado, formula y laboratorio.</p>
+                <p>2. Prepara el descargo para revisar insumos, cantidades y lotes FEFO.</p>
                 <p>3. Ajusta la cantidad real de cada insumo dentro del rango permitido.</p>
                 <p>4. Confirma solo si toda la formula tiene disponibilidad suficiente.</p>
               </div>
@@ -521,7 +527,7 @@ function ProductionRunCreatePage() {
               ) : (
                 <form className="max-w-[440px] space-y-6" onSubmit={handleSubmit(handlePrepare)}>
                   <Field
-                    label="Producto a elaborar"
+                    label="Producto elaborado"
                     required
                     error={errors.manufacturedProductId?.message}
                   >
@@ -531,14 +537,14 @@ function ProductionRunCreatePage() {
                       {...register('manufacturedProductId')}
                     >
                       <option value="" disabled>
-                        Seleccione un producto a elaborar
+                        Seleccione un producto elaborado
                       </option>
                       {manufacturedProducts
                         .filter((item) => item.active)
                         .sort((left, right) => left.name.localeCompare(right.name))
                         .map((item) => (
                           <option key={item.id} value={item.id}>
-                            {item.name} ({item.code}){item.groupCode ? ` • ${item.groupCode}` : ''}
+                            {item.name} ({item.code})
                           </option>
                         ))}
                     </select>
@@ -581,23 +587,41 @@ function ProductionRunCreatePage() {
                     </select>
                   </Field>
 
+                  <Field label="Grupo" hint="Se toma automaticamente de la formula seleccionada.">
+                    <input
+                      type="text"
+                      readOnly
+                      value={selectedRecipe?.groupCode || ''}
+                      className="w-full cursor-not-allowed rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink/80 outline-none"
+                    />
+                  </Field>
+
+                  <Field label="Ciclo" hint="Se toma automaticamente de la formula seleccionada.">
+                    <input
+                      type="text"
+                      readOnly
+                      value={selectedRecipe?.cycle || ''}
+                      className="w-full cursor-not-allowed rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink/80 outline-none"
+                    />
+                  </Field>
+
                   <Field
-                    label="Grupo o estudiante"
-                    error={errors.groupName?.message}
-                    hint="Opcional para conservar trazabilidad academica."
+                    label="Numero de lote del producto elaborado"
+                    required
+                    error={errors.lotNumber?.message}
                   >
                     <input
                       type="text"
-                      placeholder="Ej. Grupo 03 / Seccion B"
+                      placeholder="Ej. L20260925-01"
                       className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                      {...register('groupName')}
+                      {...register('lotNumber')}
                     />
                   </Field>
 
                   <Field
                     label="Observaciones"
                     error={errors.notes?.message}
-                    hint="Estas notas se adjuntan a la elaboracion y al movimiento generado."
+                    hint="Estas notas se adjuntan al descargo y al movimiento generado."
                   >
                     <textarea
                       rows={4}
@@ -634,7 +658,7 @@ function ProductionRunCreatePage() {
                       className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       <FlaskConical className="h-4 w-4" />
-                      {preparing ? 'Preparando...' : 'Preparar'}
+                      {preparing ? 'Preparando...' : 'Preparar descargo'}
                     </button>
                   </div>
                 </form>
@@ -671,7 +695,7 @@ function ProductionRunCreatePage() {
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
                     <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-copy-soft">
-                      Producto a elaborar
+                      Producto elaborado
                     </p>
                     <h4 className="mt-2 text-lg font-extrabold text-brand-ink">
                       {previewRun.manufacturedProductName}
@@ -681,7 +705,7 @@ function ProductionRunCreatePage() {
                     </p>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:justify-items-stretch">
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 xl:justify-items-stretch">
                     <PreviewDataCell
                       label="Laboratorio"
                       value={previewRun.laboratoryName}
@@ -702,6 +726,16 @@ function ProductionRunCreatePage() {
                       value={previewRun.groupName || 'Sin grupo asociado.'}
                       compact
                     />
+                    <PreviewDataCell
+                      label="Ciclo"
+                      value={previewRun.cycle || 'Sin ciclo asociado.'}
+                      compact
+                    />
+                    <PreviewDataCell
+                      label="Lote"
+                      value={previewRun.lotNumber || 'Sin lote asociado.'}
+                      compact
+                    />
                   </div>
                 </div>
 
@@ -720,7 +754,7 @@ function ProductionRunCreatePage() {
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                     <div>
-                      No hay stock suficiente para confirmar la elaboracion. Revise:
+                      No hay stock suficiente para confirmar el descargo. Revise:
                       <ul className="mt-2 list-disc pl-5">
                         {shortageItems.map((item) => (
                           <li key={item.recipeItemId}>
@@ -950,7 +984,7 @@ function ProductionRunCreatePage() {
                     </p>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-copy">
-                    Genera una vista imprimible de la formula teorica con producto, grupo, ciclo, lote y materias primas.
+                    Genera una vista imprimible de la formula teorica con producto, grupo, ciclo y materias primas.
                   </p>
                   <button
                     type="button"
@@ -995,7 +1029,7 @@ function ProductionRunCreatePage() {
                   onClick={handleReset}
                   className="inline-flex items-center justify-center rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
                 >
-                  Preparar otra elaboracion
+                  Preparar otro descargo
                 </button>
                 <button
                   type="button"
@@ -1011,8 +1045,8 @@ function ProductionRunCreatePage() {
                   {confirming
                     ? 'Confirmando...'
                     : previewRun.status === 'CONFIRMED'
-                      ? 'Elaboracion confirmada'
-                      : 'Confirmar elaboracion'}
+                      ? 'Descargo confirmado'
+                      : 'Confirmar descargo'}
                 </button>
               </div>
             </>
@@ -1020,10 +1054,10 @@ function ProductionRunCreatePage() {
             <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-10 text-center">
               <FlaskConical className="mx-auto h-8 w-8 text-copy-soft" strokeWidth={1.9} />
               <h3 className="mt-4 text-lg font-extrabold text-brand-ink">
-                Aun no hay una elaboracion preparada
+                Aun no hay un descargo preparado
               </h3>
               <p className="mt-2 text-sm leading-7 text-copy">
-                Selecciona una formula y prepara la elaboracion para revisar insumos, cantidades requeridas, lote sugerido y advertencias antes de confirmar.
+                Selecciona una formula y prepara el descargo para revisar insumos, cantidades requeridas, lotes sugeridos y advertencias antes de confirmar.
               </p>
             </div>
           )}

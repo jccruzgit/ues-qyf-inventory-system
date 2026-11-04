@@ -16,9 +16,6 @@ import {
 const defaultValues = {
   code: '',
   name: '',
-  groupCode: '',
-  cycle: '',
-  lotNumber: '',
   description: '',
   active: true,
 };
@@ -113,9 +110,6 @@ function ManufacturedProductsPage() {
     reset({
       code: item.code,
       name: item.name,
-      groupCode: item.groupCode,
-      cycle: item.cycle,
-      lotNumber: item.lotNumber,
       description: item.description,
       active: item.active,
     });
@@ -142,9 +136,6 @@ function ManufacturedProductsPage() {
       reset({
         code: savedProduct.code,
         name: savedProduct.name,
-        groupCode: savedProduct.groupCode,
-        cycle: savedProduct.cycle,
-        lotNumber: savedProduct.lotNumber,
         description: savedProduct.description,
         active: savedProduct.active,
       });
@@ -252,9 +243,6 @@ function ManufacturedProductsPage() {
                           <h4 className="mt-2 text-lg font-extrabold tracking-[-0.03em] text-brand-ink">
                             {item.name}
                           </h4>
-                          <p className="mt-2 text-xs font-bold uppercase tracking-[0.16em] text-copy-soft">
-                            Grupo {item.groupCode || 'Sin grupo'} • Ciclo {item.cycle || 'Sin ciclo'} • Lote {item.lotNumber || 'Sin lote'}
-                          </p>
                         </div>
 
                         <span
@@ -285,7 +273,7 @@ function ManufacturedProductsPage() {
                 Aun no hay productos a elaborar
               </h3>
               <p className="mt-2 text-sm leading-7 text-copy">
-                Registra el primer producto a elaborar para comenzar a definir formulas y descargos por elaboracion.
+                Registra el primer producto a elaborar para comenzar a definir formulas y descargos por formula.
               </p>
             </div>
           )}
@@ -308,9 +296,9 @@ function ManufacturedProductsPage() {
                 Define el producto que entrara a fase de formulacion. Este catalogo no reemplaza a los insumos del inventario actual.
               </p>
               <div className="mt-8 space-y-3 text-sm text-white/78">
-                <p>1. Registra codigo, nombre y trazabilidad academica.</p>
+                <p>1. Registra el codigo y nombre generico del producto.</p>
                 <p>2. Mantiene el estado activo para formulas vigentes.</p>
-                <p>3. Luego crea una formula teorica y sus insumos asociados.</p>
+                <p>3. El grupo, ciclo y lote se registran en las etapas posteriores.</p>
               </div>
             </aside>
 
@@ -334,51 +322,6 @@ function ManufacturedProductsPage() {
                   />
                 </Field>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  <Field
-                    label="Grupo"
-                    required
-                    error={errors.groupCode?.message}
-                    hint="Ej. G01M o G01J."
-                  >
-                    <input
-                      type="text"
-                      placeholder="Ej. G01M"
-                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                      {...register('groupCode')}
-                    />
-                  </Field>
-
-                  <Field
-                    label="Ciclo"
-                    required
-                    error={errors.cycle?.message}
-                    hint="Identificador del ciclo academico."
-                  >
-                    <input
-                      type="text"
-                      placeholder="Ej. 2026-01"
-                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                      {...register('cycle')}
-                    />
-                  </Field>
-
-                  <Field
-                    label="Numero de lote"
-                    required
-                    error={errors.lotNumber?.message}
-                    hint="Ej. L20260602."
-                    className="md:col-span-2"
-                  >
-                    <input
-                      type="text"
-                      placeholder="Ej. L20260602"
-                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                      {...register('lotNumber')}
-                    />
-                  </Field>
-                </div>
-
                 <Field
                   label="Descripcion"
                   error={errors.description?.message}
@@ -399,7 +342,7 @@ function ManufacturedProductsPage() {
                     {...register('active')}
                   />
                   <span className="text-sm font-semibold leading-6 text-copy">
-                    Mantener este producto a elaborar activo para nuevas formulas y elaboraciones.
+                    Mantener este producto a elaborar activo para nuevas formulas y descargos.
                   </span>
                 </label>
 

@@ -129,7 +129,7 @@ function MovementTable({
                 'Unidad precio',
                 'Laboratorio',
                 'Usuario',
-                'Elaboracion',
+                'Descargo por formula',
                 'Observacion general',
                 'Nota por linea',
                 'Acciones',
@@ -201,7 +201,7 @@ function MovementTable({
                     {row.productionRunId ? (
                       <>
                         <p className="font-extrabold text-brand-ink">
-                          {row.manufacturedProductName || 'Elaboracion asociada'}
+                          {row.manufacturedProductName || 'Descargo asociado'}
                         </p>
                         <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-copy-soft">
                           Formula {row.recipeName || 'sin nombre'} • Run #{row.productionRunId}

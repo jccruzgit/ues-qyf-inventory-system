@@ -21,7 +21,6 @@ public class RecipePrintResponseDto {
     private String manufacturedProductName;
     private String groupCode;
     private String cycle;
-    private String lotNumber;
     private LocalDateTime generatedAt;
     private List<RecipePrintItemResponseDto> items;
 }

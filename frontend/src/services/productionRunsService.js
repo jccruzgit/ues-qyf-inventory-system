@@ -25,18 +25,19 @@ function translateProductionRunMessage(message) {
   const exactMessages = {
     'Recipe id is required': 'Debe seleccionar una formula.',
     'Laboratory id is required': 'Debe seleccionar un laboratorio.',
-    'Group name must not exceed 150 characters':
-      'El nombre del grupo no debe exceder 150 caracteres.',
+    'Production lot number is required': 'El numero de lote del producto elaborado es obligatorio.',
+    'Production lot number must not exceed 50 characters':
+      'El numero de lote del producto elaborado no debe exceder 50 caracteres.',
     'Recipe must contain at least one item before creating a production run':
-      'La formula debe tener al menos un insumo antes de crear una elaboracion.',
+      'La formula debe tener al menos un insumo antes de preparar un descargo.',
     'Production run has already been confirmed':
-      'Esta elaboracion ya fue confirmada.',
+      'Este descargo ya fue confirmado.',
     'At least one production run item is required':
-      'Debe registrar al menos un insumo con cantidad real para confirmar la elaboracion.',
+      'Debe registrar al menos un insumo con cantidad real para confirmar el descargo.',
     'All recipe items must be informed when confirming actual quantities':
-      'Debe registrar la cantidad real de cada insumo antes de confirmar la elaboracion.',
-    'Access denied': 'No tiene permisos para registrar elaboraciones.',
-    'An unexpected error occurred': 'Ocurrio un error inesperado al procesar la elaboracion.',
+      'Debe registrar la cantidad real de cada insumo antes de confirmar el descargo.',
+    'Access denied': 'No tiene permisos para registrar descargos.',
+    'An unexpected error occurred': 'Ocurrio un error inesperado al procesar el descargo.',
   };
 
   if (exactMessages[normalizedMessage]) {
@@ -44,7 +45,7 @@ function translateProductionRunMessage(message) {
   }
 
   if (normalizedMessage.startsWith('Production run not found with id:')) {
-    return 'La elaboracion seleccionada ya no esta disponible.';
+    return 'El descargo seleccionado ya no esta disponible.';
   }
 
   if (normalizedMessage.startsWith('Recipe not found with id:')) {
@@ -65,8 +66,8 @@ function translateProductionRunMessage(message) {
       '',
     ).trim();
     return shortageSummary
-      ? `No hay stock suficiente para confirmar la elaboracion. Revise: ${shortageSummary}.`
-      : 'No hay stock suficiente para confirmar la elaboracion.';
+      ? `No hay stock suficiente para confirmar el descargo. Revise: ${shortageSummary}.`
+      : 'No hay stock suficiente para confirmar el descargo.';
   }
 
   if (normalizedMessage.startsWith('Actual quantity for product ')) {
@@ -83,7 +84,7 @@ function translateProductionRunMessage(message) {
   }
 
   if (normalizedMessage.startsWith('Recipe item cannot be repeated in the same production run confirmation')) {
-    return 'No se puede repetir el mismo insumo dentro de la confirmacion de elaboracion.';
+    return 'No se puede repetir el mismo insumo dentro de la confirmacion del descargo.';
   }
 
   return normalizedMessage;
@@ -156,6 +157,8 @@ function adaptProductionRunFromApi(item) {
     createdAt: normalizeText(item?.createdAt),
     confirmedAt: normalizeText(item?.confirmedAt),
     groupName: normalizeText(item?.groupName),
+    cycle: normalizeText(item?.cycle),
+    lotNumber: normalizeText(item?.lotNumber),
     notes: normalizeText(item?.notes),
     inventoryMovementId: item?.inventoryMovementId ?? null,
     readyToConfirm: Boolean(item?.readyToConfirm),
@@ -228,7 +231,7 @@ export async function createProductionRun(values) {
   const response = await api.post('/production-runs', {
     recipeId: values.recipeId,
     laboratoryId: values.laboratoryId,
-    groupName: normalizeOptionalText(values.groupName),
+    lotNumber: values.lotNumber.trim(),
     notes: normalizeOptionalText(values.notes),
   });
 
@@ -265,7 +268,7 @@ export function getProductionRunErrorMessage(error) {
   }
 
   if (error?.response?.status === 403) {
-    return 'No tiene permisos para gestionar elaboraciones.';
+    return 'No tiene permisos para gestionar descargos.';
   }
 
   if (error?.response?.data?.message) {
@@ -280,6 +283,6 @@ export function getProductionRunErrorMessage(error) {
     return translateProductionRunMessage(error.message);
   }
 
-  return 'No fue posible procesar la elaboracion.';
+  return 'No fue posible procesar el descargo.';
 }
 

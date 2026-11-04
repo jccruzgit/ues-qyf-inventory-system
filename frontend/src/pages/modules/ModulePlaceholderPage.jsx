@@ -3,7 +3,7 @@ import Card from '../../components/ui/Card';
 import SectionHeader from '../../components/ui/SectionHeader';
 
 const routeLabels = {
-  '/products': 'Productos',
+  '/products': 'Insumos',
   '/inventory': 'Inventario',
   '/movements': 'Movimientos',
   '/batches': 'Lotes',

@@ -32,6 +32,8 @@ public class ProductionRunResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime confirmedAt;
     private String groupName;
+    private String cycle;
+    private String lotNumber;
     private String notes;
     private Long inventoryMovementId;
     private Boolean readyToConfirm;

@@ -110,7 +110,8 @@ public class ProductionRunServiceImpl implements ProductionRunService {
                 .laboratory(laboratory)
                 .createdBy(currentUser)
                 .status(ProductionRunStatus.DRAFT)
-                .groupName(normalizeNullable(request.getGroupName()))
+                .groupName(recipe.getGroupCode())
+                .lotNumber(normalize(request.getLotNumber()))
                 .notes(normalizeNullable(request.getNotes()))
                 .build();
 
@@ -210,12 +211,8 @@ public class ProductionRunServiceImpl implements ProductionRunService {
                         ? productionRun.getManufacturedProduct().getName()
                         : null)
                 .groupName(resolvePrintableGroupName(productionRun))
-                .cycle(productionRun.getManufacturedProduct() != null
-                        ? productionRun.getManufacturedProduct().getCycle()
-                        : null)
-                .lotNumber(productionRun.getManufacturedProduct() != null
-                        ? productionRun.getManufacturedProduct().getLotNumber()
-                        : null)
+                .cycle(productionRun.getRecipe() != null ? productionRun.getRecipe().getCycle() : null)
+                .lotNumber(productionRun.getLotNumber())
                 .laboratoryId(productionRun.getLaboratory() != null ? productionRun.getLaboratory().getId() : null)
                 .laboratoryCode(productionRun.getLaboratory() != null ? productionRun.getLaboratory().getCode() : null)
                 .laboratoryName(productionRun.getLaboratory() != null ? productionRun.getLaboratory().getName() : null)
@@ -473,7 +470,7 @@ public class ProductionRunServiceImpl implements ProductionRunService {
     private String buildMovementObservation(ProductionRun productionRun) {
         String manufacturedProductName = productionRun.getManufacturedProduct().getName();
         String recipeCode = productionRun.getRecipe().getCode();
-        StringBuilder observation = new StringBuilder("Elaboracion de ")
+        StringBuilder observation = new StringBuilder("Descargo de ")
                 .append(manufacturedProductName)
                 .append(" con receta ")
                 .append(recipeCode);
@@ -545,6 +542,8 @@ public class ProductionRunServiceImpl implements ProductionRunService {
                 .createdAt(productionRun.getCreatedAt())
                 .confirmedAt(productionRun.getConfirmedAt())
                 .groupName(productionRun.getGroupName())
+                .cycle(productionRun.getRecipe() != null ? productionRun.getRecipe().getCycle() : null)
+                .lotNumber(productionRun.getLotNumber())
                 .notes(productionRun.getNotes())
                 .inventoryMovementId(productionRun.getInventoryMovement() != null
                         ? productionRun.getInventoryMovement().getId()
@@ -669,10 +668,14 @@ public class ProductionRunServiceImpl implements ProductionRunService {
         if (productionRun.getGroupName() != null && !productionRun.getGroupName().isBlank()) {
             return productionRun.getGroupName();
         }
-        if (productionRun.getManufacturedProduct() != null) {
-            return productionRun.getManufacturedProduct().getGroupCode();
+        if (productionRun.getRecipe() != null) {
+            return productionRun.getRecipe().getGroupCode();
         }
         return null;
+    }
+
+    private String normalize(String value) {
+        return value.trim();
     }
 
     private LocalDateTime resolveLaboratoryDate(ProductionRun productionRun, InventoryMovement inventoryMovement) {
@@ -703,6 +706,7 @@ public class ProductionRunServiceImpl implements ProductionRunService {
         state.put("laboratoryId", productionRun.getLaboratory() != null ? productionRun.getLaboratory().getId() : null);
         state.put("status", productionRun.getStatus());
         state.put("groupName", productionRun.getGroupName());
+        state.put("lotNumber", productionRun.getLotNumber());
         state.put("notes", productionRun.getNotes());
         state.put("createdById", productionRun.getCreatedBy() != null ? productionRun.getCreatedBy().getId() : null);
         state.put("confirmedById", productionRun.getConfirmedBy() != null ? productionRun.getConfirmedBy().getId() : null);

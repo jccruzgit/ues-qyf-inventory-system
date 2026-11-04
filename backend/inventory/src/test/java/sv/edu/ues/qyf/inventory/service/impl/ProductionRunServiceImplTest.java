@@ -124,10 +124,13 @@ class ProductionRunServiceImplTest {
                 stockRow(9L, 70L, "LOT-001", LocalDate.of(2026, 5, 15), "4")));
 
         ProductionRunResponseDto response = productionRunService.create(
-                new ProductionRunRequestDto(8L, 3L, "Grupo A", "Practica guiada"));
+                new ProductionRunRequestDto(8L, 3L, " LT-01 ", "Practica guiada"));
 
         assertThat(response.getId()).isEqualTo(21L);
         assertThat(response.getStatus()).isEqualTo(ProductionRunStatus.DRAFT);
+        assertThat(response.getGroupName()).isEqualTo("G01M");
+        assertThat(response.getCycle()).isEqualTo("2026-I");
+        assertThat(response.getLotNumber()).isEqualTo("LT-01");
         assertThat(response.getReadyToConfirm()).isTrue();
         assertThat(response.getItems()).hasSize(1);
         assertThat(response.getItems().get(0).getSuggestedAllocations()).hasSize(2);
@@ -318,7 +321,7 @@ class ProductionRunServiceImplTest {
 
         assertThat(response.getProductionRunId()).isEqualTo(21L);
         assertThat(response.getControlMark()).isEqualTo("DOCUMENTO DE CONTROL");
-        assertThat(response.getGroupName()).isEqualTo("Grupo A");
+        assertThat(response.getGroupName()).isEqualTo("G01M");
         assertThat(response.getCycle()).isEqualTo("2026-I");
         assertThat(response.getLotNumber()).isEqualTo("LT-01");
         assertThat(response.getLaboratoryDate()).isEqualTo(LocalDateTime.of(2026, 6, 3, 9, 5));
@@ -344,7 +347,8 @@ class ProductionRunServiceImplTest {
                 .laboratory(laboratory)
                 .createdBy(createdBy)
                 .status(ProductionRunStatus.DRAFT)
-                .groupName("Grupo A")
+                .groupName("G01M")
+                .lotNumber("LT-01")
                 .notes("Practica guiada")
                 .build();
     }
@@ -369,13 +373,12 @@ class ProductionRunServiceImplTest {
                 .id(8L)
                 .code("REC-001")
                 .name("Receta base")
+                .groupCode("G01M")
+                .cycle("2026-I")
                 .manufacturedProduct(ManufacturedProduct.builder()
                         .id(4L)
                         .code("FAB-001")
                         .name("Jabon liquido")
-                        .groupCode("G01M")
-                        .cycle("2026-I")
-                        .lotNumber("LT-01")
                         .active(Boolean.TRUE)
                         .build())
                 .active(Boolean.TRUE)

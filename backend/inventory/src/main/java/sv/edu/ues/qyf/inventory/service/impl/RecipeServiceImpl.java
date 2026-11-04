@@ -91,6 +91,8 @@ public class RecipeServiceImpl implements RecipeService {
                 .code(code)
                 .name(normalize(request.getName()))
                 .description(normalizeNullable(request.getDescription()))
+                .groupCode(normalize(request.getGroupCode()))
+                .cycle(normalize(request.getCycle()))
                 .active(resolveActive(request.getActive(), Boolean.TRUE))
                 .build();
 
@@ -138,15 +140,8 @@ public class RecipeServiceImpl implements RecipeService {
                 .manufacturedProductName(recipe.getManufacturedProduct() != null
                         ? recipe.getManufacturedProduct().getName()
                         : null)
-                .groupCode(recipe.getManufacturedProduct() != null
-                        ? recipe.getManufacturedProduct().getGroupCode()
-                        : null)
-                .cycle(recipe.getManufacturedProduct() != null
-                        ? recipe.getManufacturedProduct().getCycle()
-                        : null)
-                .lotNumber(recipe.getManufacturedProduct() != null
-                        ? recipe.getManufacturedProduct().getLotNumber()
-                        : null)
+                .groupCode(recipe.getGroupCode())
+                .cycle(recipe.getCycle())
                 .generatedAt(LocalDateTime.now())
                 .items(mapPrintableItems(recipe))
                 .build();
@@ -170,6 +165,8 @@ public class RecipeServiceImpl implements RecipeService {
         recipe.setCode(code);
         recipe.setName(normalize(request.getName()));
         recipe.setDescription(normalizeNullable(request.getDescription()));
+        recipe.setGroupCode(normalize(request.getGroupCode()));
+        recipe.setCycle(normalize(request.getCycle()));
         recipe.setActive(resolveActive(request.getActive(), recipe.getActive()));
 
         if (Boolean.TRUE.equals(recipe.getActive())) {
@@ -353,6 +350,8 @@ public class RecipeServiceImpl implements RecipeService {
         state.put("code", recipe.getCode());
         state.put("name", recipe.getName());
         state.put("description", recipe.getDescription());
+        state.put("groupCode", recipe.getGroupCode());
+        state.put("cycle", recipe.getCycle());
         state.put("active", recipe.getActive());
         state.put("deletedAt", recipe.getDeletedAt());
         state.put("deletedById", recipe.getDeletedBy() != null ? recipe.getDeletedBy().getId() : null);

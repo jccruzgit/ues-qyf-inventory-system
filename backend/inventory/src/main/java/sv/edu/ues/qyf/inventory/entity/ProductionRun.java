@@ -14,6 +14,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -74,6 +76,11 @@ public class ProductionRun {
 
     @Column(name = "group_name", length = 150)
     private String groupName;
+
+    @NotBlank
+    @Size(max = 50)
+    @Column(name = "lot_number", nullable = false, length = 50)
+    private String lotNumber;
 
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     private String notes;

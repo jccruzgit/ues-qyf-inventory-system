@@ -28,5 +28,13 @@ public class RecipeRequestDto {
     @Size(max = 500, message = "Recipe description must not exceed 500 characters")
     private String description;
 
+    @NotBlank(message = "Recipe group code is required")
+    @Size(max = 50, message = "Recipe group code must not exceed 50 characters")
+    private String groupCode;
+
+    @NotBlank(message = "Recipe cycle is required")
+    @Size(max = 50, message = "Recipe cycle must not exceed 50 characters")
+    private String cycle;
+
     private Boolean active;
 }

@@ -1,6 +1,7 @@
 package sv.edu.ues.qyf.inventory.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,8 +20,9 @@ public class ProductionRunRequestDto {
     @NotNull(message = "Laboratory id is required")
     private Long laboratoryId;
 
-    @Size(max = 150, message = "Group name must not exceed 150 characters")
-    private String groupName;
+    @NotBlank(message = "Production lot number is required")
+    @Size(max = 50, message = "Production lot number must not exceed 50 characters")
+    private String lotNumber;
 
     private String notes;
 }

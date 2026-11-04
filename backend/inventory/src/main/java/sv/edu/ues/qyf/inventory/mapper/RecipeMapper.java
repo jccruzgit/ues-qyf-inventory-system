@@ -27,18 +27,11 @@ public class RecipeMapper {
                 .manufacturedProductName(recipe.getManufacturedProduct() != null
                         ? recipe.getManufacturedProduct().getName()
                         : null)
-                .manufacturedProductGroupCode(recipe.getManufacturedProduct() != null
-                        ? recipe.getManufacturedProduct().getGroupCode()
-                        : null)
-                .manufacturedProductCycle(recipe.getManufacturedProduct() != null
-                        ? recipe.getManufacturedProduct().getCycle()
-                        : null)
-                .manufacturedProductLotNumber(recipe.getManufacturedProduct() != null
-                        ? recipe.getManufacturedProduct().getLotNumber()
-                        : null)
                 .code(recipe.getCode())
                 .name(recipe.getName())
                 .description(recipe.getDescription())
+                .groupCode(recipe.getGroupCode())
+                .cycle(recipe.getCycle())
                 .active(recipe.getActive())
                 .createdAt(recipe.getCreatedAt())
                 .updatedAt(recipe.getUpdatedAt())

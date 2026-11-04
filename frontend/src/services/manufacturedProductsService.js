@@ -42,15 +42,6 @@ function translateManufacturedProductMessage(message) {
       'El codigo no debe exceder 50 caracteres.',
     'Manufactured product name must not exceed 150 characters':
       'El nombre no debe exceder 150 caracteres.',
-    'Manufactured product group code is required': 'El grupo es obligatorio.',
-    'Manufactured product cycle is required': 'El ciclo es obligatorio.',
-    'Manufactured product lot number is required': 'El numero de lote es obligatorio.',
-    'Manufactured product group code must not exceed 50 characters':
-      'El grupo no debe exceder 50 caracteres.',
-    'Manufactured product cycle must not exceed 50 characters':
-      'El ciclo no debe exceder 50 caracteres.',
-    'Manufactured product lot number must not exceed 50 characters':
-      'El numero de lote no debe exceder 50 caracteres.',
     'Manufactured product description must not exceed 500 characters':
       'La descripcion no debe exceder 500 caracteres.',
     'Validation failed': 'Los datos del producto a elaborar no son validos.',
@@ -79,9 +70,6 @@ function adaptManufacturedProductFromApi(item) {
     id: item?.id ?? null,
     code: normalizeText(item?.code, 'SIN-CODIGO'),
     name: normalizeText(item?.name, 'Producto a elaborar sin nombre'),
-    groupCode: normalizeText(item?.groupCode ?? item?.group, ''),
-    cycle: normalizeText(item?.cycle, ''),
-    lotNumber: normalizeText(item?.lotNumber ?? item?.batchNumber, ''),
     description: normalizeText(item?.description),
     active: item?.active !== false,
     createdAt: normalizeText(item?.createdAt),
@@ -101,9 +89,6 @@ export async function createManufacturedProduct(values) {
   const response = await api.post('/manufactured-products', {
     code: values.code.trim(),
     name: values.name.trim(),
-    groupCode: values.groupCode.trim(),
-    cycle: values.cycle.trim(),
-    lotNumber: values.lotNumber.trim(),
     description: normalizeOptionalText(values.description),
     active: values.active,
   });
@@ -115,9 +100,6 @@ export async function updateManufacturedProduct(id, values) {
   const response = await api.put(`/manufactured-products/${id}`, {
     code: values.code.trim(),
     name: values.name.trim(),
-    groupCode: values.groupCode.trim(),
-    cycle: values.cycle.trim(),
-    lotNumber: values.lotNumber.trim(),
     description: normalizeOptionalText(values.description),
     active: values.active,
   });

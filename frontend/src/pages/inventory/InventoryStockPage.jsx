@@ -30,6 +30,7 @@ import {
 } from '../../services/inventoryService';
 
 const defaultFilters = {
+  search: '',
   laboratory: 'all',
   category: 'all',
   storageCondition: 'all',
@@ -87,6 +88,9 @@ function InventoryStockPage() {
   const inventoryItems = buildInventoryOverview(products, stockItems);
   const filterOptions = buildInventoryFilterOptions(inventoryItems);
   const filteredItems = inventoryItems.filter((item) => {
+    const normalizedSearch = filters.search.trim().toLocaleLowerCase('es');
+    const matchesSearch =
+      !normalizedSearch || item.productName.toLocaleLowerCase('es').includes(normalizedSearch);
     const matchesLaboratory =
       filters.laboratory === 'all' || item.laboratoryName === filters.laboratory;
     const matchesCategory = filters.category === 'all' || item.category === filters.category;
@@ -95,14 +99,18 @@ function InventoryStockPage() {
     const matchesStockState =
       filters.stockState === 'all' || item.stockState.key === filters.stockState;
 
-    return matchesLaboratory && matchesCategory && matchesStorage && matchesStockState;
+    return (
+      matchesSearch && matchesLaboratory && matchesCategory && matchesStorage && matchesStockState
+    );
   });
 
   const activeBatchCount = filteredItems.reduce((total, item) => total + item.activeBatchCount, 0);
   const criticalCount = filteredItems.filter((item) => item.stockState.key === 'critical').length;
   const lowCount = filteredItems.filter((item) => item.stockState.key === 'low').length;
   const expiringSoonCount = filteredItems.filter((item) => item.expiringSoonCount > 0).length;
-  const isFiltered = Object.values(filters).some((value) => value !== 'all');
+  const isFiltered =
+    Boolean(filters.search.trim()) ||
+    Object.entries(filters).some(([key, value]) => key !== 'search' && value !== 'all');
 
   return (
     <div className="space-y-6">
@@ -188,6 +196,7 @@ function InventoryStockPage() {
         </div>
 
         <InventoryFilters
+          search={filters.search}
           laboratory={filters.laboratory}
           category={filters.category}
           storageCondition={filters.storageCondition}
@@ -195,6 +204,9 @@ function InventoryStockPage() {
           laboratoryOptions={filterOptions.laboratoryOptions}
           categoryOptions={filterOptions.categoryOptions}
           stockStateOptions={filterOptions.stockStateOptions}
+          onSearchChange={(value) =>
+            setFilters((currentFilters) => ({ ...currentFilters, search: value }))
+          }
           onLaboratoryChange={(value) =>
             setFilters((currentFilters) => ({ ...currentFilters, laboratory: value }))
           }

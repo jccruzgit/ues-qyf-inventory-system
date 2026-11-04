@@ -81,15 +81,14 @@ class RecipeServiceImplTest {
     }
 
     @Test
-    void getById_returnsManufacturedProductAcademicTraceability() {
-        Recipe recipe = buildRecipe(7L, "G01M", "2026-I", "LT-01");
+    void getById_returnsRecipeAcademicTraceability() {
+        Recipe recipe = buildRecipe(7L, "G01M", "2026-I");
         when(recipeRepository.findByIdAndActiveTrue(9L)).thenReturn(Optional.of(recipe));
 
         RecipeResponseDto response = recipeService.getById(9L);
 
-        assertThat(response.getManufacturedProductGroupCode()).isEqualTo("G01M");
-        assertThat(response.getManufacturedProductCycle()).isEqualTo("2026-I");
-        assertThat(response.getManufacturedProductLotNumber()).isEqualTo("LT-01");
+        assertThat(response.getGroupCode()).isEqualTo("G01M");
+        assertThat(response.getCycle()).isEqualTo("2026-I");
     }
 
     @Test
@@ -103,7 +102,6 @@ class RecipeServiceImplTest {
         assertThat(response.getManufacturedProductName()).isEqualTo("Jabon liquido");
         assertThat(response.getGroupCode()).isEqualTo("G01M");
         assertThat(response.getCycle()).isEqualTo("2026-I");
-        assertThat(response.getLotNumber()).isEqualTo("LT-01");
         assertThat(response.getItems()).hasSize(1);
         assertThat(response.getItems().get(0).getTheoreticalQuantity())
                 .isEqualByComparingTo("5.5");
@@ -111,14 +109,11 @@ class RecipeServiceImplTest {
 
     @Test
     void update_blocksChangingManufacturedProductWhenRecipeAlreadyHasProductionRuns() {
-        Recipe recipe = buildRecipe(7L, "G01M", "2026-I", "LT-01");
+        Recipe recipe = buildRecipe(7L, "G01M", "2026-I");
         ManufacturedProduct replacementProduct = ManufacturedProduct.builder()
                 .id(8L)
                 .code("FAB-002")
                 .name("Gel antibacterial")
-                .groupCode("G02T")
-                .cycle("2026-II")
-                .lotNumber("LT-02")
                 .active(Boolean.TRUE)
                 .build();
 
@@ -129,7 +124,14 @@ class RecipeServiceImplTest {
 
         assertThatThrownBy(() -> recipeService.update(
                         9L,
-                        new RecipeRequestDto(8L, "REC-001", "Formula base", "Actualizada", Boolean.TRUE)))
+                        new RecipeRequestDto(
+                                8L,
+                                "REC-001",
+                                "Formula base",
+                                "Actualizada",
+                                "G02T",
+                                "2026-II",
+                                Boolean.TRUE)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Cannot change manufactured product for a recipe that has production runs");
 
@@ -138,7 +140,7 @@ class RecipeServiceImplTest {
 
     @Test
     void addItem_blocksStructuralChangesWhenRecipeAlreadyHasProductionRuns() {
-        Recipe recipe = buildRecipe(7L, "G01M", "2026-I", "LT-01");
+        Recipe recipe = buildRecipe(7L, "G01M", "2026-I");
         when(recipeRepository.findByIdAndActiveTrue(9L)).thenReturn(Optional.of(recipe));
         when(productionRunRepository.existsByRecipeId(9L)).thenReturn(true);
 
@@ -149,14 +151,11 @@ class RecipeServiceImplTest {
                 .hasMessage("Cannot modify recipe structure after it has been used in a production run");
     }
 
-    private Recipe buildRecipe(Long manufacturedProductId, String groupCode, String cycle, String lotNumber) {
+    private Recipe buildRecipe(Long manufacturedProductId, String groupCode, String cycle) {
         ManufacturedProduct manufacturedProduct = ManufacturedProduct.builder()
                 .id(manufacturedProductId)
                 .code("FAB-001")
                 .name("Jabon liquido")
-                .groupCode(groupCode)
-                .cycle(cycle)
-                .lotNumber(lotNumber)
                 .active(Boolean.TRUE)
                 .build();
 
@@ -166,13 +165,15 @@ class RecipeServiceImplTest {
                 .code("REC-001")
                 .name("Formula base")
                 .description("Demo")
+                .groupCode(groupCode)
+                .cycle(cycle)
                 .active(Boolean.TRUE)
                 .items(List.of())
                 .build();
     }
 
     private Recipe buildRecipeWithItem() {
-        Recipe recipe = buildRecipe(7L, "G01M", "2026-I", "LT-01");
+        Recipe recipe = buildRecipe(7L, "G01M", "2026-I");
         UnitOfMeasure unit = UnitOfMeasure.builder()
                 .id(4L)
                 .name("Mililitro")

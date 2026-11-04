@@ -417,7 +417,6 @@ export function printRecipeDocument(document, existingWindow) {
           ${renderMetaCard('Producto', `${document.manufacturedProductName} (${document.manufacturedProductCode})`)}
           ${renderMetaCard('Grupo', document.groupCode)}
           ${renderMetaCard('Ciclo', document.cycle)}
-          ${renderMetaCard('Lote', document.lotNumber)}
         </section>
 
         <section class="section">

@@ -5,6 +5,7 @@ import Topbar from './Topbar';
 
 function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div className="min-h-screen bg-surface-0 text-brand-ink">
@@ -12,6 +13,8 @@ function AppLayout() {
         <Sidebar
           mobileOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          desktopCollapsed={sidebarCollapsed}
+          onToggleDesktop={() => setSidebarCollapsed((currentValue) => !currentValue)}
         />
 
         <div className="flex min-h-screen min-w-0 flex-1 flex-col">

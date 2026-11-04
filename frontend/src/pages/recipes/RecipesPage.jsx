@@ -30,6 +30,8 @@ const recipeDefaultValues = {
   manufacturedProductId: '',
   code: '',
   name: '',
+  groupCode: '',
+  cycle: '',
   description: '',
   active: true,
 };
@@ -108,6 +110,15 @@ function RecipesPage() {
   const currentItems = selectedRecipeId ? selectedRecipe?.items ?? [] : draftItems;
   const selectedItemProductId = Number(watchItem('productId'));
   const selectedItemProduct = products.find((item) => item.id === selectedItemProductId) ?? null;
+  const selectedItemQuantity = Number(watchItem('quantity'));
+  const itemStockWarning =
+    selectedItemProduct &&
+    Number.isFinite(selectedItemQuantity) &&
+    selectedItemQuantity > Number(selectedItemProduct.stock ?? 0)
+      ? `Advertencia: la formula solicita ${formatQuantity(selectedItemQuantity)} ${
+          selectedItemProduct.unitSymbol || selectedItemProduct.unitName
+        }, pero el inventario actual reporta ${formatQuantity(selectedItemProduct.stock)}.`
+      : '';
 
   const manufacturedProductOptions = useMemo(
     () =>
@@ -178,6 +189,8 @@ function RecipesPage() {
       manufacturedProductId: String(recipe.manufacturedProductId),
       code: recipe.code,
       name: recipe.name,
+      groupCode: recipe.groupCode,
+      cycle: recipe.cycle,
       description: recipe.description,
       active: recipe.active,
     });
@@ -331,6 +344,8 @@ function RecipesPage() {
         manufacturedProductId: String(latestRecipe.manufacturedProductId),
         code: latestRecipe.code,
         name: latestRecipe.name,
+        groupCode: latestRecipe.groupCode,
+        cycle: latestRecipe.cycle,
         description: latestRecipe.description,
         active: latestRecipe.active,
       });
@@ -439,11 +454,9 @@ function RecipesPage() {
                           <p className="mt-1 text-sm font-semibold text-copy">
                             {recipe.manufacturedProductName}
                           </p>
-                          {recipe.manufacturedProductGroupCode || recipe.manufacturedProductCycle || recipe.manufacturedProductLotNumber ? (
-                            <p className="mt-2 text-xs font-bold uppercase tracking-[0.16em] text-copy-soft">
-                              Grupo {recipe.manufacturedProductGroupCode || 'Sin grupo'} • Ciclo {recipe.manufacturedProductCycle || 'Sin ciclo'} • Lote {recipe.manufacturedProductLotNumber || 'Sin lote'}
-                            </p>
-                          ) : null}
+                          <p className="mt-2 text-xs font-bold uppercase tracking-[0.16em] text-copy-soft">
+                            Grupo {recipe.groupCode || 'Sin grupo'} • Ciclo {recipe.cycle || 'Sin ciclo'}
+                          </p>
                         </div>
                         <span className="rounded-full bg-[#e7f4eb] px-3 py-1 text-xs font-extrabold text-[#2d7a49]">
                           {recipe.items.length} insumo(s)
@@ -483,12 +496,12 @@ function RecipesPage() {
                 <div className="mt-8 space-y-3 text-sm text-white/78">
                   <p>1. Selecciona el producto a elaborar objetivo.</p>
                   <p>2. Agrega al menos un insumo con cantidad mayor que cero.</p>
-                  <p>3. Guarda la formula para usarla en el modulo de elaboracion.</p>
+                  <p>3. Guarda la formula para usarla en el modulo de descargo por formula.</p>
                 </div>
               </aside>
 
               <div className="p-6 sm:p-8 lg:p-10">
-                <form className="space-y-6" onSubmit={handleSubmit(handleSaveRecipe)}>
+                <form id="recipe-form" className="space-y-6" onSubmit={handleSubmit(handleSaveRecipe)}>
                   <Field
                     label="Producto a elaborar"
                     required
@@ -504,7 +517,7 @@ function RecipesPage() {
                       </option>
                       {manufacturedProductOptions.map((item) => (
                         <option key={item.id} value={item.id}>
-                          {item.name} ({item.code}) • {item.groupCode || 'Sin grupo'} • {item.cycle || 'Sin ciclo'}
+                          {item.name} ({item.code})
                         </option>
                       ))}
                     </select>
@@ -519,14 +532,38 @@ function RecipesPage() {
                     />
                   </Field>
 
-                  <Field label="Nombre de formula" required error={errors.name?.message}>
+                  <Field
+                    label="Nombre del producto final"
+                    required
+                    error={errors.name?.message}
+                    hint="Nombre creativo asignado por el grupo, por ejemplo Shampoo Millennium."
+                  >
                     <input
                       type="text"
-                      placeholder="Ej. Formula teorica grupo G01M"
+                      placeholder="Ej. Shampoo Millennium"
                       className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
                       {...register('name')}
                     />
                   </Field>
+
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <Field label="Grupo" required error={errors.groupCode?.message} hint="Ej. G01M o G01J.">
+                      <input
+                        type="text"
+                        placeholder="Ej. G01M"
+                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                        {...register('groupCode')}
+                      />
+                    </Field>
+                    <Field label="Ciclo" required error={errors.cycle?.message} hint="Ej. Ciclo 2, 2026.">
+                      <input
+                        type="text"
+                        placeholder="Ej. Ciclo 2, 2026"
+                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                        {...register('cycle')}
+                      />
+                    </Field>
+                  </div>
 
                   <label className="flex items-start gap-3 rounded-[24px] border border-brand-ink/[0.06] bg-white px-5 py-4">
                     <input
@@ -535,7 +572,7 @@ function RecipesPage() {
                       {...register('active')}
                     />
                     <span className="text-sm font-semibold leading-6 text-copy">
-                      Mantener la formula activa para nuevas elaboraciones.
+                      Mantener la formula activa para nuevos descargos.
                     </span>
                   </label>
 
@@ -554,24 +591,6 @@ function RecipesPage() {
                     </div>
                   ) : null}
 
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={handleStartCreate}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
-                    >
-                      <Eraser className="h-4 w-4" />
-                      Limpiar
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      <Save className="h-4 w-4" />
-                      {isSubmitting ? 'Guardando...' : 'Guardar'}
-                    </button>
-                  </div>
                 </form>
               </div>
             </div>
@@ -664,6 +683,13 @@ function RecipesPage() {
               </div>
             </form>
 
+            {itemStockWarning ? (
+              <div className="rounded-[24px] border border-[#f3d49c] bg-[#fff8e8] px-4 py-3 text-sm font-semibold text-[#9a6514]">
+                {itemStockWarning} Puede conservar la cantidad teorica, pero el descargo no podra
+                confirmarse mientras falte stock.
+              </div>
+            ) : null}
+
             {itemServerMessage ? (
               <div className="rounded-[24px] border border-[#fdebec] bg-[#fff4f5] px-4 py-3 text-sm font-semibold text-[#d53a43]">
                 {itemServerMessage}
@@ -717,6 +743,26 @@ function RecipesPage() {
                 </p>
               </div>
             )}
+
+            <div className="grid gap-3 border-t border-brand-ink/[0.06] pt-5 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={handleStartCreate}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-5 py-3 text-sm font-extrabold text-brand-ink transition hover:border-brand-teal/30 hover:text-brand-teal"
+              >
+                <Eraser className="h-4 w-4" />
+                Limpiar
+              </button>
+              <button
+                type="submit"
+                form="recipe-form"
+                disabled={isSubmitting || !currentItems.length}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-ink px-6 py-3 text-sm font-extrabold text-white shadow-[0_16px_30px_rgba(23,61,44,0.18)] transition hover:bg-brand-ink-strong disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <Save className="h-4 w-4" />
+                {isSubmitting ? 'Guardando...' : 'Guardar formula completa'}
+              </button>
+            </div>
           </Card>
         </div>
       </div>

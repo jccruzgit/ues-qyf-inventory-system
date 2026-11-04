@@ -60,6 +60,16 @@ public class Recipe {
     @Column(length = 500)
     private String description;
 
+    @NotBlank
+    @Size(max = 50)
+    @Column(name = "group_code", nullable = false, length = 50)
+    private String groupCode;
+
+    @NotBlank
+    @Size(max = 50)
+    @Column(nullable = false, length = 50)
+    private String cycle;
+
     @NotNull
     @Column(name = "is_active", nullable = false)
     private Boolean active;

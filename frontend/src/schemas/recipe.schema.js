@@ -26,6 +26,16 @@ export const recipeFormSchema = z.object({
     .trim()
     .min(1, 'El codigo de la formula es obligatorio.')
     .max(50, 'El codigo no debe exceder 50 caracteres.'),
+  groupCode: z
+    .string()
+    .trim()
+    .min(1, 'El grupo es obligatorio.')
+    .max(50, 'El grupo no debe exceder 50 caracteres.'),
+  cycle: z
+    .string()
+    .trim()
+    .min(1, 'El ciclo es obligatorio.')
+    .max(50, 'El ciclo no debe exceder 50 caracteres.'),
   description: z
     .string()
     .trim()

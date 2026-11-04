@@ -48,7 +48,7 @@ const emptyDashboardSummary = {
 
 const quickActions = [
   {
-    title: 'Ver productos',
+    title: 'Ver insumos',
     description: 'Consulta el catalogo operativo disponible.',
     to: '/products',
     icon: PackageSearch,
@@ -134,11 +134,11 @@ function getActivityTitle(item) {
 
   if (lineCount > 1) {
     return item?.movementType === 'EXIT'
-      ? `Salida de ${lineCount} productos`
-      : `Entrada de ${lineCount} productos`;
+      ? `Salida de ${lineCount} insumos`
+      : `Entrada de ${lineCount} insumos`;
   }
 
-  const productName = item?.primaryProductName || 'producto';
+  const productName = item?.primaryProductName || 'insumo';
 
   return item?.movementType === 'EXIT'
     ? `Salida: ${productName}`
@@ -426,7 +426,7 @@ function DashboardPage() {
   const kpiCards = useMemo(() => {
     return [
       {
-        title: 'Productos activos',
+        title: 'Insumos activos',
         value: formatInteger(dashboardSummary.totalActiveProducts),
         meta: `${formatInteger(dashboardSummary.accessibleLaboratories)} laboratorios`,
         metaVariant: 'teal',
@@ -528,7 +528,7 @@ function DashboardPage() {
             Aun no hay datos operativos para resumir
           </h2>
           <p className="mt-2 text-sm leading-7 text-copy">
-            La API respondio sin registros consolidados para el dashboard. Puede crear productos o
+            La API respondio sin registros consolidados para el dashboard. Puede crear insumos o
             registrar una entrada para poblar esta vista antes de la demo.
           </p>
         </Card>
@@ -640,7 +640,7 @@ function DashboardPage() {
 
           <div className="mt-8 space-y-3 text-sm text-white/84">
             <div className="flex items-center justify-between gap-4">
-              <span>Productos con stock bajo</span>
+              <span>Insumos con stock bajo</span>
               <span className="font-extrabold">
                 {formatInteger(dashboardSummary.lowStockProducts)}
               </span>
@@ -675,7 +675,7 @@ function DashboardPage() {
             Distribucion actual
           </h2>
           <p className="mt-4 max-w-[520px] text-sm leading-7 text-copy">
-            Revise la cobertura disponible, productos visibles y focos de atencion por cada
+            Revise la cobertura disponible, insumos visibles y focos de atencion por cada
             laboratorio accesible en la demo.
           </p>
 
@@ -695,7 +695,7 @@ function DashboardPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="navy">{formatInteger(item.visibleProducts)} productos</Badge>
+                      <Badge variant="navy">{formatInteger(item.visibleProducts)} insumos</Badge>
                       <Badge variant={item.lowStockProducts > 0 ? 'warning' : 'success'}>
                         {formatInteger(item.lowStockProducts)} stock bajo
                       </Badge>

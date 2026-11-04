@@ -49,14 +49,11 @@ class ManufacturedProductServiceImplTest {
     }
 
     @Test
-    void create_persistsAcademicTraceabilityAndWritesAuditLog() {
+    void create_persistsReusableCatalogDataAndWritesAuditLog() {
         ManufacturedProductRequestDto request = new ManufacturedProductRequestDto(
                 " FAB-001 ",
                 " Jabon liquido ",
                 " Demo ",
-                " G01M ",
-                " 2026-I ",
-                " LT-01 ",
                 Boolean.TRUE);
 
         when(manufacturedProductRepository.findByCode("FAB-001")).thenReturn(Optional.empty());
@@ -73,15 +70,11 @@ class ManufacturedProductServiceImplTest {
         assertThat(response.getId()).isEqualTo(11L);
         assertThat(response.getCode()).isEqualTo("FAB-001");
         assertThat(response.getName()).isEqualTo("Jabon liquido");
-        assertThat(response.getGroupCode()).isEqualTo("G01M");
-        assertThat(response.getCycle()).isEqualTo("2026-I");
-        assertThat(response.getLotNumber()).isEqualTo("LT-01");
         verify(manufacturedProductRepository).save(argThat(product ->
                 product.getCode().equals("FAB-001")
                         && product.getName().equals("Jabon liquido")
-                        && product.getGroupCode().equals("G01M")
-                        && product.getCycle().equals("2026-I")
-                        && product.getLotNumber().equals("LT-01")));
+                        && product.getDescription().equals("Demo")
+                        && product.getActive()));
         verify(auditLogService)
                 .logAction(
                         eq("manufactured_products"),
@@ -89,9 +82,8 @@ class ManufacturedProductServiceImplTest {
                         eq("CREATE"),
                         isNull(),
                         isNull(),
-                        argThat(payload -> payload.contains("\"groupCode\":\"G01M\"")
-                                && payload.contains("\"cycle\":\"2026-I\"")
-                                && payload.contains("\"lotNumber\":\"LT-01\"")),
+                        argThat(payload -> payload.contains("\"code\":\"FAB-001\"")
+                                && payload.contains("\"name\":\"Jabon liquido\"")),
                         eq("Manufactured product created"));
     }
 }

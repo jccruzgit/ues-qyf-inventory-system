@@ -24,12 +24,11 @@ export const productionRunFormSchema = z.object({
     parseRequiredNumber,
     z.number({ required_error: 'Seleccione un laboratorio.' }).positive('Seleccione un laboratorio.'),
   ),
-  groupName: z
+  lotNumber: z
     .string()
     .trim()
-    .max(150, 'El nombre del grupo no debe exceder 150 caracteres.')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'El numero de lote es obligatorio.')
+    .max(50, 'El numero de lote no debe exceder 50 caracteres.'),
   notes: z
     .string()
     .trim()

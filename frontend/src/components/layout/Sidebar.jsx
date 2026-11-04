@@ -8,6 +8,8 @@ import {
   FlaskConical,
   LayoutDashboard,
   PackageSearch,
+  PanelLeftClose,
+  PanelLeftOpen,
   Plus,
   ShieldAlert,
   TriangleAlert,
@@ -19,7 +21,7 @@ const primaryItems = [
   { label: 'Panel', icon: LayoutDashboard, to: '/dashboard' },
   { label: 'Insumos', icon: PackageSearch, to: '/products' },
   { label: 'Inventario', icon: Boxes, to: '/inventory' },
-  { label: 'Elaboracion', icon: FlaskConical, to: '/production' },
+  { label: 'Descargo por formula', icon: FlaskConical, to: '/production' },
   { label: 'Formulas', icon: BookOpenCheck, to: '/recipes' },
   { label: 'Productos a elaborar', icon: ChevronRight, to: '/manufactured-products' },
   { label: 'Movimientos', icon: ChevronRight, to: '/movements' },
@@ -32,15 +34,19 @@ const secondaryItems = [
   { label: 'Archivo', icon: Archive, to: '/archive' },
 ];
 
-function SidebarIdentity() {
+function SidebarIdentity({ collapsed }) {
   return (
-    <div className="min-w-0 flex-1 rounded-[26px] border border-white/80 bg-white/72 px-4 py-4 shadow-[0_12px_28px_rgba(23,61,44,0.08)] backdrop-blur-sm">
+    <div
+      className={`min-w-0 flex-1 rounded-[26px] border border-white/80 bg-white/72 px-4 py-4 shadow-[0_12px_28px_rgba(23,61,44,0.08)] backdrop-blur-sm ${
+        collapsed ? 'lg:hidden' : ''
+      }`}
+    >
       <div className="flex items-center gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-ink text-[0.72rem] font-extrabold uppercase tracking-[0.18em] text-white shadow-[0_12px_24px_rgba(23,61,44,0.18)]">
           Q&amp;F
         </div>
 
-        <div className="min-w-0">
+        <div className={`min-w-0 ${collapsed ? 'lg:hidden' : ''}`}>
           <p className="truncate text-sm font-extrabold leading-tight tracking-tight text-brand-ink">
             Sistema de Inventario
           </p>
@@ -54,11 +60,11 @@ function SidebarIdentity() {
   );
 }
 
-function NavItem({ item, onNavigate }) {
+function NavItem({ item, onNavigate, collapsed }) {
   const Icon = item.icon;
 
   return (
-    <NavLink to={item.to} onClick={onNavigate}>
+    <NavLink to={item.to} onClick={onNavigate} title={collapsed ? item.label : undefined}>
       {({ isActive }) => (
         <span
           className={`group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-bold transition ${
@@ -76,14 +82,14 @@ function NavItem({ item, onNavigate }) {
           >
             <Icon className="h-4 w-4" strokeWidth={2.2} />
           </span>
-          <span className="truncate">{item.label}</span>
+          <span className={`truncate ${collapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
         </span>
       )}
     </NavLink>
   );
 }
 
-function Sidebar({ mobileOpen, onClose }) {
+function Sidebar({ mobileOpen, onClose, desktopCollapsed, onToggleDesktop }) {
   return (
     <>
       <div
@@ -94,12 +100,30 @@ function Sidebar({ mobileOpen, onClose }) {
       />
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[288px] flex-col bg-[linear-gradient(180deg,_#edf4ee_0%,_#f6faf7_100%)] px-4 pb-5 pt-4 shadow-[18px_0_40px_rgba(23,61,44,0.08)] transition duration-300 lg:sticky lg:top-0 lg:z-10 lg:h-screen lg:translate-x-0 lg:border-r lg:border-white/60 lg:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[288px] flex-col bg-[linear-gradient(180deg,_#edf4ee_0%,_#f6faf7_100%)] px-4 pb-5 pt-4 shadow-[18px_0_40px_rgba(23,61,44,0.08)] transition-[width,transform,padding] duration-300 lg:sticky lg:top-0 lg:z-10 lg:h-screen lg:translate-x-0 lg:border-r lg:border-white/60 lg:shadow-none ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } ${desktopCollapsed ? 'lg:w-[88px] lg:px-3' : 'lg:w-[288px]'}`}
       >
-        <div className="mb-6 flex items-start gap-3">
-          <SidebarIdentity />
+        <div
+          className={`mb-6 flex items-start gap-3 ${
+            desktopCollapsed ? 'lg:justify-center' : ''
+          }`}
+        >
+          <SidebarIdentity collapsed={desktopCollapsed} />
+
+          <button
+            type="button"
+            onClick={onToggleDesktop}
+            className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-copy transition hover:bg-white hover:text-brand-ink lg:inline-flex"
+            aria-label={desktopCollapsed ? 'Expandir barra lateral' : 'Contraer barra lateral'}
+            title={desktopCollapsed ? 'Expandir barra lateral' : 'Contraer barra lateral'}
+          >
+            {desktopCollapsed ? (
+              <PanelLeftOpen className="h-5 w-5" />
+            ) : (
+              <PanelLeftClose className="h-5 w-5" />
+            )}
+          </button>
 
           <button
             type="button"
@@ -113,31 +137,47 @@ function Sidebar({ mobileOpen, onClose }) {
 
         <nav className="hide-scrollbar flex-1 space-y-1.5 overflow-y-auto pr-1">
           {primaryItems.map((item) => (
-            <NavItem key={item.to} item={item} onNavigate={onClose} />
+            <NavItem
+              key={item.to}
+              item={item}
+              onNavigate={onClose}
+              collapsed={desktopCollapsed}
+            />
           ))}
         </nav>
 
         <Link
           to="/inventory/entries/new"
           onClick={onClose}
-          className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-5 py-4 text-sm font-extrabold text-white shadow-[0_20px_36px_rgba(23,61,44,0.2)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong"
+          title={desktopCollapsed ? 'Nueva entrada' : undefined}
+          className={`mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink py-4 text-sm font-extrabold text-white shadow-[0_20px_36px_rgba(23,61,44,0.2)] transition hover:-translate-y-0.5 hover:bg-brand-ink-strong ${
+            desktopCollapsed ? 'px-5 lg:px-0' : 'px-5'
+          }`}
         >
           <Plus className="h-4 w-4" strokeWidth={2.5} />
-          Nueva entrada
+          <span className={desktopCollapsed ? 'lg:hidden' : ''}>Nueva entrada</span>
         </Link>
 
         <Link
           to="/inventory/exits/new"
           onClick={onClose}
-          className="mt-3 inline-flex items-center justify-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white px-5 py-4 text-sm font-extrabold text-brand-ink shadow-[0_16px_28px_rgba(23,61,44,0.08)] transition hover:-translate-y-0.5 hover:border-brand-teal/30 hover:text-brand-teal"
+          title={desktopCollapsed ? 'Registrar salida' : undefined}
+          className={`mt-3 inline-flex items-center justify-center gap-2 rounded-full border border-brand-ink/[0.08] bg-white py-4 text-sm font-extrabold text-brand-ink shadow-[0_16px_28px_rgba(23,61,44,0.08)] transition hover:-translate-y-0.5 hover:border-brand-teal/30 hover:text-brand-teal ${
+            desktopCollapsed ? 'px-5 lg:px-0' : 'px-5'
+          }`}
         >
           <ArrowDownCircle className="h-4 w-4" strokeWidth={2.4} />
-          Registrar salida
+          <span className={desktopCollapsed ? 'lg:hidden' : ''}>Registrar salida</span>
         </Link>
 
         <div className="mt-5 space-y-1.5 border-t border-brand-ink/[0.06] pt-4">
           {secondaryItems.map((item) => (
-            <NavItem key={item.to} item={item} onNavigate={onClose} />
+            <NavItem
+              key={item.to}
+              item={item}
+              onNavigate={onClose}
+              collapsed={desktopCollapsed}
+            />
           ))}
         </div>
       </aside>

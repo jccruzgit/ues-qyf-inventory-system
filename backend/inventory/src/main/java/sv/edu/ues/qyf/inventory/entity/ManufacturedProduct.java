@@ -51,21 +51,6 @@ public class ManufacturedProduct {
     @Column(length = 500)
     private String description;
 
-    @NotBlank
-    @Size(max = 50)
-    @Column(name = "group_code", nullable = false, length = 50)
-    private String groupCode;
-
-    @NotBlank
-    @Size(max = 50)
-    @Column(name = "cycle", nullable = false, length = 50)
-    private String cycle;
-
-    @NotBlank
-    @Size(max = 50)
-    @Column(name = "lot_number", nullable = false, length = 50)
-    private String lotNumber;
-
     @NotNull
     @Column(name = "is_active", nullable = false)
     private Boolean active;

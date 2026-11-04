@@ -11,21 +11,6 @@ export const manufacturedProductFormSchema = z.object({
     .trim()
     .min(1, 'El codigo del producto a elaborar es obligatorio.')
     .max(50, 'El codigo no debe exceder 50 caracteres.'),
-  groupCode: z
-    .string()
-    .trim()
-    .min(1, 'El grupo es obligatorio.')
-    .max(50, 'El grupo no debe exceder 50 caracteres.'),
-  cycle: z
-    .string()
-    .trim()
-    .min(1, 'El ciclo es obligatorio.')
-    .max(50, 'El ciclo no debe exceder 50 caracteres.'),
-  lotNumber: z
-    .string()
-    .trim()
-    .min(1, 'El numero de lote es obligatorio.')
-    .max(50, 'El numero de lote no debe exceder 50 caracteres.'),
   description: z
     .string()
     .trim()
