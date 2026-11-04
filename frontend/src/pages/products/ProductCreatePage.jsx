@@ -111,7 +111,7 @@ function ProductCreatePage() {
       </div>
 
       <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-0">
-        <div className="grid gap-0 lg:grid-cols-[minmax(260px,0.34fr)_minmax(0,0.66fr)]">
+        <div className="grid gap-0 lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)] xl:grid-cols-[minmax(260px,300px)_minmax(0,1fr)]">
           <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
               <PackagePlus className="h-5 w-5" strokeWidth={2.2} />

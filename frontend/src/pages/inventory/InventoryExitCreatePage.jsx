@@ -255,7 +255,7 @@ function InventoryExitCreatePage() {
       </div>
 
       <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-0">
-        <div className="grid gap-0 lg:grid-cols-[minmax(260px,0.34fr)_minmax(0,0.66fr)]">
+        <div className="grid gap-0 lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)] xl:grid-cols-[minmax(260px,300px)_minmax(0,1fr)]">
           <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
               <ArrowDownCircle className="h-5 w-5" strokeWidth={2.2} />
@@ -284,7 +284,7 @@ function InventoryExitCreatePage() {
                   <div className="h-14 rounded-[22px] bg-surface-2" />
                 </div>
                 <div className="h-36 rounded-[26px] bg-surface-2" />
-                <div className="grid gap-4 lg:grid-cols-4">
+                <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-4">
                   <div className="h-14 rounded-[22px] bg-surface-2" />
                   <div className="h-14 rounded-[22px] bg-surface-2" />
                   <div className="h-14 rounded-[22px] bg-surface-2" />

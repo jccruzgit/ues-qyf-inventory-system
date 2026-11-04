@@ -1,6 +1,6 @@
 function ProductField({ label, htmlFor, required, error, children, hint }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-2 block text-sm font-extrabold tracking-tight text-brand-ink">
         {label}
         {required ? <span className="ml-1 text-[#d53a43]">*</span> : null}
@@ -31,7 +31,7 @@ function ProductForm({
 
   return (
     <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 xl:grid-cols-2">
         <ProductField
           label="Nombre"
           htmlFor="name"
@@ -80,7 +80,7 @@ function ProductForm({
         />
       </ProductField>
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-5 xl:grid-cols-2 2xl:grid-cols-3">
         <ProductField
           label="Categoria"
           htmlFor="categoryId"
@@ -154,7 +154,7 @@ function ProductForm({
         </ProductField>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-5 xl:grid-cols-2 2xl:grid-cols-3">
         <ProductField
           label="Stock minimo"
           htmlFor="minimumStock"

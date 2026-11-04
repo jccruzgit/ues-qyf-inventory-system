@@ -22,7 +22,7 @@ const defaultValues = {
 
 function Field({ label, required, error, children, hint, className = '' }) {
   return (
-    <label className={`block ${className}`.trim()}>
+    <label className={`block min-w-0 ${className}`.trim()}>
       <span className="mb-2 block text-sm font-extrabold tracking-tight text-brand-ink">
         {label}
         {required ? <span className="ml-1 text-[#d53a43]">*</span> : null}
@@ -180,7 +180,7 @@ function ManufacturedProductsPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(320px,0.42fr)_minmax(0,0.58fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(300px,0.34fr)_minmax(0,0.66fr)]">
         <Card className="space-y-4 bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)]">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -280,7 +280,7 @@ function ManufacturedProductsPage() {
         </Card>
 
         <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-0">
-          <div className="grid gap-0 lg:grid-cols-[minmax(220px,260px)_minmax(0,1fr)] xl:grid-cols-[minmax(240px,280px)_minmax(0,1fr)]">
+          <div className="grid gap-0 lg:grid-cols-[minmax(220px,240px)_minmax(0,1fr)]">
             <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
                 {editingProduct ? (
@@ -302,25 +302,27 @@ function ManufacturedProductsPage() {
               </div>
             </aside>
 
-            <div className="p-6 sm:p-8 lg:p-10">
+            <div className="min-w-0 p-6 sm:p-8">
               <form className="space-y-6" onSubmit={handleSubmit(handleSave)}>
-                <Field label="Codigo" required error={errors.code?.message}>
-                  <input
-                    type="text"
-                    placeholder="Ej. ELAB-JAB-001"
-                    className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                    {...register('code')}
-                  />
-                </Field>
+                <div className="grid gap-6 2xl:grid-cols-[minmax(180px,0.75fr)_minmax(240px,1.25fr)]">
+                  <Field label="Codigo" required error={errors.code?.message}>
+                    <input
+                      type="text"
+                      placeholder="Ej. ELAB-JAB-001"
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      {...register('code')}
+                    />
+                  </Field>
 
-                <Field label="Nombre" required error={errors.name?.message}>
-                  <input
-                    type="text"
-                    placeholder="Ej. Acetaminofen tabletas"
-                    className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                    {...register('name')}
-                  />
-                </Field>
+                  <Field label="Nombre" required error={errors.name?.message}>
+                    <input
+                      type="text"
+                      placeholder="Ej. Acetaminofen tabletas"
+                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                      {...register('name')}
+                    />
+                  </Field>
+                </div>
 
                 <Field
                   label="Descripcion"

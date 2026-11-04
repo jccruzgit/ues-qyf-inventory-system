@@ -491,7 +491,7 @@ function ProductionRunCreatePage() {
 
       <div className="space-y-6">
         <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-0">
-          <div className="grid gap-0 xl:grid-cols-[minmax(220px,240px)_minmax(0,1fr)]">
+          <div className="grid gap-0 lg:grid-cols-[minmax(220px,260px)_minmax(0,1fr)]">
             <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
                 <BookOpenCheck className="h-5 w-5" strokeWidth={2.1} />
@@ -512,20 +512,21 @@ function ProductionRunCreatePage() {
 
             <div className="min-w-0 p-6 sm:p-8">
               {loading ? (
-                <div className="max-w-[440px] space-y-4 animate-pulse">
-                  <div className="h-5 w-44 rounded-full bg-surface-2" />
+                <div className="grid animate-pulse gap-4 xl:grid-cols-2">
                   <div className="h-14 rounded-[22px] bg-surface-2" />
                   <div className="h-14 rounded-[22px] bg-surface-2" />
                   <div className="h-14 rounded-[22px] bg-surface-2" />
                   <div className="h-14 rounded-[22px] bg-surface-2" />
-                  <div className="h-24 rounded-[22px] bg-surface-2" />
+                  <div className="h-14 rounded-[22px] bg-surface-2" />
+                  <div className="h-14 rounded-[22px] bg-surface-2" />
+                  <div className="h-24 rounded-[22px] bg-surface-2 xl:col-span-2" />
                 </div>
               ) : error ? (
                 <div className="rounded-[24px] border border-[#fdebec] bg-[#fff4f5] px-4 py-4 text-sm font-semibold text-[#d53a43]">
                   {error}
                 </div>
               ) : (
-                <form className="max-w-[440px] space-y-6" onSubmit={handleSubmit(handlePrepare)}>
+                <form className="grid gap-6 xl:grid-cols-2" onSubmit={handleSubmit(handlePrepare)}>
                   <Field
                     label="Producto elaborado"
                     required
@@ -618,32 +619,34 @@ function ProductionRunCreatePage() {
                     />
                   </Field>
 
-                  <Field
-                    label="Observaciones"
-                    error={errors.notes?.message}
-                    hint="Estas notas se adjuntan al descargo y al movimiento generado."
-                  >
-                    <textarea
-                      rows={4}
-                      placeholder="Describe la practica, el contexto del descargo o cualquier detalle relevante."
-                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                      {...register('notes')}
-                    />
-                  </Field>
+                  <div className="xl:col-span-2">
+                    <Field
+                      label="Observaciones"
+                      error={errors.notes?.message}
+                      hint="Estas notas se adjuntan al descargo y al movimiento generado."
+                    >
+                      <textarea
+                        rows={4}
+                        placeholder="Describe la practica, el contexto del descargo o cualquier detalle relevante."
+                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                        {...register('notes')}
+                      />
+                    </Field>
+                  </div>
 
                   {selectedRecipe ? (
-                    <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-4 py-4 text-sm font-semibold text-copy">
+                    <div className="rounded-[24px] border border-brand-ink/[0.06] bg-white px-4 py-4 text-sm font-semibold text-copy xl:col-span-2">
                       Esta formula contiene <span className="text-brand-ink">{selectedRecipe.items.length}</span> insumo(s) registrados.
                     </div>
                   ) : null}
 
                   {serverMessage ? (
-                    <div className="rounded-[24px] border border-[#fdebec] bg-[#fff4f5] px-4 py-3 text-sm font-semibold text-[#d53a43]">
+                    <div className="rounded-[24px] border border-[#fdebec] bg-[#fff4f5] px-4 py-3 text-sm font-semibold text-[#d53a43] xl:col-span-2">
                       {serverMessage}
                     </div>
                   ) : null}
 
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-3 sm:grid-cols-2 xl:col-span-2 xl:max-w-[560px]">
                     <button
                       type="button"
                       onClick={handleReset}

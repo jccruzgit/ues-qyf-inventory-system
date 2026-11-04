@@ -2,7 +2,7 @@ import { AlertTriangle, ArrowDownCircle, Boxes, ShieldAlert } from 'lucide-react
 
 function Field({ label, required, hint, error, children }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-2 block text-sm font-extrabold tracking-tight text-brand-ink">
         {label}
         {required ? <span className="ml-1 text-[#d53a43]">*</span> : null}
@@ -72,7 +72,7 @@ function InventoryExitForm({
 
   return (
     <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 xl:grid-cols-2">
         <Field label="Insumo" required error={errors.productId?.message}>
           <select
             className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm font-semibold text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
@@ -156,7 +156,7 @@ function InventoryExitForm({
         </div>
       ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-4">
+      <div className="grid gap-5 xl:grid-cols-2 2xl:grid-cols-4">
         <Field
           label="Lote disponible"
           required

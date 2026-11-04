@@ -2,7 +2,7 @@ import { AlertTriangle, PackageCheck, ShieldAlert } from 'lucide-react';
 
 function Field({ label, htmlFor, required, hint, error, children }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-2 block text-sm font-extrabold tracking-tight text-brand-ink">
         {label}
         {required ? <span className="ml-1 text-[#d53a43]">*</span> : null}
@@ -51,7 +51,7 @@ function InventoryEntryForm({
 
   return (
     <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 xl:grid-cols-2">
         <Field
           label="Insumo"
           htmlFor="productId"
@@ -159,7 +159,7 @@ function InventoryEntryForm({
         </div>
       ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-4">
+      <div className="grid gap-5 xl:grid-cols-2 2xl:grid-cols-4">
         <Field label="Numero de lote" htmlFor="batchCode" error={errors.batchCode?.message}>
           <input
             id="batchCode"
@@ -223,7 +223,7 @@ function InventoryEntryForm({
         </Field>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,0.24fr)_minmax(0,0.24fr)_minmax(0,0.52fr)]">
+      <div className="grid gap-5 xl:grid-cols-2 2xl:grid-cols-[minmax(0,0.24fr)_minmax(0,0.24fr)_minmax(0,0.52fr)]">
         <Field
           label="Unidad"
           htmlFor="unitLabel"
@@ -255,20 +255,22 @@ function InventoryEntryForm({
           <input type="hidden" {...register('priceUnitId')} />
         </Field>
 
-        <Field
-          label="Observaciones"
-          htmlFor="observations"
-          error={errors.observations?.message}
-        >
-          <textarea
-            id="observations"
-            rows={4}
-            placeholder="Notas internas sobre el ingreso, proveedor o condicion del lote."
-            className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-            aria-invalid={Boolean(errors.observations)}
-            {...register('observations')}
-          />
-        </Field>
+        <div className="xl:col-span-2 2xl:col-span-1">
+          <Field
+            label="Observaciones"
+            htmlFor="observations"
+            error={errors.observations?.message}
+          >
+            <textarea
+              id="observations"
+              rows={4}
+              placeholder="Notas internas sobre el ingreso, proveedor o condicion del lote."
+              className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+              aria-invalid={Boolean(errors.observations)}
+              {...register('observations')}
+            />
+          </Field>
+        </div>
       </div>
 
       {productRequiresTracking ? (

@@ -45,7 +45,7 @@ const itemDefaultValues = {
 
 function Field({ label, required, error, children, hint }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-2 block text-sm font-extrabold tracking-tight text-brand-ink">
         {label}
         {required ? <span className="ml-1 text-[#d53a43]">*</span> : null}
@@ -389,7 +389,7 @@ function RecipesPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(340px,0.4fr)_minmax(0,0.6fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(300px,0.3fr)_minmax(0,0.7fr)]">
         <Card className="space-y-4 bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)]">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -482,7 +482,7 @@ function RecipesPage() {
 
         <div className="space-y-6">
           <Card className="overflow-hidden bg-[linear-gradient(135deg,_#ffffff_0%,_#f4f8f4_100%)] p-0">
-            <div className="grid gap-0 lg:grid-cols-[minmax(220px,0.28fr)_minmax(0,0.72fr)]">
+            <div className="grid gap-0 lg:grid-cols-[minmax(210px,240px)_minmax(0,1fr)]">
               <aside className="border-b border-brand-ink/[0.06] bg-[linear-gradient(160deg,_#163826_0%,_#1e5d38_100%)] p-6 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:p-8">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
                   <BookOpenCheck className="h-5 w-5" strokeWidth={2.1} />
@@ -500,7 +500,7 @@ function RecipesPage() {
                 </div>
               </aside>
 
-              <div className="p-6 sm:p-8 lg:p-10">
+              <div className="min-w-0 p-6 sm:p-8">
                 <form id="recipe-form" className="space-y-6" onSubmit={handleSubmit(handleSaveRecipe)}>
                   <Field
                     label="Producto a elaborar"
@@ -523,30 +523,32 @@ function RecipesPage() {
                     </select>
                   </Field>
 
-                  <Field label="Codigo de formula" required error={errors.code?.message}>
-                    <input
-                      type="text"
-                      placeholder="Ej. FOR-ACE-001"
-                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                      {...register('code')}
-                    />
-                  </Field>
+                  <div className="grid gap-6 md:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]">
+                    <Field label="Codigo de formula" required error={errors.code?.message}>
+                      <input
+                        type="text"
+                        placeholder="Ej. FOR-ACE-001"
+                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                        {...register('code')}
+                      />
+                    </Field>
 
-                  <Field
-                    label="Nombre del producto final"
-                    required
-                    error={errors.name?.message}
-                    hint="Nombre creativo asignado por el grupo, por ejemplo Shampoo Millennium."
-                  >
-                    <input
-                      type="text"
-                      placeholder="Ej. Shampoo Millennium"
-                      className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
-                      {...register('name')}
-                    />
-                  </Field>
+                    <Field
+                      label="Nombre del producto final"
+                      required
+                      error={errors.name?.message}
+                      hint="Nombre creativo asignado por el grupo, por ejemplo Shampoo Millennium."
+                    >
+                      <input
+                        type="text"
+                        placeholder="Ej. Shampoo Millennium"
+                        className="w-full rounded-[22px] border border-transparent bg-surface-2 px-4 py-3.5 text-sm text-brand-ink outline-none transition focus:border-brand-teal/25 focus:bg-white focus:ring-4 focus:ring-brand-teal/10"
+                        {...register('name')}
+                      />
+                    </Field>
+                  </div>
 
-                  <div className="grid gap-6 md:grid-cols-2">
+                  <div className="grid gap-6 md:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]">
                     <Field label="Grupo" required error={errors.groupCode?.message} hint="Ej. G01M o G01J.">
                       <input
                         type="text"
